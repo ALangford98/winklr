@@ -1,0 +1,42 @@
+.Navbar {
+  display: flex;
+  background-color: #1e2026;
+  height: 40pt;
+  align-items: center; /* Center items vertically */
+  justify-content: space-between; /* Space out items evenly */
+}
+
+a {
+  text-decoration: none;
+  color: aliceblue;
+}
+
+li {
+  list-style: none;
+}
+
+.LeftWidget,
+.CenterLeftWidget,
+.CenterWidget,
+.CenterRightWidget,
+.RightWidget {
+  font-size: 30px;
+  height: 40px;
+  max-height: 50px;
+  color: aliceblue;
+}
+
+/* Media query for smaller screens */
+@media screen and (max-width: 500px) {
+  .LeftWidget,
+  .CenterWidget,
+  .RightWidget {
+    width: 100%; /* Take up full width on smaller screens */
+    margin-bottom: 5px; /* Add some spacing between items */
+    text-align: center; /* Center text on smaller screens */
+  }
+  .CenterLeftWidget,
+  .CenterRightWidget {
+	  display: none;
+  }
+}

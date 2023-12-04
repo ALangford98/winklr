@@ -1,0 +1,17 @@
+.Home {
+	background-color: #282c34;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: row;
+	align-items: top;
+	justify-content: center;
+	font-size: calc(10px + 2vmin);
+	color: white;
+
+}
+
+.Editing {
+	position: absolute;
+	bottom: 5px;
+	right: 5px;
+}
