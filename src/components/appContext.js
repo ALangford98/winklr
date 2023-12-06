@@ -1,10 +1,10 @@
-// appContext.js
 import React, { createContext, useState } from "react";
 
 const AppContext = createContext();
 
 const AppContextProvider = ({ children }) => {
   const [widgets, setWidgets] = useState([]); // List of widgets
+  const [viewMode, setViewMode] = useState(true); // true for viewing, false for editing
 
   const addWidget = (widget) => {
     setWidgets((prevWidgets) => [...prevWidgets, widget]);
@@ -18,27 +18,26 @@ const AppContextProvider = ({ children }) => {
     });
   };
 
-  const updateState = (newState) => {
-    // Your other state values here
-    // ...
+  const toggleViewMode = () => {
+    setViewMode((prevMode) => !prevMode);
+  };
 
-    // Include the widgets in the state
+  const updateState = (newState) => {
     setWidgets(newState.widgets || []);
+    // You can add more logic to update other state values here
   };
 
   return (
     <AppContext.Provider
       value={{
         state: {
-          // Your other state values here
-          // ...
-
-          // Include the widgets in the context state
           widgets,
+          viewMode,
         },
         updateState,
         addWidget,
         removeWidget,
+        toggleViewMode,
       }}
     >
       {children}

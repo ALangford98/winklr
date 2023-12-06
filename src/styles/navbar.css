@@ -2,6 +2,7 @@
   display: flex;
   background-color: #1e2026;
   height: 40pt;
+  padding-top: 10px;
   align-items: center; /* Center items vertically */
   justify-content: space-between; /* Space out items evenly */
 }
@@ -19,11 +20,16 @@ li {
 .CenterLeftWidget,
 .CenterWidget,
 .CenterRightWidget,
-.RightWidget {
-  font-size: 30px;
+.RightWidget,
+.SavedWidget {
+  font-size: 20px;
   height: 40px;
   max-height: 50px;
   color: aliceblue;
+}
+
+select {
+max-width: 100px;
 }
 
 /* Media query for smaller screens */
@@ -40,3 +46,23 @@ li {
 	  display: none;
   }
 }
+
+
+.editable-widget {
+  position: relative;
+}
+
+.widget-container {
+  display: flex;
+  align-items: center;
+}
+
+.close-button {
+  cursor: pointer;
+  margin-left: 8px; /* Adjust the margin as needed */
+}
+
+.editing-options {
+  margin-top: 8px; /* Adjust the margin as needed */
+}
+

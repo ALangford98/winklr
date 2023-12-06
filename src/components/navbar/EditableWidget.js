@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { NavbarLinks, navbarLinksOptions } from './NavbarLinks';
-import { NavbarFunctions, navbarFunctionsOptions } from './NavbarFunctions';
+import SearchBar from './functional-components/Searchbar';
+import DropdownMenu from './functional-components/DropdownMenu';
+import { AppContext } from '../../components/appContext';
 
-const EditableWidget = () => {
+const functionalComponentsOptions = [
+  { value: 'Search', label: 'Search Bar', component: <SearchBar /> },
+  { value: 'Dropdown', label: 'Dropdown Menu', component: <DropdownMenu /> },
+  // Add more options as needed
+];
+
+const EditableWidget = ({ onSaveWidget, isViewMode }) => {
+  const { saveWidget } = useContext(AppContext);
+
   const [isEditing, setEditing] = useState(false);
   const [widgetType, setWidgetType] = useState('none');
   const [widgetContent, setWidgetContent] = useState('');
@@ -10,7 +20,7 @@ const EditableWidget = () => {
   const handleToggleEditing = () => {
     setEditing(!isEditing);
 
-    // Reset widget state when toggling editing
+    // Reset widget state only if the widget is not being created
     if (!isEditing) {
       setWidgetType('none');
       setWidgetContent('');
@@ -24,8 +34,15 @@ const EditableWidget = () => {
 
   const handleWidgetContentChange = (selectedContent) => {
     setWidgetContent(selectedContent);
-    // Automatically close the editing mode after selecting content
-    setEditing(false);
+  };
+
+  const handleSaveWidget = () => {
+    if (widgetType !== 'none' && widgetContent !== '') {
+      onSaveWidget(widgetType, widgetContent);
+
+      // Reset the state
+      setEditing(false);
+    }
   };
 
   const getOptions = (optionsArray) => {
@@ -38,33 +55,28 @@ const EditableWidget = () => {
 
   return (
     <div className='editable-widget'>
-      <span onClick={handleToggleEditing}>{isEditing ? '❌' : (widgetContent || '+')}</span>
-      {isEditing && (
+      {isEditing && !isViewMode && (
         <>
           <select onChange={(e) => handleWidgetTypeChange(e.target.value)} value={widgetType}>
             <option value="none" disabled>Select a Widget to add</option>
             <option value="link">Link</option>
-            <option value="function">Function</option>
+            <option value="function">Tool</option>
           </select>
 
-          {widgetType === 'link' && (
-            <select onChange={(e) => handleWidgetContentChange(e.target.value)} value={widgetContent}>
-              <option value="" disabled>Select Content</option>
-              {getOptions(navbarLinksOptions)}
-            </select>
-          )}
+          {widgetType !== 'none' && (
+            <>
+              <select onChange={(e) => handleWidgetContentChange(e.target.value)} value={widgetContent}>
+                <option value="" disabled>Select Content</option>
+                {widgetType === 'link' ? getOptions(navbarLinksOptions) : getOptions(functionalComponentsOptions)}
+              </select>
 
-          {widgetType === 'function' && (
-            <select onChange={(e) => handleWidgetContentChange(e.target.value)} value={widgetContent}>
-              <option value="" disabled>Select Content</option>
-              {getOptions(navbarFunctionsOptions)}
-            </select>
+              <button onClick={handleSaveWidget}>Save Widget</button>
+            </>
           )}
-
-          {widgetType === 'link' && <NavbarLinks selectedOption={widgetContent} />}
-          {widgetType === 'function' && <NavbarFunctions selectedOption={widgetContent} />}
         </>
       )}
+
+      <span onClick={handleToggleEditing}>{isEditing ? '❌' : (widgetContent || '+')}</span>
     </div>
   );
 };
