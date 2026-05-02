@@ -129,7 +129,7 @@ Other scripts: `npm test`, `npm run build`.
 - [ ] Basic tests for `AppContext` reducers and the `Tile` / `Layout` components
 
 ### Stretch
-- [ ] Export/import config as JSON
+- [x] Export/import config as JSON
 - [ ] Shareable URL that encodes the config
 - [ ] Drag-and-drop tile reordering
 - [ ] Custom tile config builder (beyond the predefined ones)

@@ -7,6 +7,7 @@ import LayoutSelector from "../components/layout/LayoutSelector";
 import Layout from "../components/layout/Layout";
 import EmptyState from "../components/EmptyState";
 import ThemePicker from "../components/ThemePicker";
+import ConfigPorter from "../components/ConfigPorter";
 
 export default function Home() {
   const { state } = useContext(AppContext);
@@ -20,6 +21,7 @@ export default function Home() {
           <TileConfigSelector />
           <LayoutSelector />
           <ThemePicker />
+          <ConfigPorter />
         </aside>
       )}
 

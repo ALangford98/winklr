@@ -52,6 +52,14 @@ const AppContextProvider = ({ children }) => {
     );
   };
 
+  const loadConfig = (config) => {
+    if (config.widgets      !== null) setWidgets(config.widgets);
+    if (config.stockList    !== null) setStockList(config.stockList);
+    if (config.tileConfig   !== null) setTileConfig(config.tileConfig);
+    if (config.layoutConfig !== null) setLayoutConfig(config.layoutConfig);
+    if (config.theme        !== null) setTheme(config.theme);
+  };
+
   const toggleViewMode = () => setViewMode((prev) => !prev);
 
   return (
@@ -68,6 +76,7 @@ const AppContextProvider = ({ children }) => {
         setTileConfig,
         setLayoutConfig,
         setTheme,
+        loadConfig,
       }}
     >
       {children}

@@ -182,6 +182,8 @@
   background: var(--accent-subtle);
 }
 
+.config-import-label { cursor: pointer; }
+
 /* ── TileConfigSelector ────────────────────────────────── */
 .tile-config-selector {
   display: flex;
