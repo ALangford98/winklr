@@ -1,11 +1,11 @@
 /* ── Base tile ─────────────────────────────────────────── */
 .tile {
-  background: #2d333b;
-  border: 1px solid #444c56;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 10px;
   overflow: hidden;
   display: flex;
-  color: #cdd9e5;
+  color: var(--text-primary);
 }
 
 .tile-img {
@@ -21,8 +21,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #3d444d;
-  color: #768390;
+  background: var(--bg-raised);
+  color: var(--border-hover);
   font-size: 1.4rem;
   font-weight: 600;
 }
@@ -59,7 +59,7 @@
 
 .tile--compact .tile-price {
   font-size: 12px;
-  color: #8b949e;
+  color: var(--text-secondary);
 }
 
 /* ── Standard ──────────────────────────────────────────── */
@@ -87,7 +87,7 @@
 
 .tile--standard .tile-price {
   font-size: 13px;
-  color: #8b949e;
+  color: var(--text-secondary);
 }
 
 /* ── Detailed ──────────────────────────────────────────── */
@@ -115,7 +115,7 @@
 
 .tile--detailed .tile-price {
   font-size: 14px;
-  color: #8b949e;
+  color: var(--text-secondary);
 }
 
 .tile-meta {
@@ -132,17 +132,54 @@
 }
 
 .tile-meta-row dt {
-  color: #636e7b;
+  color: var(--text-muted);
   text-transform: capitalize;
   flex-shrink: 0;
 }
 
 .tile-meta-row dd {
   margin: 0;
-  color: #adbac7;
+  color: var(--text-meta);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ── Shared selector styles (TileConfigSelector, LayoutSelector, ThemePicker) */
+.selector-label {
+  margin: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.selector-options {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.selector-btn {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.selector-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.selector-btn--active {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  background: var(--accent-subtle);
 }
 
 /* ── TileConfigSelector ────────────────────────────────── */
@@ -152,38 +189,60 @@
   gap: 8px;
 }
 
-.selector-label {
-  margin: 0;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #8b949e;
-}
-
-.selector-options {
+/* ── ThemePicker ───────────────────────────────────────── */
+.theme-picker {
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.selector-btn {
-  padding: 5px 14px;
+.palette-swatches {
+  display: flex;
+  gap: 8px;
+}
+
+.palette-swatch {
+  width: 36px;
+  height: 36px;
   border-radius: 6px;
-  border: 1px solid #444c56;
-  background: none;
-  color: #8b949e;
-  font-size: 13px;
+  border: 2px solid transparent;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 4px;
+  transition: transform 0.1s;
 }
 
-.selector-btn:hover {
-  border-color: #768390;
-  color: #cdd9e5;
+.palette-swatch:hover { transform: scale(1.08); }
+
+.palette-swatch-accent {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: block;
+  flex-shrink: 0;
 }
 
-.selector-btn--active {
-  border-color: #316dca;
-  color: #cdd9e5;
-  background: rgba(49, 109, 202, 0.1);
+.colour-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
+.colour-input {
+  width: 36px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  padding: 2px;
+  background: var(--bg-card);
+  cursor: pointer;
+}
+
+.colour-hex {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: monospace;
+}

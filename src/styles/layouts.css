@@ -26,7 +26,7 @@
 .layout--strip::-webkit-scrollbar { height: 5px; }
 .layout--strip::-webkit-scrollbar-track { background: transparent; }
 .layout--strip::-webkit-scrollbar-thumb {
-  background: #444c56;
+  background: var(--border-subtle);
   border-radius: 3px;
 }
 

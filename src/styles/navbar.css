@@ -1,18 +1,18 @@
 .Navbar {
   display: flex;
-  background-color: #1e2026;
+  background-color: var(--bg-nav);
   height: 40pt;
   padding-top: 10px;
   align-items: center;
   justify-content: space-between;
-  overflow: visible; /* allow widget editor dropdowns to overflow the bar */
+  overflow: visible;
   position: relative;
   z-index: 10;
 }
 
 a {
   text-decoration: none;
-  color: aliceblue;
+  color: var(--text-primary);
 }
 
 li {
@@ -28,28 +28,26 @@ li {
   font-size: 20px;
   height: 40px;
   max-height: 50px;
-  color: aliceblue;
+  color: var(--text-primary);
 }
 
 select {
-max-width: 100px;
+  max-width: 100px;
 }
 
-/* Media query for smaller screens */
 @media screen and (max-width: 500px) {
   .LeftWidget,
   .CenterWidget,
   .RightWidget {
-    width: 100%; /* Take up full width on smaller screens */
-    margin-bottom: 5px; /* Add some spacing between items */
-    text-align: center; /* Center text on smaller screens */
+    width: 100%;
+    margin-bottom: 5px;
+    text-align: center;
   }
   .CenterLeftWidget,
   .CenterRightWidget {
-	  display: none;
+    display: none;
   }
 }
-
 
 .editable-widget {
   position: relative;
@@ -61,7 +59,7 @@ max-width: 100px;
 .widget-add,
 .widget-clear {
   cursor: pointer;
-  color: #8b949e;
+  color: var(--text-secondary);
   font-size: 14px;
   line-height: 1;
   padding: 2px 4px;
@@ -69,12 +67,12 @@ max-width: 100px;
   user-select: none;
 }
 
-.widget-add:hover  { color: #cdd9e5; }
-.widget-clear:hover { color: #e06c75; }
+.widget-add:hover  { color: var(--text-primary); }
+.widget-clear:hover { color: var(--accent-danger); }
 
 .widget-label {
   font-size: 13px;
-  color: #cdd9e5;
+  color: var(--text-primary);
 }
 
 .widget-editor {
@@ -82,23 +80,23 @@ max-width: 100px;
   top: calc(100% + 6px);
   left: 0;
   z-index: 100;
-  background: #2d333b;
-  border: 1px solid #444c56;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-width: 180px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 .widget-editor select {
   max-width: 100%;
   width: 100%;
-  background: #1e2026;
-  color: #cdd9e5;
-  border: 1px solid #444c56;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
   border-radius: 4px;
   padding: 4px 6px;
   font-size: 13px;
@@ -113,16 +111,16 @@ max-width: 100px;
   flex: 1;
   padding: 4px 0;
   border-radius: 4px;
-  border: 1px solid #444c56;
+  border: 1px solid var(--border-subtle);
   background: none;
-  color: #cdd9e5;
+  color: var(--text-primary);
   font-size: 12px;
   cursor: pointer;
 }
 
 .widget-editor-actions button:first-child:not(:disabled) {
-  border-color: #316dca;
-  background: rgba(49, 109, 202, 0.15);
+  border-color: var(--accent-primary);
+  background: var(--accent-subtle);
 }
 
 .widget-editor-actions button:disabled {
@@ -134,13 +132,3 @@ max-width: 100px;
   display: flex;
   align-items: center;
 }
-
-.close-button {
-  cursor: pointer;
-  margin-left: 8px; /* Adjust the margin as needed */
-}
-
-.editing-options {
-  margin-top: 8px; /* Adjust the margin as needed */
-}
-

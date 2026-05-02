@@ -31,6 +31,7 @@ Designed for quick setup: you shouldn't have to design your own grid system to d
 - Create React App
 - Context API for app state
 - SheetJS (`xlsx`) for CSV / XLSX parsing
+- CSS custom properties for runtime theming
 
 ## Project Structure
 
@@ -123,7 +124,7 @@ Other scripts: `npm test`, `npm run build`.
 
 ### Polish
 - [x] Replace CRA boilerplate favicon and manifest with Winklr branding
-- [ ] Light/dark theme toggle
+- [x] Theme system: 4 palettes (Dark, Light, Midnight, Dusk) + custom accent colour picker
 - [x] Empty state when no stock list is loaded
 - [ ] Basic tests for `AppContext` reducers and the `Tile` / `Layout` components
 
