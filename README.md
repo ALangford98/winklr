@@ -48,6 +48,8 @@ src/
 │   │   └── StockListLoader.js        # File upload UI (JSON / CSV / XLSX)
 │   └── view-mode/
 │       └── NavbarView.js             # View-mode navbar
+├── hooks/
+│   └── useLocalStorage.js            # useState wrapper that syncs to localStorage
 ├── models/
 │   └── stockItem.js                  # Stock item shape + factory function
 ├── pages/
@@ -78,7 +80,7 @@ Other scripts: `npm test`, `npm run build`.
 - [x] Define the stock list data model (id, name, image, price, metadata, etc.)
 - [x] Add stock list state to `AppContext` (currently only tracks widgets and view mode)
 - [x] Decide on stock list data source: JSON file upload or CSV / XLSX
-- [ ] Add persistence so config survives a page refresh (localStorage to start)
+- [x] Add persistence so config survives a page refresh (localStorage)
 
 ### Tiles
 - [ ] Create a `Tile` component that renders one stock list item

@@ -1,12 +1,13 @@
-import React, { createContext, useState } from "react";
+import React, { createContext } from "react";
 import { createStockItem } from "../models/stockItem";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 const AppContext = createContext();
 
 const AppContextProvider = ({ children }) => {
-  const [widgets, setWidgets] = useState([]); // List of widgets
-  const [viewMode, setViewMode] = useState(true); // true for viewing, false for editing
-  const [stockList, setStockList] = useState([]); // List of stock items
+  const [widgets, setWidgets] = useLocalStorage("winklr_widgets", []);
+  const [viewMode, setViewMode] = useLocalStorage("winklr_viewMode", true);
+  const [stockList, setStockList] = useLocalStorage("winklr_stockList", []);
 
   const addWidget = (widget) => {
     setWidgets((prevWidgets) => [...prevWidgets, widget]);
