@@ -1,6 +1,6 @@
 # Winklr
 
-A simple React app for creating repeating display tiles for a stock list, using a small number of predefined layout configurations.
+A React app for building and deploying repeating display tiles for a stock list, using a small number of predefined layout configurations.
 
 ## The Idea
 
@@ -16,13 +16,12 @@ Designed for quick setup: you shouldn't have to design your own grid system to d
 - **Widget** — a configurable element that lives in the navbar/header (link, search bar, dropdown, etc.).
 - **View Mode / Edit Mode** — toggle between configuring the page and displaying it.
 
-## Predefined Layout Configs (planned)
+## Predefined Layout Configs
 
 - **Grid** — uniform tiles arranged in rows and columns.
 - **Strip** — single horizontal scrolling row.
 - **Stacked List** — vertical list, one tile per row, full width.
 - **Featured + Grid** — one large tile on top, smaller tiles below.
-- **Compact Cards** — dense card layout for high item counts.
 
 ## Tech Stack
 
@@ -31,6 +30,7 @@ Designed for quick setup: you shouldn't have to design your own grid system to d
 - Create React App
 - Context API for app state
 - SheetJS (`xlsx`) for CSV / XLSX parsing
+- `@dnd-kit` for drag-and-drop tile reordering
 - CSS custom properties for runtime theming
 
 ## Project Structure
@@ -40,6 +40,9 @@ src/
 ├── App.js                            # Root component, view/edit mode switch
 ├── components/
 │   ├── appContext.js                 # Global state (widgets, viewMode, stockList)
+│   ├── ConfigPorter.js               # Export / import / shareable link
+│   ├── EmptyState.js                 # Empty state when no stock list is loaded
+│   ├── ThemePicker.js                # Palette swatches + accent colour picker
 │   ├── navbar/
 │   │   ├── Navbar.js                 # Edit-mode navbar with widget slots
 │   │   ├── EditableWidget.js         # Slot-aware configurable widget
@@ -50,10 +53,11 @@ src/
 │   │   ├── StockListLoader.js        # File upload UI (JSON / CSV / XLSX)
 │   │   └── StockListEditor.js        # Add / remove / reorder items in edit mode
 │   ├── layout/
-│   │   ├── Layout.js                 # Arranges tiles (Grid / Strip / Stacked / Featured)
+│   │   ├── Layout.js                 # Arranges tiles with optional DnD context
 │   │   └── LayoutSelector.js         # Edit-mode layout picker
 │   ├── tiles/
 │   │   ├── Tile.js                   # Renders one stock item (Compact / Standard / Detailed)
+│   │   ├── SortableTile.js           # Tile wrapped with useSortable for drag-and-drop
 │   │   └── TileConfigSelector.js     # Edit-mode tile style picker
 │   └── view-mode/
 │       └── NavbarView.js             # View-mode navbar
@@ -68,8 +72,12 @@ src/
 │   ├── layouts.css
 │   ├── navbar.css
 │   └── tiles.css
+├── theme/
+│   └── palettes.js                   # 4 palettes (Dark, Light, Midnight, Dusk) + hexToRgba
 └── utils/
-    └── parseStockFile.js             # Parses JSON / CSV / XLSX into stock items
+    ├── configSerializer.js           # Export / import config as JSON
+    ├── parseStockFile.js             # Parses JSON / CSV / XLSX into stock items
+    └── shareableUrl.js               # Base64 URL hash encode / decode
 ```
 
 ## Getting Started
@@ -87,49 +95,91 @@ Other scripts: `npm test`, `npm run build`.
 
 ## TODO
 
-### Foundations
-- [x] Define the stock list data model (id, name, image, price, metadata, etc.)
-- [x] Add stock list state to `AppContext` (currently only tracks widgets and view mode)
-- [x] Decide on stock list data source: JSON file upload or CSV / XLSX
-- [x] Add persistence so config survives a page refresh (localStorage)
+### Functionality
+- [ ] Shopping cart — add/remove items, quantity management, cart sidebar or modal
+- [ ] Help popup / onboarding guide for first-time users
+- [ ] Search bar — live tile filtering by name and metadata fields
+- [ ] Custom tile config builder — define field layout, font sizes, visible fields beyond the three presets
+- [ ] Mapbox API integration — delivery address autocomplete and validation at checkout
+- [ ] Payment method API integration — Stripe or similar for processing orders
 
-### Tiles
-- [x] Create a `Tile` component that renders one stock list item
-- [x] Build 2–3 predefined tile configs (Compact, Standard, Detailed)
-- [x] Tile selector UI in edit mode
-- [x] Style each tile config in `styles/`
-
-### Layouts
-- [x] Create a `Layout` component that takes a config + stock list and renders the tiles
-- [x] Implement Grid layout
-- [x] Implement Strip (horizontal row) layout
-- [x] Implement Stacked List layout
-- [x] Implement Featured + Grid layout
-- [x] Layout selector UI in edit mode
-
-### Pages / Routing
-- [x] Flesh out `Home.js` to host the layout + tiles
-- [x] Single page — no additional routes needed
-
-### Edit Mode UX
-- [x] Wire up the existing `EditableWidget` slots end-to-end
-- [x] Form for adding/removing/reordering stock list items
-- [x] Visual preview — tile/layout selectors apply live (no separate step needed)
-- [x] Fix `addWidget` placeholder in `App.js`
-
-### View Mode UX
-- [x] Hide all editing UI in view mode
-- [x] `NavbarView` mirrors the navbar config from edit mode
-- [x] Responsive behavior for each layout
+### Deployment pipeline
+- [ ] Static export — bundle the configured store as a self-contained deployable package (no API connections required)
+- [ ] Guided self-deployment — export + step-by-step hosting instructions (Netlify, Vercel, etc.)
+- [ ] Managed deployment subscription tier — automated hosting on Winklr infrastructure for users who don't want to self-host
+- [ ] Version 1.0.0 milestone: full end-to-end deployment pipeline (static export + managed option) live
 
 ### Polish
-- [x] Replace CRA boilerplate favicon and manifest with Winklr branding
-- [x] Theme system: 4 palettes (Dark, Light, Midnight, Dusk) + custom accent colour picker
-- [x] Empty state when no stock list is loaded
 - [ ] Basic tests for `AppContext` reducers and the `Tile` / `Layout` components
 
-### Stretch
-- [x] Export/import config as JSON
-- [x] Shareable URL that encodes the config
-- [x] Drag-and-drop tile reordering
-- [ ] Custom tile config builder (beyond the predefined ones)
+---
+
+## Changelog
+
+### [0.1.0] — 2026-05-03
+- Drag-and-drop tile reordering in edit mode using `@dnd-kit/core` and `@dnd-kit/sortable`
+- `SortableTile` wrapper component with `DragOverlay` floating preview
+- DnD disabled in view mode — plain tiles render unchanged
+
+### [0.0.13] — 2026-05-02
+- Shareable URL: encodes full config as a base64 URL hash (`#winklr=...`)
+- Unicode-safe encoding via `TextEncoder` + `btoa`
+- Config decoded and applied on mount, then hash cleared from the address bar
+
+### [0.0.12] — 2026-05-02
+- Export config as a downloadable `winklr-config.json`
+- Import config from JSON file with loose field validation
+- `ConfigPorter` component with Export, Import, and Copy Link controls
+
+### [0.0.11] — 2026-05-02
+- Full CSS custom property theme system — all hardcoded hex values replaced with semantic variables
+- 4 predefined palettes: Dark, Light, Midnight, Dusk
+- Custom accent colour picker with live `--accent-subtle` computed from the chosen hex
+- `ThemePicker` component with palette swatches and `<input type="color">`
+
+### [0.0.10] — 2026-05-02
+- Winklr branding: SVG favicon, updated `<title>`, and `manifest.json`
+- Empty state component with context-aware heading and body text (edit vs. view mode)
+
+### [0.0.9] — 2026-05-02
+- View mode hides all editing UI
+- `NavbarView` mirrors the navbar widget config from edit mode
+- Responsive breakpoints for all layout variants (860 px and 600 px)
+
+### [0.0.8] — 2026-05-02
+- Slot-based widget system redesigned as a keyed object (`{ left, centerLeft, center, centerRight, right }`)
+- Widget config now persists across page refreshes
+- `StockListEditor` — add, remove, and reorder items with ↑/↓ controls
+- `widgetRegistry` shared `renderWidget()` used by both edit and view mode navbars
+
+### [0.0.7] — 2026-05-02
+- Collapsed two `<Router>` instances into a single top-level router
+- Single-page architecture confirmed — no additional routes needed
+
+### [0.0.6] — 2026-05-02
+- `Layout` component with four variants: Grid, Strip, Stacked List, Featured + Grid
+- `LayoutSelector` edit-mode picker
+- Layout and tile config stored in `AppContext` and synced to `localStorage`
+
+### [0.0.5] — 2026-05-02
+- `Tile` component with three variants: Compact (row, 220×60 px), Standard (column, 180 px), Detailed (column, 260 px with metadata)
+- `TileConfigSelector` edit-mode picker
+
+### [0.0.4] — 2026-05-02
+- `useLocalStorage` hook wraps `useState` and keeps all app state in sync with `localStorage`
+- Config survives full page refreshes
+
+### [0.0.3] — 2026-05-02
+- `StockListLoader` file-upload UI supporting JSON, CSV, and XLSX
+- `parseStockFile` utility with auto-detection of wrapper objects (`{ items: [...] }`)
+- `stockItem` model with factory function (`id`, `name`, `image`, `price`, `metadata`)
+- Stock list state added to `AppContext`
+
+### [0.0.2] — 2023-12-06
+- View mode / edit mode context switching wired up in `AppContext`
+- Project scope and TODO defined in README
+
+### [0.0.1] — 2023-12-04
+- Initial commit: Create React App scaffold
+- Editable navbar with configurable widget slots
+- Edit / view mode toggle
