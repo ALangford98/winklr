@@ -5,6 +5,7 @@ import StockListEditor from "../components/stock/StockListEditor";
 import TileConfigSelector from "../components/tiles/TileConfigSelector";
 import LayoutSelector from "../components/layout/LayoutSelector";
 import Layout from "../components/layout/Layout";
+import EmptyState from "../components/EmptyState";
 
 export default function Home() {
   const { state } = useContext(AppContext);
@@ -27,9 +28,7 @@ export default function Home() {
           tileConfig={state.tileConfig}
         />
       ) : (
-        <p className="empty-state">
-          {state.viewMode ? "Load a stock list to get started." : "No stock list loaded."}
-        </p>
+        <EmptyState />
       )}
     </div>
   );

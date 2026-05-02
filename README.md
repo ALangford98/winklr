@@ -122,9 +122,9 @@ Other scripts: `npm test`, `npm run build`.
 - [x] Responsive behavior for each layout
 
 ### Polish
-- [ ] Replace CRA boilerplate favicon and manifest with Winklr branding
+- [x] Replace CRA boilerplate favicon and manifest with Winklr branding
 - [ ] Light/dark theme toggle
-- [ ] Empty state when no stock list is loaded
+- [x] Empty state when no stock list is loaded
 - [ ] Basic tests for `AppContext` reducers and the `Tile` / `Layout` components
 
 ### Stretch
