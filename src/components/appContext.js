@@ -9,6 +9,7 @@ const AppContextProvider = ({ children }) => {
   const [viewMode, setViewMode] = useLocalStorage("winklr_viewMode", true);
   const [stockList, setStockList] = useLocalStorage("winklr_stockList", []);
   const [tileConfig, setTileConfig] = useLocalStorage("winklr_tileConfig", "standard");
+  const [layoutConfig, setLayoutConfig] = useLocalStorage("winklr_layoutConfig", "grid");
 
   const addWidget = (widget) => {
     setWidgets((prevWidgets) => [...prevWidgets, widget]);
@@ -53,6 +54,7 @@ const AppContextProvider = ({ children }) => {
           viewMode,
           stockList,
           tileConfig,
+          layoutConfig,
         },
         updateState,
         addWidget,
@@ -63,6 +65,7 @@ const AppContextProvider = ({ children }) => {
         updateStockItem,
         setStockList,
         setTileConfig,
+        setLayoutConfig,
       }}
     >
       {children}

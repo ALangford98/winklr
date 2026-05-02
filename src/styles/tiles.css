@@ -145,16 +145,6 @@
   white-space: nowrap;
 }
 
-/* ── Tile grid ─────────────────────────────────────────── */
-.tile-grid {
-  flex: 1;
-  padding: 24px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-content: flex-start;
-}
-
 /* ── TileConfigSelector ────────────────────────────────── */
 .tile-config-selector {
   display: flex;

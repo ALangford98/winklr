@@ -1,0 +1,112 @@
+/* ── Base ──────────────────────────────────────────────── */
+.layout {
+  flex: 1;
+  padding: 24px;
+  min-width: 0; /* prevent flex blowout */
+}
+
+/* ── Grid ──────────────────────────────────────────────── */
+.layout--grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-content: flex-start;
+}
+
+/* ── Strip ─────────────────────────────────────────────── */
+.layout--strip {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 16px;
+  align-items: flex-start;
+  padding-bottom: 20px;
+}
+
+.layout--strip::-webkit-scrollbar { height: 5px; }
+.layout--strip::-webkit-scrollbar-track { background: transparent; }
+.layout--strip::-webkit-scrollbar-thumb {
+  background: #444c56;
+  border-radius: 3px;
+}
+
+/* ── Stacked ───────────────────────────────────────────── */
+.layout--stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 860px;
+}
+
+.layout--stacked .tile {
+  width: 100%;
+  flex-direction: row;
+}
+
+/* image column fixed width in stacked mode */
+.layout--stacked .tile-img-wrap,
+.layout--stacked .tile-img-wrap--sm {
+  width: 80px;
+  min-width: 80px;
+  height: 80px;
+}
+
+.layout--stacked .tile--detailed .tile-img-wrap {
+  width: 100px;
+  min-width: 100px;
+  height: 100px;
+}
+
+/* ── Featured + Grid ───────────────────────────────────── */
+.layout--featured {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.layout-featured-slot .tile {
+  width: 100%;
+  flex-direction: row;
+  height: 300px;
+}
+
+.layout-featured-slot .tile-img-wrap,
+.layout-featured-slot .tile-img-wrap--sm {
+  width: 45%;
+  min-width: 45%;
+  height: 100%;
+}
+
+.layout-featured-slot .tile-body {
+  flex: 1;
+  padding: 28px 32px;
+  justify-content: center;
+  gap: 10px;
+}
+
+.layout-featured-slot .tile-name {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+}
+
+.layout-featured-slot .tile-price {
+  font-size: 17px !important;
+}
+
+.layout-featured-slot .tile-meta {
+  margin-top: 10px;
+}
+
+.layout-featured-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-content: flex-start;
+}
+
+/* ── LayoutSelector ────────────────────────────────────── */
+.layout-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

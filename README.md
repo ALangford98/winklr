@@ -46,6 +46,9 @@ src/
 │   │   └── functional-components/    # SearchBar, DropdownMenu, etc.
 │   ├── stock/
 │   │   └── StockListLoader.js        # File upload UI (JSON / CSV / XLSX)
+│   ├── layout/
+│   │   ├── Layout.js                 # Arranges tiles (Grid / Strip / Stacked / Featured)
+│   │   └── LayoutSelector.js         # Edit-mode layout picker
 │   ├── tiles/
 │   │   ├── Tile.js                   # Renders one stock item (Compact / Standard / Detailed)
 │   │   └── TileConfigSelector.js     # Edit-mode tile style picker
@@ -59,6 +62,7 @@ src/
 │   └── Home.js                       # Main page
 ├── styles/
 │   ├── home.css
+│   ├── layouts.css
 │   ├── navbar.css
 │   └── tiles.css
 └── utils/
@@ -93,12 +97,12 @@ Other scripts: `npm test`, `npm run build`.
 - [x] Style each tile config in `styles/`
 
 ### Layouts
-- [ ] Create a `Layout` component that takes a config + stock list and renders the tiles
-- [ ] Implement Grid layout
-- [ ] Implement Strip (horizontal row) layout
-- [ ] Implement Stacked List layout
-- [ ] Implement Featured + Grid layout
-- [ ] Layout selector UI in edit mode
+- [x] Create a `Layout` component that takes a config + stock list and renders the tiles
+- [x] Implement Grid layout
+- [x] Implement Strip (horizontal row) layout
+- [x] Implement Stacked List layout
+- [x] Implement Featured + Grid layout
+- [x] Layout selector UI in edit mode
 
 ### Pages / Routing
 - [ ] Flesh out `Home.js` to host the layout + tiles
