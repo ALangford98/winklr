@@ -10,6 +10,83 @@
 
 }
 
+/* StockListLoader */
+.stock-list-loader {
+  margin: 32px auto;
+  width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.loader-label {
+  margin: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8b949e;
+}
+
+.loader-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 24px 16px;
+  border: 1.5px dashed #444c56;
+  border-radius: 8px;
+  color: #cdd9e5;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.loader-drop-zone:hover {
+  border-color: #768390;
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.loader-hint {
+  font-size: 11px;
+  color: #636e7b;
+}
+
+.loader-loaded {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border: 1px solid #444c56;
+  border-radius: 8px;
+  color: #cdd9e5;
+}
+
+.loader-clear {
+  background: none;
+  border: 1px solid #636e7b;
+  border-radius: 4px;
+  color: #8b949e;
+  font-size: 12px;
+  padding: 2px 10px;
+  cursor: pointer;
+}
+
+.loader-clear:hover {
+  border-color: #e06c75;
+  color: #e06c75;
+}
+
+.loader-status {
+  margin: 0;
+  font-size: 12px;
+  color: #57ab5a;
+}
+
+.loader-status--error {
+  color: #e06c75;
+}
+
 .Editing {
 	font-size: large;
 	position: absolute;

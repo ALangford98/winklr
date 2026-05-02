@@ -1,8 +1,13 @@
-import Navbar from "../components/navbar/Navbar"
+import React, { useContext } from "react";
+import { AppContext } from "../components/appContext";
+import StockListLoader from "../components/stock/StockListLoader";
 
 export default function Home() {
-	return(
-		<div className="Home">
-		</div>
-	)
+  const { state } = useContext(AppContext);
+
+  return (
+    <div className="Home">
+      {state.viewMode && <StockListLoader />}
+    </div>
+  );
 }

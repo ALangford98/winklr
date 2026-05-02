@@ -1,0 +1,16 @@
+symbol,company,sector,price,change,change_percent,volume,market_cap,pe_ratio,dividend_yield,logo
+AAPL,Apple Inc.,Technology,232.45,1.82,0.79,48210000,3520000000000,32.4,0.45,https://picsum.photos/seed/aapl/200/200
+MSFT,Microsoft Corp.,Technology,468.12,-2.05,-0.44,21450000,3480000000000,36.8,0.71,https://picsum.photos/seed/msft/200/200
+NVDA,NVIDIA Corp.,Technology,142.88,3.41,2.45,312500000,3500000000000,68.2,0.03,https://picsum.photos/seed/nvda/200/200
+GOOGL,Alphabet Inc.,Communication Services,184.20,0.62,0.34,28940000,2260000000000,24.1,0.41,https://picsum.photos/seed/googl/200/200
+AMZN,Amazon.com Inc.,Consumer Cyclical,209.55,-0.88,-0.42,38120000,2200000000000,46.5,0.00,https://picsum.photos/seed/amzn/200/200
+META,Meta Platforms Inc.,Communication Services,612.31,4.77,0.79,15680000,1550000000000,28.7,0.32,https://picsum.photos/seed/meta/200/200
+TSLA,Tesla Inc.,Consumer Cyclical,341.09,-7.22,-2.07,89230000,1090000000000,89.4,0.00,https://picsum.photos/seed/tsla/200/200
+BRK.B,Berkshire Hathaway,Financial Services,478.66,1.04,0.22,3150000,1030000000000,15.3,0.00,https://picsum.photos/seed/brk/200/200
+JPM,JPMorgan Chase,Financial Services,248.92,0.55,0.22,9180000,705000000000,12.8,2.10,https://picsum.photos/seed/jpm/200/200
+V,Visa Inc.,Financial Services,289.40,-0.31,-0.11,5640000,580000000000,30.5,0.79,https://picsum.photos/seed/v/200/200
+WMT,Walmart Inc.,Consumer Defensive,98.27,0.42,0.43,11290000,790000000000,38.1,1.04,https://picsum.photos/seed/wmt/200/200
+JNJ,Johnson & Johnson,Healthcare,162.44,-0.18,-0.11,7320000,390000000000,23.6,3.05,https://picsum.photos/seed/jnj/200/200
+XOM,Exxon Mobil,Energy,118.93,1.27,1.08,14750000,520000000000,14.2,3.32,https://picsum.photos/seed/xom/200/200
+DIS,Walt Disney Co.,Communication Services,108.72,-1.45,-1.32,8910000,196000000000,38.4,0.92,https://picsum.photos/seed/dis/200/200
+KO,Coca-Cola Co.,Consumer Defensive,71.06,0.21,0.30,12340000,306000000000,26.7,2.85,https://picsum.photos/seed/ko/200/200

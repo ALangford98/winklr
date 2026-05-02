@@ -30,6 +30,7 @@ Designed for quick setup: you shouldn't have to design your own grid system to d
 - React Router 6
 - Create React App
 - Context API for app state
+- SheetJS (`xlsx`) for CSV / XLSX parsing
 
 ## Project Structure
 
@@ -37,16 +38,25 @@ Designed for quick setup: you shouldn't have to design your own grid system to d
 src/
 ├── App.js                            # Root component, view/edit mode switch
 ├── components/
-│   ├── appContext.js                 # Global state (widgets, viewMode)
+│   ├── appContext.js                 # Global state (widgets, viewMode, stockList)
 │   ├── navbar/
 │   │   ├── Navbar.js                 # Edit-mode navbar with widget slots
 │   │   ├── EditableWidget.js         # Configurable widget slot
 │   │   ├── NavbarLinks.js
 │   │   └── functional-components/    # SearchBar, DropdownMenu, etc.
+│   ├── stock/
+│   │   └── StockListLoader.js        # File upload UI (JSON / CSV / XLSX)
 │   └── view-mode/
 │       └── NavbarView.js             # View-mode navbar
-└── pages/
-    └── Home.js                       # Main page (currently empty)
+├── models/
+│   └── stockItem.js                  # Stock item shape + factory function
+├── pages/
+│   └── Home.js                       # Main page
+├── styles/
+│   ├── home.css
+│   └── navbar.css
+└── utils/
+    └── parseStockFile.js             # Parses JSON / CSV / XLSX into stock items
 ```
 
 ## Getting Started
@@ -65,9 +75,9 @@ Other scripts: `npm test`, `npm run build`.
 ## TODO
 
 ### Foundations
-- [ ] Define the stock list data model (id, name, image, price, metadata, etc.)
-- [ ] Add stock list state to `AppContext` (currently only tracks widgets and view mode)
-- [ ] Decide on stock list data source: local JSON, file upload, paste/CSV, or external API
+- [x] Define the stock list data model (id, name, image, price, metadata, etc.)
+- [x] Add stock list state to `AppContext` (currently only tracks widgets and view mode)
+- [x] Decide on stock list data source: JSON file upload or CSV / XLSX
 - [ ] Add persistence so config survives a page refresh (localStorage to start)
 
 ### Tiles
