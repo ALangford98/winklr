@@ -19,6 +19,7 @@ const AppContextProvider = ({ children }) => {
   const [tileConfig, setTileConfig]   = useLocalStorage("winklr_tileConfig", "standard");
   const [layoutConfig, setLayoutConfig] = useLocalStorage("winklr_layoutConfig", "grid");
   const [theme, setTheme]             = useLocalStorage("winklr_theme", THEME_DEFAULT);
+  const [cart, setCart]               = useLocalStorage("winklr_cart", []);
 
   // On mount: load config from URL hash if present, then clear the hash
   useEffect(() => {
@@ -59,6 +60,25 @@ const AppContextProvider = ({ children }) => {
     setStockList((prev) => prev.filter((item) => item.id !== id));
   };
 
+  const addToCart = (itemId) => {
+    setCart((prev) => {
+      const existing = prev.find((c) => c.itemId === itemId);
+      if (existing) return prev.map((c) => c.itemId === itemId ? { ...c, quantity: c.quantity + 1 } : c);
+      return [...prev, { itemId, quantity: 1 }];
+    });
+  };
+
+  const removeFromCart = (itemId) => {
+    setCart((prev) => prev.filter((c) => c.itemId !== itemId));
+  };
+
+  const updateCartQty = (itemId, quantity) => {
+    if (quantity <= 0) { setCart((prev) => prev.filter((c) => c.itemId !== itemId)); return; }
+    setCart((prev) => prev.map((c) => c.itemId === itemId ? { ...c, quantity } : c));
+  };
+
+  const clearCart = () => setCart([]);
+
   const updateStockItem = (id, changes) => {
     setStockList((prev) =>
       prev.map((item) => (item.id === id ? { ...item, ...changes, id } : item))
@@ -78,7 +98,7 @@ const AppContextProvider = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
-        state: { widgets, viewMode, stockList, tileConfig, layoutConfig, theme },
+        state: { widgets, viewMode, stockList, tileConfig, layoutConfig, theme, cart },
         setWidget,
         clearWidget,
         toggleViewMode,
@@ -90,6 +110,10 @@ const AppContextProvider = ({ children }) => {
         setLayoutConfig,
         setTheme,
         loadConfig,
+        addToCart,
+        removeFromCart,
+        updateCartQty,
+        clearCart,
       }}
     >
       {children}

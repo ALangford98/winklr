@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useContext } from "react";
+import { AppContext } from "../appContext";
 
 function Placeholder({ name }) {
   return (
@@ -13,6 +14,18 @@ function TileImage({ item }) {
   return <img className="tile-img" src={item.image} alt={item.name} />;
 }
 
+function AddToCartBtn({ itemId, compact = false }) {
+  const { addToCart } = useContext(AppContext);
+  return (
+    <button
+      className={`tile-add-btn${compact ? " tile-add-btn--compact" : ""}`}
+      onClick={(e) => { e.stopPropagation(); addToCart(itemId); }}
+    >
+      {compact ? "+" : "Add to cart"}
+    </button>
+  );
+}
+
 function CompactTile({ item }) {
   return (
     <div className="tile tile--compact">
@@ -23,6 +36,7 @@ function CompactTile({ item }) {
         <span className="tile-name">{item.name}</span>
         {item.price > 0 && <span className="tile-price">${item.price.toFixed(2)}</span>}
       </div>
+      <AddToCartBtn itemId={item.id} compact />
     </div>
   );
 }
@@ -36,6 +50,7 @@ function StandardTile({ item }) {
       <div className="tile-body">
         <span className="tile-name">{item.name}</span>
         {item.price > 0 && <span className="tile-price">${item.price.toFixed(2)}</span>}
+        <AddToCartBtn itemId={item.id} />
       </div>
     </div>
   );
@@ -61,6 +76,7 @@ function DetailedTile({ item }) {
             ))}
           </dl>
         )}
+        <AddToCartBtn itemId={item.id} />
       </div>
     </div>
   );

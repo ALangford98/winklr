@@ -96,7 +96,7 @@ Other scripts: `npm test`, `npm run build`.
 ## TODO
 
 ### Functionality
-- [ ] Shopping cart — add/remove items, quantity management, cart sidebar or modal
+- [x] Shopping cart — add/remove items, quantity management, cart sidebar or modal
 - [ ] Help popup / onboarding guide for first-time users
 - [ ] Search bar — live tile filtering by name and metadata fields
 - [ ] Custom tile config builder — define field layout, font sizes, visible fields beyond the three presets
@@ -115,6 +115,13 @@ Other scripts: `npm test`, `npm run build`.
 ---
 
 ## Changelog
+
+### [0.1.1] — 2026-05-03
+- Shopping cart: add/remove items from any tile variant, with quantity controls and subtotal in the drawer
+- Cart state persisted to localStorage (`winklr_cart`)
+- `CartDrawer` slide-in panel with item list, +/− qty controls, per-item remove, and clear cart
+- Cart FAB button (bottom-right) with live item-count badge
+- "Add to cart" button on all three tile variants (circular `+` on compact, full-width on standard/detailed)
 
 ### [0.1.0] — 2026-05-03
 - Drag-and-drop tile reordering in edit mode using `@dnd-kit/core` and `@dnd-kit/sortable`

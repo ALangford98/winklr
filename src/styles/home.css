@@ -263,15 +263,16 @@
 }
 
 .Editing {
-	font-size: large;
-	position: absolute;
-	bottom: 20px;
-	right: 20px;
-	height: 50px;
-	width: 130px;
+	height: 40px;
+	padding: 0 16px;
 	border-radius: 10px;
-	background-color: var(--bg-app);
+	background: var(--bg-nav);
 	color: var(--text-primary);
-	border: 2pt solid var(--text-primary);
+	border: 2px solid var(--border-subtle);
 	cursor: pointer;
+	font-size: 13px;
+	font-weight: 500;
+	transition: border-color 0.15s;
 }
+
+.Editing:hover { border-color: var(--text-primary); }
