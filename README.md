@@ -46,6 +46,9 @@ src/
 │   │   └── functional-components/    # SearchBar, DropdownMenu, etc.
 │   ├── stock/
 │   │   └── StockListLoader.js        # File upload UI (JSON / CSV / XLSX)
+│   ├── tiles/
+│   │   ├── Tile.js                   # Renders one stock item (Compact / Standard / Detailed)
+│   │   └── TileConfigSelector.js     # Edit-mode tile style picker
 │   └── view-mode/
 │       └── NavbarView.js             # View-mode navbar
 ├── hooks/
@@ -56,7 +59,8 @@ src/
 │   └── Home.js                       # Main page
 ├── styles/
 │   ├── home.css
-│   └── navbar.css
+│   ├── navbar.css
+│   └── tiles.css
 └── utils/
     └── parseStockFile.js             # Parses JSON / CSV / XLSX into stock items
 ```
@@ -83,10 +87,10 @@ Other scripts: `npm test`, `npm run build`.
 - [x] Add persistence so config survives a page refresh (localStorage)
 
 ### Tiles
-- [ ] Create a `Tile` component that renders one stock list item
-- [ ] Build 2–3 predefined tile configs (e.g. Compact, Standard, Detailed)
-- [ ] Tile selector UI in edit mode
-- [ ] Style each tile config in `styles/`
+- [x] Create a `Tile` component that renders one stock list item
+- [x] Build 2–3 predefined tile configs (Compact, Standard, Detailed)
+- [x] Tile selector UI in edit mode
+- [x] Style each tile config in `styles/`
 
 ### Layouts
 - [ ] Create a `Layout` component that takes a config + stock list and renders the tiles

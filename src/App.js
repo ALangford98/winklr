@@ -1,6 +1,7 @@
 import './App.css';
 import './styles/home.css';
 import './styles/navbar.css';
+import './styles/tiles.css';
 
 import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';

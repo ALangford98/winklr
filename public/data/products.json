@@ -1,7 +1,7 @@
 {
   "name": "Sample Product Inventory",
   "updated": "2026-05-02",
-  "currency": "USD",
+  "currency": "ZAR",
   "items": [
     {
       "id": "p-001",

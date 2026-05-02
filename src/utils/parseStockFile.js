@@ -35,7 +35,14 @@ function mapRowToStockItem(row) {
 
 function parseJSON(text) {
   const data = JSON.parse(text);
-  const rows = Array.isArray(data) ? data : [data];
+  let rows;
+  if (Array.isArray(data)) {
+    rows = data;
+  } else {
+    // Support wrapper objects like { items: [...] } — use the first array-valued property.
+    // Fall back to treating the object itself as a single item.
+    rows = Object.values(data).find(Array.isArray) ?? [data];
+  }
   return rows.map(mapRowToStockItem);
 }
 

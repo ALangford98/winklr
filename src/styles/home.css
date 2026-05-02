@@ -3,17 +3,25 @@
 	min-height: 100vh;
 	display: flex;
 	flex-direction: row;
-	align-items: top;
-	justify-content: center;
+	align-items: flex-start;
 	font-size: calc(10px + 2vmin);
 	color: white;
+}
 
+.edit-panel {
+	width: 260px;
+	min-height: 100vh;
+	flex-shrink: 0;
+	padding: 24px 20px;
+	border-right: 1px solid #444c56;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
 }
 
 /* StockListLoader */
 .stock-list-loader {
-  margin: 32px auto;
-  width: 360px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 10px;
