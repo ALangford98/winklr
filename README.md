@@ -117,9 +117,9 @@ Other scripts: `npm test`, `npm run build`.
 - [x] Fix `addWidget` placeholder in `App.js`
 
 ### View Mode UX
-- [ ] Hide all editing UI in view mode
-- [ ] Make sure `NavbarView` mirrors the navbar config from edit mode
-- [ ] Responsive behavior for each layout
+- [x] Hide all editing UI in view mode
+- [x] `NavbarView` mirrors the navbar config from edit mode
+- [x] Responsive behavior for each layout
 
 ### Polish
 - [ ] Replace CRA boilerplate favicon and manifest with Winklr branding

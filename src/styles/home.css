@@ -19,6 +19,21 @@
 	gap: 24px;
 }
 
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .Home {
+    flex-direction: column;
+  }
+
+  .edit-panel {
+    width: 100%;
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid #444c56;
+    padding: 16px;
+  }
+}
+
 /* StockListLoader */
 .stock-list-loader {
   width: 100%;

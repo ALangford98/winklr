@@ -110,3 +110,63 @@
   flex-direction: column;
   gap: 8px;
 }
+
+/* ── Responsive ────────────────────────────────────────── */
+
+/* Tablet: tighten up detailed tile width */
+@media (max-width: 860px) {
+  .layout--detailed {
+    width: 220px;
+  }
+}
+
+/* Mobile: single-column everything */
+@media (max-width: 600px) {
+  .layout {
+    padding: 16px;
+  }
+
+  /* Grid — stretch all tile types to full width */
+  .layout--grid .tile,
+  .layout-featured-grid .tile {
+    width: 100%;
+  }
+
+  /* Standard/Detailed in grid — restore vertical image height */
+  .layout--grid .tile--standard .tile-img-wrap,
+  .layout--grid .tile--detailed .tile-img-wrap,
+  .layout-featured-grid .tile--standard .tile-img-wrap,
+  .layout-featured-grid .tile--detailed .tile-img-wrap {
+    height: 180px;
+  }
+
+  /* Featured hero — stack vertically */
+  .layout-featured-slot .tile {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .layout-featured-slot .tile-img-wrap,
+  .layout-featured-slot .tile-img-wrap--sm {
+    width: 100%;
+    min-width: unset;
+    height: 220px;
+  }
+
+  .layout-featured-slot .tile-body {
+    padding: 16px 20px;
+  }
+
+  .layout-featured-slot .tile-name {
+    font-size: 17px !important;
+  }
+
+  .layout-featured-slot .tile-price {
+    font-size: 14px !important;
+  }
+
+  /* Stacked — remove desktop max-width cap */
+  .layout--stacked {
+    max-width: 100%;
+  }
+}
