@@ -130,6 +130,6 @@ Other scripts: `npm test`, `npm run build`.
 
 ### Stretch
 - [x] Export/import config as JSON
-- [ ] Shareable URL that encodes the config
+- [x] Shareable URL that encodes the config
 - [ ] Drag-and-drop tile reordering
 - [ ] Custom tile config builder (beyond the predefined ones)

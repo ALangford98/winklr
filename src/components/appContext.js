@@ -2,6 +2,7 @@ import React, { createContext, useEffect } from "react";
 import { createStockItem } from "../models/stockItem";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { PALETTES, hexToRgba } from "../theme/palettes";
+import { decodeConfigFromHash } from "../utils/shareableUrl";
 
 const AppContext = createContext();
 
@@ -18,6 +19,18 @@ const AppContextProvider = ({ children }) => {
   const [tileConfig, setTileConfig]   = useLocalStorage("winklr_tileConfig", "standard");
   const [layoutConfig, setLayoutConfig] = useLocalStorage("winklr_layoutConfig", "grid");
   const [theme, setTheme]             = useLocalStorage("winklr_theme", THEME_DEFAULT);
+
+  // On mount: load config from URL hash if present, then clear the hash
+  useEffect(() => {
+    const config = decodeConfigFromHash(window.location.hash);
+    if (!config) return;
+    if (config.widgets)      setWidgets(config.widgets);
+    if (config.stockList)    setStockList(config.stockList);
+    if (config.tileConfig)   setTileConfig(config.tileConfig);
+    if (config.layoutConfig) setLayoutConfig(config.layoutConfig);
+    if (config.theme)        setTheme(config.theme);
+    window.history.replaceState(null, "", window.location.pathname);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Apply palette + primary colour to CSS variables whenever theme changes
   useEffect(() => {

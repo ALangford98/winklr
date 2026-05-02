@@ -1,6 +1,7 @@
 import React, { useContext, useRef, useState } from "react";
 import { AppContext } from "./appContext";
 import { exportConfig, parseConfigFile } from "../utils/configSerializer";
+import { encodeConfigToHash } from "../utils/shareableUrl";
 
 export default function ConfigPorter() {
   const { state, loadConfig } = useContext(AppContext);
@@ -24,13 +25,23 @@ export default function ConfigPorter() {
     if (inputRef.current) inputRef.current.value = "";
   };
 
+  const handleCopyLink = async () => {
+    const hash = encodeConfigToHash(state);
+    const url  = window.location.origin + window.location.pathname + hash;
+    window.history.pushState(null, "", hash);
+    try {
+      await navigator.clipboard.writeText(url);
+      setStatus({ message: "Link copied to clipboard.", isError: false });
+    } catch {
+      setStatus({ message: "Link updated — copy it from the address bar.", isError: false });
+    }
+  };
+
   return (
     <div className="config-porter">
       <p className="selector-label">Config</p>
       <div className="selector-options">
-        <button className="selector-btn" onClick={handleExport}>
-          Export
-        </button>
+        <button className="selector-btn" onClick={handleExport}>Export</button>
         <label className="selector-btn config-import-label">
           Import
           <input
@@ -42,6 +53,9 @@ export default function ConfigPorter() {
           />
         </label>
       </div>
+      <button className="selector-btn config-share-btn" onClick={handleCopyLink}>
+        Copy link
+      </button>
       {status && (
         <p className={`loader-status${status.isError ? " loader-status--error" : ""}`}>
           {status.message}
