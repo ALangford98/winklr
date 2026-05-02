@@ -4,23 +4,24 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 
 const AppContext = createContext();
 
+const WIDGET_SLOTS_DEFAULT = {
+  left: null, centerLeft: null, center: null, centerRight: null, right: null,
+};
+
 const AppContextProvider = ({ children }) => {
-  const [widgets, setWidgets] = useLocalStorage("winklr_widgets", []);
+  // New key avoids loading stale array-shaped data from the old "winklr_widgets" key
+  const [widgets, setWidgets] = useLocalStorage("winklr_widgetSlots", WIDGET_SLOTS_DEFAULT);
   const [viewMode, setViewMode] = useLocalStorage("winklr_viewMode", true);
   const [stockList, setStockList] = useLocalStorage("winklr_stockList", []);
   const [tileConfig, setTileConfig] = useLocalStorage("winklr_tileConfig", "standard");
   const [layoutConfig, setLayoutConfig] = useLocalStorage("winklr_layoutConfig", "grid");
 
-  const addWidget = (widget) => {
-    setWidgets((prevWidgets) => [...prevWidgets, widget]);
+  const setWidget = (slot, widget) => {
+    setWidgets((prev) => ({ ...prev, [slot]: widget }));
   };
 
-  const removeWidget = (index) => {
-    setWidgets((prevWidgets) => {
-      const updatedWidgets = [...prevWidgets];
-      updatedWidgets.splice(index, 1);
-      return updatedWidgets;
-    });
+  const clearWidget = (slot) => {
+    setWidgets((prev) => ({ ...prev, [slot]: null }));
   };
 
   const addStockItem = (item) => {
@@ -38,27 +39,15 @@ const AppContextProvider = ({ children }) => {
   };
 
   const toggleViewMode = () => {
-    setViewMode((prevMode) => !prevMode);
-  };
-
-  const updateState = (newState) => {
-    setWidgets(newState.widgets || []);
-    // You can add more logic to update other state values here
+    setViewMode((prev) => !prev);
   };
 
   return (
     <AppContext.Provider
       value={{
-        state: {
-          widgets,
-          viewMode,
-          stockList,
-          tileConfig,
-          layoutConfig,
-        },
-        updateState,
-        addWidget,
-        removeWidget,
+        state: { widgets, viewMode, stockList, tileConfig, layoutConfig },
+        setWidget,
+        clearWidget,
         toggleViewMode,
         addStockItem,
         removeStockItem,

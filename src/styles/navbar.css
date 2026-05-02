@@ -3,8 +3,11 @@
   background-color: #1e2026;
   height: 40pt;
   padding-top: 10px;
-  align-items: center; /* Center items vertically */
-  justify-content: space-between; /* Space out items evenly */
+  align-items: center;
+  justify-content: space-between;
+  overflow: visible; /* allow widget editor dropdowns to overflow the bar */
+  position: relative;
+  z-index: 10;
 }
 
 a {
@@ -50,6 +53,81 @@ max-width: 100px;
 
 .editable-widget {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.widget-add,
+.widget-clear {
+  cursor: pointer;
+  color: #8b949e;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  user-select: none;
+}
+
+.widget-add:hover  { color: #cdd9e5; }
+.widget-clear:hover { color: #e06c75; }
+
+.widget-label {
+  font-size: 13px;
+  color: #cdd9e5;
+}
+
+.widget-editor {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 100;
+  background: #2d333b;
+  border: 1px solid #444c56;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+.widget-editor select {
+  max-width: 100%;
+  width: 100%;
+  background: #1e2026;
+  color: #cdd9e5;
+  border: 1px solid #444c56;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 13px;
+}
+
+.widget-editor-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.widget-editor-actions button {
+  flex: 1;
+  padding: 4px 0;
+  border-radius: 4px;
+  border: 1px solid #444c56;
+  background: none;
+  color: #cdd9e5;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.widget-editor-actions button:first-child:not(:disabled) {
+  border-color: #316dca;
+  background: rgba(49, 109, 202, 0.15);
+}
+
+.widget-editor-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .widget-container {

@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { AppContext } from "../components/appContext";
 import StockListLoader from "../components/stock/StockListLoader";
+import StockListEditor from "../components/stock/StockListEditor";
 import TileConfigSelector from "../components/tiles/TileConfigSelector";
 import LayoutSelector from "../components/layout/LayoutSelector";
 import Layout from "../components/layout/Layout";
@@ -13,6 +14,7 @@ export default function Home() {
       {state.viewMode && (
         <aside className="edit-panel">
           <StockListLoader />
+          <StockListEditor />
           <TileConfigSelector />
           <LayoutSelector />
         </aside>

@@ -1,82 +1,70 @@
 import React, { useState, useContext } from 'react';
-import { NavbarLinks, navbarLinksOptions } from './NavbarLinks';
-import SearchBar from './functional-components/Searchbar';
-import DropdownMenu from './functional-components/DropdownMenu';
-import { AppContext } from '../../components/appContext';
+import { AppContext } from '../appContext';
+import { linkOptions, functionalOptions } from './widgetRegistry';
 
-const functionalComponentsOptions = [
-  { value: 'Search', label: 'Search Bar', component: <SearchBar /> },
-  { value: 'Dropdown', label: 'Dropdown Menu', component: <DropdownMenu /> },
-  // Add more options as needed
-];
+const EditableWidget = ({ slot }) => {
+  const { state, setWidget, clearWidget } = useContext(AppContext);
+  const saved = state.widgets[slot];
 
-const EditableWidget = ({ onSaveWidget, isViewMode }) => {
-  const { saveWidget } = useContext(AppContext);
-
-  const [isEditing, setEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [widgetType, setWidgetType] = useState('none');
   const [widgetContent, setWidgetContent] = useState('');
 
-  const handleToggleEditing = () => {
-    setEditing(!isEditing);
+  const handleOpen = () => setIsEditing(true);
 
-    // Reset widget state only if the widget is not being created
-    if (!isEditing) {
-      setWidgetType('none');
-      setWidgetContent('');
-    }
-  };
-
-  const handleWidgetTypeChange = (selectedType) => {
-    setWidgetType(selectedType);
+  const handleCancel = () => {
+    setIsEditing(false);
+    setWidgetType('none');
     setWidgetContent('');
   };
 
-  const handleWidgetContentChange = (selectedContent) => {
-    setWidgetContent(selectedContent);
-  };
-
-  const handleSaveWidget = () => {
+  const handleSave = () => {
     if (widgetType !== 'none' && widgetContent !== '') {
-      onSaveWidget(widgetType, widgetContent);
-
-      // Reset the state
-      setEditing(false);
+      setWidget(slot, { type: widgetType, content: widgetContent });
+      handleCancel();
     }
   };
 
-  const getOptions = (optionsArray) => {
-    return optionsArray.map((option) => (
-      <option key={option.value} value={option.value}>
-        {option.label}
-      </option>
-    ));
-  };
+  const getOptions = (opts) =>
+    opts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>);
 
   return (
-    <div className='editable-widget'>
-      {isEditing && !isViewMode && (
+    <div className="editable-widget">
+      {saved ? (
         <>
-          <select onChange={(e) => handleWidgetTypeChange(e.target.value)} value={widgetType}>
-            <option value="none" disabled>Select a Widget to add</option>
+          <span className="widget-label">{saved.content}</span>
+          <span className="widget-clear" onClick={() => clearWidget(slot)}>✕</span>
+        </>
+      ) : (
+        <span className="widget-add" onClick={handleOpen}>+</span>
+      )}
+
+      {isEditing && (
+        <div className="widget-editor">
+          <select
+            value={widgetType}
+            onChange={(e) => { setWidgetType(e.target.value); setWidgetContent(''); }}
+          >
+            <option value="none" disabled>Type</option>
             <option value="link">Link</option>
             <option value="function">Tool</option>
           </select>
 
           {widgetType !== 'none' && (
-            <>
-              <select onChange={(e) => handleWidgetContentChange(e.target.value)} value={widgetContent}>
-                <option value="" disabled>Select Content</option>
-                {widgetType === 'link' ? getOptions(navbarLinksOptions) : getOptions(functionalComponentsOptions)}
-              </select>
-
-              <button onClick={handleSaveWidget}>Save Widget</button>
-            </>
+            <select value={widgetContent} onChange={(e) => setWidgetContent(e.target.value)}>
+              <option value="" disabled>Select</option>
+              {widgetType === 'link' ? getOptions(linkOptions) : getOptions(functionalOptions)}
+            </select>
           )}
-        </>
-      )}
 
-      <span onClick={handleToggleEditing}>{isEditing ? '❌' : (widgetContent || '+')}</span>
+          <div className="widget-editor-actions">
+            <button onClick={handleSave} disabled={widgetType === 'none' || !widgetContent}>
+              Save
+            </button>
+            <button onClick={handleCancel}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

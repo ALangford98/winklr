@@ -41,11 +41,13 @@ src/
 │   ├── appContext.js                 # Global state (widgets, viewMode, stockList)
 │   ├── navbar/
 │   │   ├── Navbar.js                 # Edit-mode navbar with widget slots
-│   │   ├── EditableWidget.js         # Configurable widget slot
+│   │   ├── EditableWidget.js         # Slot-aware configurable widget
 │   │   ├── NavbarLinks.js
+│   │   ├── widgetRegistry.js         # Shared widget options + renderWidget()
 │   │   └── functional-components/    # SearchBar, DropdownMenu, etc.
 │   ├── stock/
-│   │   └── StockListLoader.js        # File upload UI (JSON / CSV / XLSX)
+│   │   ├── StockListLoader.js        # File upload UI (JSON / CSV / XLSX)
+│   │   └── StockListEditor.js        # Add / remove / reorder items in edit mode
 │   ├── layout/
 │   │   ├── Layout.js                 # Arranges tiles (Grid / Strip / Stacked / Featured)
 │   │   └── LayoutSelector.js         # Edit-mode layout picker
@@ -109,10 +111,10 @@ Other scripts: `npm test`, `npm run build`.
 - [x] Single page — no additional routes needed
 
 ### Edit Mode UX
-- [ ] Wire up the existing `EditableWidget` slots end-to-end
-- [ ] Form for adding/removing/reordering stock list items
-- [ ] Visual preview of layout/tile choices before applying
-- [ ] Fix `addWidget` placeholder in `App.js` (currently passes empty object)
+- [x] Wire up the existing `EditableWidget` slots end-to-end
+- [x] Form for adding/removing/reordering stock list items
+- [x] Visual preview — tile/layout selectors apply live (no separate step needed)
+- [x] Fix `addWidget` placeholder in `App.js`
 
 ### View Mode UX
 - [ ] Hide all editing UI in view mode

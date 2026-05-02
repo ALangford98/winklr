@@ -1,41 +1,22 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import EditableWidget from './EditableWidget';
-import { AppContext } from '../../components/appContext';
 
-const Navbar = () => {
-  const { state, addWidget } = useContext(AppContext);
+const SLOTS = [
+  { key: 'left',        className: 'LeftWidget'        },
+  { key: 'centerLeft',  className: 'CenterLeftWidget'  },
+  { key: 'center',      className: 'CenterWidget'      },
+  { key: 'centerRight', className: 'CenterRightWidget' },
+  { key: 'right',       className: 'RightWidget'       },
+];
 
-  const handleSaveWidget = (widgetType, widgetContent) => {
-    if (widgetType !== 'none' && widgetContent !== '') {
-      const newWidget = {
-        type: widgetType,
-        content: widgetContent,
-      };
-
-      // Add the new widget to the context
-      addWidget(newWidget);
-    }
-  };  
-
-	return (
-    <div className='Navbar'>
-      <li className='LeftWidget'>
-        <EditableWidget onSaveWidget={handleSaveWidget} />
-		</li>
-      <li className='CenterLeftWidget'>
-        <EditableWidget onSaveWidget={handleSaveWidget} />
+const Navbar = () => (
+  <div className="Navbar">
+    {SLOTS.map(({ key, className }) => (
+      <li key={key} className={className}>
+        <EditableWidget slot={key} />
       </li>
-      <li className='CenterWidget'>
-        <EditableWidget onSaveWidget={handleSaveWidget} />
-      </li>
-      <li className='CenterRightWidget'>
-        <EditableWidget onSaveWidget={handleSaveWidget} />
-      </li>
-      <li className='RightWidget'>
-        <EditableWidget onSaveWidget={handleSaveWidget} />
-      </li>
-    </div>
-  );
-};
+    ))}
+  </div>
+);
 
 export default Navbar;

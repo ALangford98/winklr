@@ -95,6 +95,130 @@
   color: #e06c75;
 }
 
+/* StockListEditor */
+.stock-list-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editor-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.editor-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 5px 8px;
+  background: #2d333b;
+  border: 1px solid #444c56;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.editor-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #cdd9e5;
+}
+
+.editor-item-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.editor-item-actions button {
+  background: none;
+  border: none;
+  color: #636e7b;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 1px 4px;
+  border-radius: 3px;
+  line-height: 1;
+}
+
+.editor-item-actions button:hover:not(:disabled) { color: #cdd9e5; }
+.editor-item-actions button:disabled { opacity: 0.25; cursor: not-allowed; }
+.editor-item-actions .editor-remove:hover { color: #e06c75; }
+
+.editor-add-btn {
+  background: none;
+  border: 1px dashed #444c56;
+  border-radius: 6px;
+  color: #8b949e;
+  font-size: 12px;
+  padding: 6px 0;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.editor-add-btn:hover {
+  border-color: #768390;
+  color: #cdd9e5;
+}
+
+.editor-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.editor-add-form input {
+  background: #2d333b;
+  border: 1px solid #444c56;
+  border-radius: 4px;
+  color: #cdd9e5;
+  font-size: 12px;
+  padding: 5px 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.editor-add-form input:focus {
+  outline: none;
+  border-color: #316dca;
+}
+
+.editor-form-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.editor-form-actions button {
+  flex: 1;
+  padding: 5px 0;
+  border-radius: 4px;
+  border: 1px solid #444c56;
+  background: none;
+  color: #cdd9e5;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.editor-form-actions button[type="submit"]:not(:disabled) {
+  border-color: #316dca;
+  background: rgba(49, 109, 202, 0.15);
+}
+
+.editor-form-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .Editing {
 	font-size: large;
 	position: absolute;
