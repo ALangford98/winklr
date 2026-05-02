@@ -105,8 +105,8 @@ Other scripts: `npm test`, `npm run build`.
 - [x] Layout selector UI in edit mode
 
 ### Pages / Routing
-- [ ] Flesh out `Home.js` to host the layout + tiles
-- [ ] Decide whether multiple pages/views are needed, or just one display
+- [x] Flesh out `Home.js` to host the layout + tiles
+- [x] Single page — no additional routes needed
 
 ### Edit Mode UX
 - [ ] Wire up the existing `EditableWidget` slots end-to-end
