@@ -1,70 +1,112 @@
-# Getting Started with Create React App
+# Winklr
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A simple React app for creating repeating display tiles for a stock list, using a small number of predefined layout configurations.
 
-## Available Scripts
+## The Idea
 
-In the project directory, you can run:
+Pick a layout, point it at your stock list, and Winklr renders a tile per item using one of a handful of predefined tile configs. Switch between **Edit Mode** (configure tiles, layouts, and data sources) and **View Mode** (display only, for showing the result).
 
-### `npm start`
+Designed for quick setup: you shouldn't have to design your own grid system to display a list of products, tickers, or any other repeating record. Choose a config, plug in your list, done.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Core Concepts
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Stock list** — the underlying data source (a list of items the user wants to display).
+- **Tile** — a single repeating unit that renders one item from the stock list.
+- **Layout config** — a predefined way of arranging tiles on the page (grid, row, carousel, etc.).
+- **Widget** — a configurable element that lives in the navbar/header (link, search bar, dropdown, etc.).
+- **View Mode / Edit Mode** — toggle between configuring the page and displaying it.
 
-### `npm test`
+## Predefined Layout Configs (planned)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Grid** — uniform tiles arranged in rows and columns.
+- **Strip** — single horizontal scrolling row.
+- **Stacked List** — vertical list, one tile per row, full width.
+- **Featured + Grid** — one large tile on top, smaller tiles below.
+- **Compact Cards** — dense card layout for high item counts.
 
-### `npm run build`
+## Tech Stack
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- React 18
+- React Router 6
+- Create React App
+- Context API for app state
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Project Structure
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+src/
+├── App.js                            # Root component, view/edit mode switch
+├── components/
+│   ├── appContext.js                 # Global state (widgets, viewMode)
+│   ├── navbar/
+│   │   ├── Navbar.js                 # Edit-mode navbar with widget slots
+│   │   ├── EditableWidget.js         # Configurable widget slot
+│   │   ├── NavbarLinks.js
+│   │   └── functional-components/    # SearchBar, DropdownMenu, etc.
+│   └── view-mode/
+│       └── NavbarView.js             # View-mode navbar
+└── pages/
+    └── Home.js                       # Main page (currently empty)
+```
 
-### `npm run eject`
+## Getting Started
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+npm install
+npm start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Opens at [http://localhost:3000](http://localhost:3000).
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Other scripts: `npm test`, `npm run build`.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## TODO
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Foundations
+- [ ] Define the stock list data model (id, name, image, price, metadata, etc.)
+- [ ] Add stock list state to `AppContext` (currently only tracks widgets and view mode)
+- [ ] Decide on stock list data source: local JSON, file upload, paste/CSV, or external API
+- [ ] Add persistence so config survives a page refresh (localStorage to start)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Tiles
+- [ ] Create a `Tile` component that renders one stock list item
+- [ ] Build 2–3 predefined tile configs (e.g. Compact, Standard, Detailed)
+- [ ] Tile selector UI in edit mode
+- [ ] Style each tile config in `styles/`
 
-### Code Splitting
+### Layouts
+- [ ] Create a `Layout` component that takes a config + stock list and renders the tiles
+- [ ] Implement Grid layout
+- [ ] Implement Strip (horizontal row) layout
+- [ ] Implement Stacked List layout
+- [ ] Implement Featured + Grid layout
+- [ ] Layout selector UI in edit mode
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Pages / Routing
+- [ ] Flesh out `Home.js` to host the layout + tiles
+- [ ] Decide whether multiple pages/views are needed, or just one display
 
-### Analyzing the Bundle Size
+### Edit Mode UX
+- [ ] Wire up the existing `EditableWidget` slots end-to-end
+- [ ] Form for adding/removing/reordering stock list items
+- [ ] Visual preview of layout/tile choices before applying
+- [ ] Fix `addWidget` placeholder in `App.js` (currently passes empty object)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### View Mode UX
+- [ ] Hide all editing UI in view mode
+- [ ] Make sure `NavbarView` mirrors the navbar config from edit mode
+- [ ] Responsive behavior for each layout
 
-### Making a Progressive Web App
+### Polish
+- [ ] Replace CRA boilerplate favicon and manifest with Winklr branding
+- [ ] Light/dark theme toggle
+- [ ] Empty state when no stock list is loaded
+- [ ] Basic tests for `AppContext` reducers and the `Tile` / `Layout` components
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Stretch
+- [ ] Export/import config as JSON
+- [ ] Shareable URL that encodes the config
+- [ ] Drag-and-drop tile reordering
+- [ ] Custom tile config builder (beyond the predefined ones)
