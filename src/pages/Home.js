@@ -10,7 +10,7 @@ import ThemePicker from "../components/ThemePicker";
 import ConfigPorter from "../components/ConfigPorter";
 
 export default function Home() {
-  const { state } = useContext(AppContext);
+  const { state, setStockList } = useContext(AppContext);
 
   return (
     <div className="Home">
@@ -30,6 +30,8 @@ export default function Home() {
           config={state.layoutConfig}
           items={state.stockList}
           tileConfig={state.tileConfig}
+          isEditMode={state.viewMode}
+          onReorder={setStockList}
         />
       ) : (
         <EmptyState />
