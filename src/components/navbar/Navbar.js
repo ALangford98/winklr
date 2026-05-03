@@ -1,5 +1,6 @@
 import React from 'react';
 import EditableWidget from './EditableWidget';
+import NavbarBrand from './NavbarBrand';
 
 const SLOTS = [
   { key: 'left',        className: 'LeftWidget'        },
@@ -11,11 +12,14 @@ const SLOTS = [
 
 const Navbar = () => (
   <div className="Navbar">
-    {SLOTS.map(({ key, className }) => (
-      <li key={key} className={className}>
-        <EditableWidget slot={key} />
-      </li>
-    ))}
+    <NavbarBrand />
+    <div className="navbar-slots">
+      {SLOTS.map(({ key, className }) => (
+        <li key={key} className={className}>
+          <EditableWidget slot={key} />
+        </li>
+      ))}
+    </div>
   </div>
 );
 

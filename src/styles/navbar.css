@@ -4,10 +4,30 @@
   height: 40pt;
   padding-top: 10px;
   align-items: center;
-  justify-content: space-between;
   overflow: visible;
   position: relative;
   z-index: 10;
+}
+
+.navbar-brand {
+  flex-shrink: 0;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-brand-logo {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+
+.navbar-slots {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
 }
 
 a {

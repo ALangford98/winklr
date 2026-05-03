@@ -7,6 +7,7 @@ import LayoutSelector from "../components/layout/LayoutSelector";
 import Layout from "../components/layout/Layout";
 import EmptyState from "../components/EmptyState";
 import ThemePicker from "../components/ThemePicker";
+import BrandingEditor from "../components/BrandingEditor";
 import ConfigPorter from "../components/ConfigPorter";
 
 function matchesQuery(item, query) {
@@ -14,6 +15,19 @@ function matchesQuery(item, query) {
   if (item.name.toLowerCase().includes(q)) return true;
   return Object.values(item.metadata || {}).some((v) =>
     String(v).toLowerCase().includes(q)
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="app-footer">
+      <span className="footer-text">Powered by</span>
+      <img
+        src={`${process.env.PUBLIC_URL}/branding/wordmark-lowercase.svg`}
+        alt="Winklr"
+        className="footer-wordmark"
+      />
+    </footer>
   );
 }
 
@@ -38,6 +52,7 @@ export default function Home() {
           <TileConfigSelector />
           <LayoutSelector />
           <ThemePicker />
+          <BrandingEditor />
           <ConfigPorter />
         </aside>
       )}
@@ -77,6 +92,8 @@ export default function Home() {
         ) : (
           <p className="search-no-results">No items match "{state.searchQuery}"</p>
         )}
+
+        <Footer />
       </div>
     </div>
   );

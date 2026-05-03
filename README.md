@@ -116,12 +116,33 @@ Other scripts: `npm test`, `npm run build`.
 - [ ] Managed deployment subscription tier — automated hosting on Winklr infrastructure for users who don't want to self-host
 - [ ] Version 1.0.0 milestone: full end-to-end deployment pipeline (static export + managed option) live
 
+### Branding
+- [x] Default Winklr branding assets (mark + wordmark) displayed in navbar and footer
+- [x] User logo upload in edit panel — replaces default with any image
+- [x] "Powered by Winklr" footer
+- [ ] Store name / tagline field — displayed in navbar or hero area
+- [ ] Favicon swap when custom logo is uploaded
+
+### Mobile
+- [ ] Edit panel is too wide for mobile — replace the left-side panel with a bottom sheet or slide-in drawer triggered by a FAB
+- [ ] FAB group (Cart, Help, Edit Mode toggle) needs repositioning on small screens to avoid overlapping tile content
+- [ ] Navbar widget slots collapse poorly on mobile — review slot visibility and overflow behaviour at narrow widths
+- [ ] Test and fix tile layout responsiveness in all four layout variants on common mobile screen sizes (375px, 390px, 414px)
+- [ ] Touch target audit — ensure all interactive elements (tile buttons, cart qty controls, widget editor) meet minimum 44px tap target size
+
 ### Polish
 - [ ] Basic tests for `AppContext` reducers and the `Tile` / `Layout` components
 
 ---
 
 ## Changelog
+
+### [0.1.4] — 2026-05-03
+- Fixed FAB and Edit Mode button text colour in light mode — all use `--text-on-nav` which is always legible against the navbar background
+- Added 4 new colour palettes: Forest, Sunset, Ocean, Rose (8 total)
+- Custom colour pickers for all major UI variables (page/card/nav backgrounds, text, success, danger) — selecting a palette resets custom overrides
+- Winklr branding assets in navbar (mark icon) and footer (wordmark); user can upload a custom logo in the Branding panel
+- "Powered by Winklr" footer at the bottom of the content area
 
 ### [0.1.2] — 2026-05-03
 - Live search bar above the tile grid — filters by item name and any metadata field

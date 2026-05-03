@@ -87,7 +87,7 @@
   border-radius: 50%;
   background: var(--bg-nav);
   border: 2px solid var(--border-subtle);
-  color: var(--text-secondary);
+  color: var(--text-on-nav);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -327,7 +327,7 @@
   height: 40px;
   border-radius: 10px;
   background: var(--bg-nav);
-  color: var(--text-primary);
+  color: var(--text-on-nav);
   border: 2px solid var(--border-subtle);
   cursor: pointer;
   font-size: 13px;

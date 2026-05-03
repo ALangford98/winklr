@@ -10,7 +10,8 @@ const WIDGET_SLOTS_DEFAULT = {
   left: null, centerLeft: null, center: null, centerRight: null, right: null,
 };
 
-const THEME_DEFAULT = { palette: "dark", primaryColor: "#316dca" };
+const THEME_DEFAULT  = { palette: "dark", primaryColor: "#316dca", custom: {} };
+const BRAND_DEFAULT  = { logo: null };
 
 const AppContextProvider = ({ children }) => {
   const [widgets, setWidgets]         = useLocalStorage("winklr_widgetSlots", WIDGET_SLOTS_DEFAULT);
@@ -20,6 +21,7 @@ const AppContextProvider = ({ children }) => {
   const [layoutConfig, setLayoutConfig] = useLocalStorage("winklr_layoutConfig", "grid");
   const [theme, setTheme]             = useLocalStorage("winklr_theme", THEME_DEFAULT);
   const [cart, setCart]               = useLocalStorage("winklr_cart", []);
+  const [brand, setBrand]             = useLocalStorage("winklr_brand", BRAND_DEFAULT);
   const [searchQuery, setSearchQuery] = useState("");
   const [cartOpen, setCartOpen]       = useState(false);
   const [helpOpen, setHelpOpen]       = useState(false);
@@ -42,6 +44,9 @@ const AppContextProvider = ({ children }) => {
     const root = document.documentElement;
     Object.entries(palette).forEach(([key, value]) => {
       if (key !== "name") root.style.setProperty(key, value);
+    });
+    Object.entries(theme.custom || {}).forEach(([key, value]) => {
+      root.style.setProperty(key, value);
     });
     root.style.setProperty("--accent-primary", theme.primaryColor);
     root.style.setProperty("--accent-subtle", hexToRgba(theme.primaryColor, 0.15));
@@ -96,12 +101,16 @@ const AppContextProvider = ({ children }) => {
     if (config.theme        !== null) setTheme(config.theme);
   };
 
+  const setThemeCustom = (variable, value) => {
+    setTheme((prev) => ({ ...prev, custom: { ...(prev.custom || {}), [variable]: value } }));
+  };
+
   const toggleViewMode = () => setViewMode((prev) => !prev);
 
   return (
     <AppContext.Provider
       value={{
-        state: { widgets, viewMode, stockList, tileConfig, layoutConfig, theme, cart, searchQuery },
+        state: { widgets, viewMode, stockList, tileConfig, layoutConfig, theme, cart, brand, searchQuery },
         setWidget,
         clearWidget,
         toggleViewMode,
@@ -114,6 +123,8 @@ const AppContextProvider = ({ children }) => {
         setTheme,
         loadConfig,
         setSearchQuery,
+        setBrand,
+        setThemeCustom,
         cartOpen, setCartOpen,
         helpOpen, setHelpOpen,
         addToCart,
