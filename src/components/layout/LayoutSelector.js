@@ -13,7 +13,6 @@ export default function LayoutSelector() {
 
   return (
     <div className="layout-selector">
-      <p className="selector-label">Layout</p>
       <div className="selector-options">
         {OPTIONS.map(({ value, label }) => (
           <button

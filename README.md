@@ -156,6 +156,7 @@ Other scripts: `npm test`, `npm run build`.
 - Red warning shown inline if a pasted value looks like a secret key (`sk_` or `sk.` prefix)
 - Integration keys stored in `localStorage` (`winklr_integrations`) and included in JSON config export/import
 - Keys intentionally excluded from shareable URL encoding (public keys only travel in downloads)
+- Added functionality to collapse panel sections
 
 ### [0.1.4] — 2026-05-03
 - Fixed FAB and Edit Mode button text colour in light mode — all use `--text-on-nav` which is always legible against the navbar background

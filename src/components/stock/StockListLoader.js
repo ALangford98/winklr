@@ -39,8 +39,6 @@ export default function StockListLoader() {
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
     >
-      <p className="loader-label">Stock List</p>
-
       {!hasItems ? (
         <label className="loader-drop-zone">
           <input

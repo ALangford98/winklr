@@ -28,7 +28,6 @@ export default function ThemePicker() {
 
   return (
     <div className="theme-picker">
-      <p className="selector-label">Theme</p>
       <div className="palette-swatches">
         {Object.entries(PALETTES).map(([key, p]) => (
           <button

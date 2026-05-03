@@ -30,8 +30,6 @@ export default function StockListEditor() {
 
   return (
     <div className="stock-list-editor">
-      <p className="loader-label">Items ({state.stockList.length})</p>
-
       <ul className="editor-list">
         {state.stockList.map((item, i) => (
           <li key={item.id} className="editor-item">

@@ -39,7 +39,6 @@ export default function ConfigPorter() {
 
   return (
     <div className="config-porter">
-      <p className="selector-label">Config</p>
       <div className="selector-options">
         <button className="selector-btn" onClick={handleExport}>Export</button>
         <label className="selector-btn config-import-label">

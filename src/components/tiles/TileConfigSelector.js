@@ -12,7 +12,6 @@ export default function TileConfigSelector() {
 
   return (
     <div className="tile-config-selector">
-      <p className="selector-label">Tile Style</p>
       <div className="selector-options">
         {OPTIONS.map(({ value, label }) => (
           <button

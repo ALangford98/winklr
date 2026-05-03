@@ -10,6 +10,7 @@ import ThemePicker from "../components/ThemePicker";
 import BrandingEditor from "../components/BrandingEditor";
 import ConfigPorter from "../components/ConfigPorter";
 import IntegrationsPanel from "../components/IntegrationsPanel";
+import CollapsibleSection from "../components/CollapsibleSection";
 
 function matchesQuery(item, query) {
   const q = query.toLowerCase();
@@ -48,14 +49,30 @@ export default function Home() {
     <div className="Home">
       {state.viewMode && (
         <aside className="edit-panel">
-          <StockListLoader />
-          <StockListEditor />
-          <TileConfigSelector />
-          <LayoutSelector />
-          <ThemePicker />
-          <BrandingEditor />
-          <IntegrationsPanel />
-          <ConfigPorter />
+          <CollapsibleSection title="Stock List" storageKey="stockLoader" defaultOpen={true}>
+            <StockListLoader />
+          </CollapsibleSection>
+          <CollapsibleSection title={`Items${state.stockList.length ? ` (${state.stockList.length})` : ''}`} storageKey="stockEditor" defaultOpen={true}>
+            <StockListEditor />
+          </CollapsibleSection>
+          <CollapsibleSection title="Tile Style" storageKey="tileConfig" defaultOpen={false}>
+            <TileConfigSelector />
+          </CollapsibleSection>
+          <CollapsibleSection title="Layout" storageKey="layout" defaultOpen={false}>
+            <LayoutSelector />
+          </CollapsibleSection>
+          <CollapsibleSection title="Theme" storageKey="theme" defaultOpen={false}>
+            <ThemePicker />
+          </CollapsibleSection>
+          <CollapsibleSection title="Branding" storageKey="branding" defaultOpen={false}>
+            <BrandingEditor />
+          </CollapsibleSection>
+          <CollapsibleSection title="Integrations" storageKey="integrations" defaultOpen={false}>
+            <IntegrationsPanel />
+          </CollapsibleSection>
+          <CollapsibleSection title="Config" storageKey="config" defaultOpen={false}>
+            <ConfigPorter />
+          </CollapsibleSection>
         </aside>
       )}
 

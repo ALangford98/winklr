@@ -85,7 +85,6 @@ const IntegrationsPanel = () => {
 
   return (
     <div className="integrations-panel">
-      <p className="selector-label">Integrations</p>
       <p className="integration-panel-notice">
         Keys entered here are stored in your browser and included in exported config files.
         Only use <strong>public / publishable</strong> keys — never paste secret keys.

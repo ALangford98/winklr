@@ -17,7 +17,6 @@ export default function BrandingEditor() {
 
   return (
     <div className="branding-editor">
-      <p className="selector-label">Branding</p>
       <div className="branding-preview">
         <img src={logoSrc} alt="Brand logo" className="branding-preview-img" />
       </div>
