@@ -4,11 +4,11 @@ import { renderWidget } from '../navbar/widgetRegistry';
 import NavbarBrand from '../navbar/NavbarBrand';
 
 const SLOTS = [
-  { key: 'left',        className: 'LeftWidget'        },
-  { key: 'centerLeft',  className: 'CenterLeftWidget'  },
-  { key: 'center',      className: 'CenterWidget'      },
-  { key: 'centerRight', className: 'CenterRightWidget' },
-  { key: 'right',       className: 'RightWidget'       },
+  { key: 'left',        desktopOnly: false },
+  { key: 'centerLeft',  desktopOnly: true  },
+  { key: 'center',      desktopOnly: false },
+  { key: 'centerRight', desktopOnly: true  },
+  { key: 'right',       desktopOnly: false },
 ];
 
 const NavbarView = () => {
@@ -18,15 +18,14 @@ const NavbarView = () => {
     <div className="Navbar">
       <NavbarBrand />
       <div className="navbar-slots">
-        {SLOTS.map(({ key, className }) => {
-          const content = renderWidget(state.widgets[key]);
-          if (!content) return null;
-          return (
-            <li key={key} className={className}>
-              {content}
-            </li>
-          );
-        })}
+        {SLOTS.map(({ key, desktopOnly }) => (
+          <li
+            key={key}
+            className={`navbar-slot${desktopOnly ? ' navbar-slot--desktop' : ''}`}
+          >
+            {renderWidget(state.widgets[key])}
+          </li>
+        ))}
       </div>
     </div>
   );

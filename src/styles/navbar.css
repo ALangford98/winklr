@@ -1,104 +1,148 @@
+/* ── Navbar shell ──────────────────────────────────────── */
 .Navbar {
   display: flex;
-  background-color: var(--bg-nav);
-  height: 40pt;
-  padding-top: 10px;
-  align-items: center;
-  overflow: visible;
+  background: var(--bg-nav);
+  height: 56px;
+  align-items: stretch;
   position: relative;
   z-index: 10;
+  overflow: visible;
 }
 
+/* ── Brand ─────────────────────────────────────────────── */
 .navbar-brand {
   flex-shrink: 0;
-  padding: 0 14px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .navbar-brand-logo {
-  height: 28px;
+  height: 30px;
   width: auto;
   display: block;
 }
 
+/* ── Slots container ───────────────────────────────────── */
 .navbar-slots {
   flex: 1;
   display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+/* ── Individual slot ───────────────────────────────────── */
+.navbar-slot {
+  flex: 1;
+  display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 0 8px;
-}
-
-a {
-  text-decoration: none;
-  color: var(--text-primary);
-}
-
-li {
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 0;
+  position: relative;
   list-style: none;
+  transition: background 0.12s;
 }
 
-.LeftWidget,
-.CenterLeftWidget,
-.CenterWidget,
-.CenterRightWidget,
-.RightWidget,
-.SavedWidget {
-  font-size: 20px;
-  height: 40px;
-  max-height: 50px;
-  color: var(--text-primary);
+.navbar-slot:last-child {
+  border-right: none;
 }
 
-select {
-  max-width: 100px;
+/* Subtle fill when slot is hovered in edit mode */
+.navbar-slot:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
-@media screen and (max-width: 500px) {
-  .LeftWidget,
-  .CenterWidget,
-  .RightWidget {
-    width: 100%;
-    margin-bottom: 5px;
-    text-align: center;
-  }
-  .CenterLeftWidget,
-  .CenterRightWidget {
+/* Desktop-only slots: hidden on mobile */
+.navbar-slot--desktop {
+  border-left: 1px dashed rgba(255, 255, 255, 0.1);
+  border-right: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 600px) {
+  .navbar-slot--desktop {
     display: none;
   }
 }
 
+/* ── Links inside navbar ───────────────────────────────── */
+.Navbar a {
+  text-decoration: none;
+  color: var(--text-on-nav);
+}
+
+/* ── Editable widget ───────────────────────────────────── */
 .editable-widget {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
 }
 
-.widget-add,
+.widget-add {
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1;
+  padding: 4px 10px;
+  border-radius: 4px;
+  user-select: none;
+  transition: color 0.15s;
+}
+
+.widget-add:hover {
+  color: var(--text-secondary);
+}
+
+.widget-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
 .widget-clear {
   cursor: pointer;
-  color: var(--text-secondary);
-  font-size: 14px;
+  color: var(--text-muted);
+  font-size: 11px;
   line-height: 1;
   padding: 2px 4px;
   border-radius: 3px;
   user-select: none;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+  flex-shrink: 0;
 }
 
-.widget-add:hover  { color: var(--text-primary); }
+.navbar-slot:hover .widget-clear { opacity: 1; }
 .widget-clear:hover { color: var(--accent-danger); }
 
-.widget-label {
-  font-size: 13px;
-  color: var(--text-primary);
+/* Desktop-only badge — visible inside the slot at the bottom */
+.widget-desktop-badge {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+  white-space: nowrap;
 }
 
+/* ── Widget editor dropdown ────────────────────────────── */
 .widget-editor {
   position: absolute;
   top: calc(100% + 6px);
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 100;
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -109,6 +153,18 @@ select {
   gap: 8px;
   min-width: 180px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Prevent edge slots from overflowing the viewport */
+.navbar-slot:first-child .widget-editor {
+  left: 0;
+  transform: none;
+}
+
+.navbar-slot:last-child .widget-editor {
+  left: auto;
+  right: 0;
+  transform: none;
 }
 
 .widget-editor select {
@@ -148,15 +204,36 @@ select {
   cursor: not-allowed;
 }
 
-.widget-container {
-  display: flex;
-  align-items: center;
+.widget-editor-opts {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 12px;
+  padding: 4px 6px;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
 }
 
+.widget-editor-opts:focus { border-color: var(--accent-primary); }
+.widget-editor-opts::placeholder { color: var(--text-muted); }
+
+.widget-editor-notice {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 4px 6px;
+  background: var(--bg-raised);
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+/* ── Navbar widget components ──────────────────────────── */
 .navbar-action-btn {
   background: none;
   border: none;
-  color: var(--text-primary);
+  color: var(--text-on-nav);
   font-size: 14px;
   cursor: pointer;
   padding: 4px 8px;
@@ -165,6 +242,7 @@ select {
   align-items: center;
   gap: 6px;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .navbar-action-btn:hover { color: var(--accent-primary); }
@@ -184,35 +262,6 @@ select {
   line-height: 1;
 }
 
-.navbar-dropdown {
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
-  border-radius: 6px;
-  color: var(--text-primary);
-  font-size: 13px;
-  padding: 4px 8px;
-}
-
-.widget-preview {
-  display: flex;
-  align-items: center;
-}
-
-.widget-editor-opts {
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
-  border-radius: 4px;
-  color: var(--text-primary);
-  font-size: 12px;
-  padding: 4px 6px;
-  width: 100%;
-  box-sizing: border-box;
-  outline: none;
-}
-
-.widget-editor-opts:focus { border-color: var(--accent-primary); }
-.widget-editor-opts::placeholder { color: var(--text-muted); }
-
 .navbar-search-input {
   background: var(--bg-input);
   border: 1px solid var(--border-subtle);
@@ -221,9 +270,19 @@ select {
   font-size: 13px;
   padding: 4px 10px;
   outline: none;
-  width: 160px;
+  width: 140px;
   transition: border-color 0.15s;
 }
 
 .navbar-search-input:focus { border-color: var(--accent-primary); }
 .navbar-search-input::placeholder { color: var(--text-muted); }
+
+.navbar-dropdown {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 4px 8px;
+  max-width: 120px;
+}

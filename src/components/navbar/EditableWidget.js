@@ -2,14 +2,14 @@ import React, { useState, useContext } from 'react';
 import { AppContext } from '../appContext';
 import { linkOptions, functionalOptions, renderWidget } from './widgetRegistry';
 
-const EditableWidget = ({ slot }) => {
+const EditableWidget = ({ slot, desktopOnly = false }) => {
   const { state, setWidget, clearWidget } = useContext(AppContext);
   const saved = state.widgets[slot];
 
-  const [isEditing, setIsEditing]       = useState(false);
-  const [widgetType, setWidgetType]     = useState('none');
+  const [isEditing, setIsEditing]         = useState(false);
+  const [widgetType, setWidgetType]       = useState('none');
   const [widgetContent, setWidgetContent] = useState('');
-  const [dropdownOpts, setDropdownOpts] = useState('');
+  const [dropdownOpts, setDropdownOpts]   = useState('');
 
   const handleOpen = () => setIsEditing(true);
 
@@ -44,8 +44,18 @@ const EditableWidget = ({ slot }) => {
         <span className="widget-add" onClick={handleOpen}>+</span>
       )}
 
+      {desktopOnly && (
+        <span className="widget-desktop-badge">Desktop only</span>
+      )}
+
       {isEditing && (
         <div className="widget-editor">
+          {desktopOnly && (
+            <p className="widget-editor-notice">
+              This slot is hidden on screens narrower than 600 px.
+            </p>
+          )}
+
           <select
             value={widgetType}
             onChange={(e) => { setWidgetType(e.target.value); setWidgetContent(''); setDropdownOpts(''); }}
