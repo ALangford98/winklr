@@ -107,16 +107,43 @@ Other scripts: `npm test`, `npm run build`.
 - [x] Help popup / onboarding guide for first-time users
 - [x] Search bar — live tile filtering by name and metadata fields
 - [ ] Custom tile config builder — define field layout, font sizes, visible fields beyond the three presets
-- [ ] Mapbox API integration — delivery address autocomplete and validation at checkout
-- [ ] Payment method API integration — Stripe or similar for processing orders
 
 ### Integrations
 - [x] Integrations panel in the edit UI — fields for each supported client-side credential (Stripe publishable key, Mapbox access token)
 - [x] Clear labelling distinguishing public keys (safe to export) from secret keys (managed tier only)
 - [x] In-editor warning if a user pastes what looks like a secret key (starts with `sk_`)
 - [x] Integration status indicators — show connected / not configured per service
-- [ ] Stripe publishable key → wires up Stripe Elements in the exported store for card tokenisation
-- [ ] Mapbox access token → enables address autocomplete and validation at checkout in the exported store
+
+### Checkout
+- [x] Checkout modal — triggered from the "Checkout" button in the cart drawer; overlays the page (not a new route)
+- [x] Multi-step flow: (1) Contact details → (2) Delivery address → (3) Payment → (4) Confirmation
+- [x] Step indicator showing current and completed steps; allow navigating back to earlier steps
+- [x] Contact step — name, email, phone fields with basic required-field validation
+- [x] Delivery step — address fields (line 1, line 2, city, postcode, country); Mapbox autocomplete hooks in here
+- [x] Payment step — card fields; Stripe Elements hooks in here
+- [x] Order summary sidebar (or collapsible panel on mobile) — visible across all steps: itemised cart, subtotal, shipping line, total
+- [x] Shipping cost calculation placeholder — free shipping over $50, $5 flat rate otherwise
+- [x] Confirmation step — order reference number (client-generated), summary of items and delivery address, "Continue shopping" CTA
+- [x] Persist in-progress checkout form state to React state (not localStorage) so a page refresh resets it
+- [ ] Accessible focus management — trap focus inside the modal, return focus to the trigger on close
+
+### Stripe
+- [ ] Wire Stripe publishable key from integrations state into the checkout payment step
+- [ ] Load Stripe.js lazily when the payment step mounts — only if a publishable key is configured
+- [ ] Render `CardElement` (or individual `CardNumberElement` / `CardExpiryElement` / `CardCvcElement`) in the payment step
+- [ ] Tokenise on submit via `stripe.confirmCardPayment` or `stripe.createToken` — no server-side charge in the editor
+- [ ] Disable the Pay button until the card Element reports complete
+- [ ] Surface Stripe field errors inline below the card input
+- [ ] On success: advance to the Confirmation step and clear the cart
+- [ ] Static export: embed Stripe publishable key and Stripe.js script tag; wire up Elements in the exported storefront
+
+### Mapbox
+- [ ] Wire Mapbox access token from integrations state into the checkout flow
+- [ ] Add delivery address field to checkout — autocomplete via Mapbox Geocoding API (`/geocoding/v5/mapbox.places`)
+- [ ] Debounced suggestion dropdown as the user types — show formatted place names
+- [ ] On suggestion select: populate structured address fields (line 1, city, postcode, country)
+- [ ] Basic address validation — require a selection from suggestions rather than free-text entry
+- [ ] Static export: embed Mapbox token and `mapbox-gl` / Geocoding API call in the exported storefront
 
 ### Deployment pipeline
 - [ ] Static export — generate a single self-contained HTML file from the current config; embeds theme CSS vars, stock data, and client-side API keys; renders a fully functional read-only storefront with basic cart and search in vanilla JS
@@ -148,6 +175,18 @@ Other scripts: `npm test`, `npm run build`.
 ---
 
 ## Changelog
+
+### [0.1.6] — 2026-05-03
+- Checkout modal — 4-step flow (Contact → Delivery → Payment → Confirmation) triggered from the cart drawer
+- Step indicator with completed-step checkmarks and animated connecting lines
+- Contact step: name, email (required), phone (optional)
+- Delivery step: address line 1/2, city, postcode, country select; city + postcode in a two-column row
+- Payment step: cardholder name, card number, expiry, CVC; placeholder notice for Stripe integration
+- Confirmation step: generated order reference, delivery address summary, items ordered
+- Order summary sidebar across all steps: item thumbnails with qty badges, subtotal, shipping, total
+- Shipping: free over $50, $5 flat rate otherwise
+- "Continue shopping" on confirmation clears the modal and resets form state
+- Responsive: slides up as a bottom sheet on mobile with summary scrollable at top
 
 ### [0.1.5] — 2026-05-03
 - Integrations panel in the edit UI — Stripe publishable key and Mapbox access token fields

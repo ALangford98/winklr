@@ -25,8 +25,9 @@ const AppContextProvider = ({ children }) => {
   const [brand, setBrand]                   = useLocalStorage("winklr_brand", BRAND_DEFAULT);
   const [integrations, setIntegrations]     = useLocalStorage("winklr_integrations", INTEGRATIONS_DEFAULT);
   const [searchQuery, setSearchQuery]       = useState("");
-  const [cartOpen, setCartOpen]       = useState(false);
-  const [helpOpen, setHelpOpen]       = useState(false);
+  const [cartOpen, setCartOpen]           = useState(false);
+  const [helpOpen, setHelpOpen]           = useState(false);
+  const [checkoutOpen, setCheckoutOpen]   = useState(false);
 
   // On mount: load config from URL hash if present, then clear the hash
   useEffect(() => {
@@ -131,6 +132,7 @@ const AppContextProvider = ({ children }) => {
         setThemeCustom,
         cartOpen, setCartOpen,
         helpOpen, setHelpOpen,
+        checkoutOpen, setCheckoutOpen,
         addToCart,
         removeFromCart,
         updateCartQty,

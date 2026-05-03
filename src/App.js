@@ -4,6 +4,7 @@ import './styles/navbar.css';
 import './styles/tiles.css';
 import './styles/layouts.css';
 import './styles/cart.css';
+import './styles/checkout.css';
 
 import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -12,6 +13,7 @@ import Navbar from './components/navbar/Navbar';
 import NavbarView from './components/view-mode/NavbarView';
 import CartDrawer, { CartIcon } from './components/cart/CartDrawer';
 import HelpModal from './components/HelpModal';
+import CheckoutModal from './components/checkout/CheckoutModal';
 import Home from './pages/Home';
 
 function hasWidget(widgets, type, content) {
@@ -19,7 +21,7 @@ function hasWidget(widgets, type, content) {
 }
 
 function App() {
-  const { toggleViewMode, state, cartOpen, setCartOpen, helpOpen, setHelpOpen } = useContext(AppContext);
+  const { toggleViewMode, state, cartOpen, setCartOpen, helpOpen, setHelpOpen, checkoutOpen, setCheckoutOpen } = useContext(AppContext);
 
   const cartCount    = state.cart.reduce((sum, c) => sum + c.quantity, 0);
   const hideCartFab  = hasWidget(state.widgets, 'link', 'Cart');
@@ -51,6 +53,7 @@ function App() {
 
         <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
         <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
+        <CheckoutModal open={checkoutOpen} onClose={() => setCheckoutOpen(false)} />
       </div>
     </Router>
   );

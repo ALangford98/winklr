@@ -13,7 +13,7 @@ function CartIcon() {
 export { CartIcon };
 
 export default function CartDrawer({ open, onClose }) {
-  const { state, removeFromCart, updateCartQty, clearCart } = useContext(AppContext);
+  const { state, removeFromCart, updateCartQty, clearCart, setCheckoutOpen } = useContext(AppContext);
 
   const cartItems = state.cart
     .map((entry) => ({ ...entry, item: state.stockList.find((i) => i.id === entry.itemId) }))
@@ -67,7 +67,10 @@ export default function CartDrawer({ open, onClose }) {
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
               )}
-              <button className="cart-btn-checkout selector-btn selector-btn--active">
+              <button
+                className="cart-btn-checkout selector-btn selector-btn--active"
+                onClick={() => { onClose(); setCheckoutOpen(true); }}
+              >
                 Checkout
               </button>
               <button className="cart-btn-clear selector-btn" onClick={clearCart}>
