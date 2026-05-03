@@ -1,22 +1,31 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { AppContext } from '../appContext';
 
-const NavbarLink = ({ to, label }) => (
-  <Link to={to} className='lnk'>
-    {label}
-  </Link>
-);
-
-const navbarLinksOptions = [
-  { value: 'Home', label: 'Home', component: <NavbarLink to="/" label="Home" /> },
-  { value: 'Help', label: 'Help', component: <NavbarLink to="/Help" label="Help" /> },
-  { value: 'Cart', label: 'Cart', component: <NavbarLink to="/Cart" label="Cart" /> },
-];
-
-const NavbarLinks = ({ selectedOption }) => {
-  const selectedComponent = navbarLinksOptions.find((option) => option.value === selectedOption)?.component;
-
-  return <>{selectedComponent}</>;
+const HelpLink = () => {
+  const { setHelpOpen } = useContext(AppContext);
+  return (
+    <button className="navbar-action-btn" onClick={() => setHelpOpen(true)}>
+      Help
+    </button>
+  );
 };
 
-export { NavbarLinks, navbarLinksOptions };
+const CartLink = () => {
+  const { state, setCartOpen } = useContext(AppContext);
+  const count = state.cart.reduce((sum, c) => sum + c.quantity, 0);
+  return (
+    <button className="navbar-action-btn" onClick={() => setCartOpen(true)}>
+      Cart
+      {count > 0 && <span className="navbar-cart-badge">{count}</span>}
+    </button>
+  );
+};
+
+const LINK_COMPONENTS = { Help: <HelpLink />, Cart: <CartLink /> };
+
+export const navbarLinksOptions = [
+  { value: 'Help', label: 'Help' },
+  { value: 'Cart', label: 'Cart' },
+];
+
+export const NavbarLinks = ({ selectedOption }) => LINK_COMPONENTS[selectedOption] ?? null;

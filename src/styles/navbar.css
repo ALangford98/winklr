@@ -133,6 +133,66 @@ select {
   align-items: center;
 }
 
+.navbar-action-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+.navbar-action-btn:hover { color: var(--accent-primary); }
+
+.navbar-cart-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 8px;
+  background: var(--accent-primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.navbar-dropdown {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 4px 8px;
+}
+
+.widget-preview {
+  display: flex;
+  align-items: center;
+}
+
+.widget-editor-opts {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 12px;
+  padding: 4px 6px;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.widget-editor-opts:focus { border-color: var(--accent-primary); }
+.widget-editor-opts::placeholder { color: var(--text-muted); }
+
 .navbar-search-input {
   background: var(--bg-input);
   border: 1px solid var(--border-subtle);

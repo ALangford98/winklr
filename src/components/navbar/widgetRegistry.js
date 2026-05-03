@@ -7,14 +7,16 @@ export const linkOptions = navbarLinksOptions;
 
 export const functionalOptions = [
   { value: 'Search',   label: 'Search Bar',   component: <SearchBar /> },
-  { value: 'Dropdown', label: 'Dropdown Menu', component: <DropdownMenu /> },
+  { value: 'Dropdown', label: 'Dropdown Menu', render: (widget) => <DropdownMenu options={widget.options ?? []} /> },
 ];
 
 export function renderWidget(widget) {
   if (!widget) return null;
   if (widget.type === 'link') return <NavbarLinks selectedOption={widget.content} />;
   if (widget.type === 'function') {
-    return functionalOptions.find((o) => o.value === widget.content)?.component ?? null;
+    const opt = functionalOptions.find((o) => o.value === widget.content);
+    if (!opt) return null;
+    return opt.render ? opt.render(widget) : opt.component;
   }
   return null;
 }

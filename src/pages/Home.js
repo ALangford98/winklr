@@ -20,6 +20,10 @@ function matchesQuery(item, query) {
 export default function Home() {
   const { state, setStockList, setSearchQuery } = useContext(AppContext);
 
+  const hasSearchWidget = Object.values(state.widgets).some(
+    (w) => w?.type === 'function' && w?.content === 'Search'
+  );
+
   const query = state.searchQuery.trim();
   const filtered = query
     ? state.stockList.filter((item) => matchesQuery(item, query))
@@ -39,7 +43,7 @@ export default function Home() {
       )}
 
       <div className="content-area">
-        {state.stockList.length > 0 && (
+        {state.stockList.length > 0 && !hasSearchWidget && (
           <div className="store-search-wrap">
             <input
               className="store-search-input"

@@ -21,6 +21,8 @@ const AppContextProvider = ({ children }) => {
   const [theme, setTheme]             = useLocalStorage("winklr_theme", THEME_DEFAULT);
   const [cart, setCart]               = useLocalStorage("winklr_cart", []);
   const [searchQuery, setSearchQuery] = useState("");
+  const [cartOpen, setCartOpen]       = useState(false);
+  const [helpOpen, setHelpOpen]       = useState(false);
 
   // On mount: load config from URL hash if present, then clear the hash
   useEffect(() => {
@@ -112,6 +114,8 @@ const AppContextProvider = ({ children }) => {
         setTheme,
         loadConfig,
         setSearchQuery,
+        cartOpen, setCartOpen,
+        helpOpen, setHelpOpen,
         addToCart,
         removeFromCart,
         updateCartQty,

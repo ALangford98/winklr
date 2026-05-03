@@ -5,7 +5,7 @@ import './styles/tiles.css';
 import './styles/layouts.css';
 import './styles/cart.css';
 
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppContext } from './components/appContext';
 import Navbar from './components/navbar/Navbar';
@@ -14,12 +14,16 @@ import CartDrawer, { CartIcon } from './components/cart/CartDrawer';
 import HelpModal from './components/HelpModal';
 import Home from './pages/Home';
 
-function App() {
-  const { toggleViewMode, state } = useContext(AppContext);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
+function hasWidget(widgets, type, content) {
+  return Object.values(widgets).some((w) => w?.type === type && w?.content === content);
+}
 
-  const cartCount = state.cart.reduce((sum, c) => sum + c.quantity, 0);
+function App() {
+  const { toggleViewMode, state, cartOpen, setCartOpen, helpOpen, setHelpOpen } = useContext(AppContext);
+
+  const cartCount    = state.cart.reduce((sum, c) => sum + c.quantity, 0);
+  const hideCartFab  = hasWidget(state.widgets, 'link', 'Cart');
+  const hideHelpFab  = hasWidget(state.widgets, 'link', 'Help');
 
   return (
     <Router>
@@ -30,12 +34,16 @@ function App() {
         </Routes>
 
         <div className="fab-group">
-          <button className="help-fab" onClick={() => setHelpOpen(true)} title="Help">?</button>
-          <button className="cart-fab" onClick={() => setCartOpen(true)}>
-            <CartIcon />
-            Cart
-            {cartCount > 0 && <span className="cart-fab-badge">{cartCount}</span>}
-          </button>
+          {!hideHelpFab && (
+            <button className="help-fab" onClick={() => setHelpOpen(true)} title="Help">?</button>
+          )}
+          {!hideCartFab && (
+            <button className="cart-fab" onClick={() => setCartOpen(true)}>
+              <CartIcon />
+              Cart
+              {cartCount > 0 && <span className="cart-fab-badge">{cartCount}</span>}
+            </button>
+          )}
           <button className="Editing" onClick={toggleViewMode}>
             {state.viewMode ? 'View Mode' : 'Edit Mode'}
           </button>

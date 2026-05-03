@@ -95,6 +95,13 @@ Other scripts: `npm test`, `npm run build`.
 
 ## TODO
 
+### Navbar widget rework
+- [x] Convert "Help" and "Cart" link widgets from dead routes to action triggers (Help → opens help modal, Cart → opens cart drawer)
+- [x] When a Cart or Help widget is present in any navbar slot, suppress the corresponding FAB button — the navbar widget is the canonical entry point
+- [x] Remove the "Home" link option (redundant in a single-page app) or replace it with a configurable external URL field
+- [x] When the Search Bar widget is present in any navbar slot, hide the store search bar above the tile grid
+- [x] Review the Dropdown widget — give it configurable options rather than hardcoded placeholders
+
 ### Functionality
 - [x] Shopping cart — add/remove items, quantity management, cart sidebar or modal
 - [x] Help popup / onboarding guide for first-time users
@@ -116,14 +123,17 @@ Other scripts: `npm test`, `npm run build`.
 
 ## Changelog
 
-### [0.1.3] — 2026-05-03
+### [0.1.2] — 2026-05-03
 - Live search bar above the tile grid — filters by item name and any metadata field
 - Navbar search widget now functional — uses the same shared `searchQuery` state
 - Clear button appears when query is active; "no results" message when nothing matches
-
-### [0.1.2] — 2026-05-03
-- Help modal: "?" FAB button opens a scrollable overlay covering all nine core concepts
-- Closes on backdrop click or Escape key
+- Help modal: "?" FAB button opens a scrollable overlay covering all nine core concepts; closes on backdrop click or Escape
+- "Help" and "Cart" link widgets converted from dead routes to action triggers (open their respective modal/drawer)
+- Cart and Help FAB buttons suppressed when the corresponding navbar widget is present
+- Store search bar suppressed when a Search Bar navbar widget is present
+- "Home" link option removed (redundant in single-page app)
+- Dropdown widget now accepts configurable options via comma-separated input in the widget editor
+- Saved navbar widgets now render their actual component in edit mode (Cart/Help/Search are functional from the navbar in both modes)
 
 ### [0.1.1] — 2026-05-03
 - Shopping cart: add/remove items from any tile variant, with quantity controls and subtotal in the drawer
