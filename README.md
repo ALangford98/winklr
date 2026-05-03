@@ -97,8 +97,8 @@ Other scripts: `npm test`, `npm run build`.
 
 ### Functionality
 - [x] Shopping cart — add/remove items, quantity management, cart sidebar or modal
-- [ ] Help popup / onboarding guide for first-time users
-- [ ] Search bar — live tile filtering by name and metadata fields
+- [x] Help popup / onboarding guide for first-time users
+- [x] Search bar — live tile filtering by name and metadata fields
 - [ ] Custom tile config builder — define field layout, font sizes, visible fields beyond the three presets
 - [ ] Mapbox API integration — delivery address autocomplete and validation at checkout
 - [ ] Payment method API integration — Stripe or similar for processing orders
@@ -115,6 +115,15 @@ Other scripts: `npm test`, `npm run build`.
 ---
 
 ## Changelog
+
+### [0.1.3] — 2026-05-03
+- Live search bar above the tile grid — filters by item name and any metadata field
+- Navbar search widget now functional — uses the same shared `searchQuery` state
+- Clear button appears when query is active; "no results" message when nothing matches
+
+### [0.1.2] — 2026-05-03
+- Help modal: "?" FAB button opens a scrollable overlay covering all nine core concepts
+- Closes on backdrop click or Escape key
 
 ### [0.1.1] — 2026-05-03
 - Shopping cart: add/remove items from any tile variant, with quantity controls and subtotal in the drawer

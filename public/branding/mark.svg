@@ -1,0 +1,7 @@
+<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Winklr mark">
+  <rect width="40" height="40" rx="6" fill="#2C2C2A"/>
+  <rect x="11" y="11" width="8" height="8" rx="1.5" fill="#FFFFFF"/>
+  <rect x="21" y="11" width="8" height="8" rx="1.5" fill="#FFFFFF" opacity="0.55"/>
+  <rect x="11" y="21" width="8" height="8" rx="1.5" fill="#FFFFFF" opacity="0.55"/>
+  <rect x="21" y="21" width="8" height="8" rx="1.5" fill="#FFFFFF"/>
+</svg>

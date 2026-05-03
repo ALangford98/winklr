@@ -132,3 +132,18 @@ select {
   display: flex;
   align-items: center;
 }
+
+.navbar-search-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 4px 10px;
+  outline: none;
+  width: 160px;
+  transition: border-color 0.15s;
+}
+
+.navbar-search-input:focus { border-color: var(--accent-primary); }
+.navbar-search-input::placeholder { color: var(--text-muted); }

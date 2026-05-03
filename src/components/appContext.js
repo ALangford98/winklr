@@ -1,4 +1,4 @@
-import React, { createContext, useEffect } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { createStockItem } from "../models/stockItem";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { PALETTES, hexToRgba } from "../theme/palettes";
@@ -20,6 +20,7 @@ const AppContextProvider = ({ children }) => {
   const [layoutConfig, setLayoutConfig] = useLocalStorage("winklr_layoutConfig", "grid");
   const [theme, setTheme]             = useLocalStorage("winklr_theme", THEME_DEFAULT);
   const [cart, setCart]               = useLocalStorage("winklr_cart", []);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // On mount: load config from URL hash if present, then clear the hash
   useEffect(() => {
@@ -98,7 +99,7 @@ const AppContextProvider = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
-        state: { widgets, viewMode, stockList, tileConfig, layoutConfig, theme, cart },
+        state: { widgets, viewMode, stockList, tileConfig, layoutConfig, theme, cart, searchQuery },
         setWidget,
         clearWidget,
         toggleViewMode,
@@ -110,6 +111,7 @@ const AppContextProvider = ({ children }) => {
         setLayoutConfig,
         setTheme,
         loadConfig,
+        setSearchQuery,
         addToCart,
         removeFromCart,
         updateCartQty,

@@ -11,11 +11,13 @@ import { AppContext } from './components/appContext';
 import Navbar from './components/navbar/Navbar';
 import NavbarView from './components/view-mode/NavbarView';
 import CartDrawer, { CartIcon } from './components/cart/CartDrawer';
+import HelpModal from './components/HelpModal';
 import Home from './pages/Home';
 
 function App() {
   const { toggleViewMode, state } = useContext(AppContext);
   const [cartOpen, setCartOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const cartCount = state.cart.reduce((sum, c) => sum + c.quantity, 0);
 
@@ -28,6 +30,7 @@ function App() {
         </Routes>
 
         <div className="fab-group">
+          <button className="help-fab" onClick={() => setHelpOpen(true)} title="Help">?</button>
           <button className="cart-fab" onClick={() => setCartOpen(true)}>
             <CartIcon />
             Cart
@@ -39,6 +42,7 @@ function App() {
         </div>
 
         <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+        <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
       </div>
     </Router>
   );
