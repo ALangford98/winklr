@@ -9,6 +9,7 @@ import EmptyState from "../components/EmptyState";
 import ThemePicker from "../components/ThemePicker";
 import BrandingEditor from "../components/BrandingEditor";
 import ConfigPorter from "../components/ConfigPorter";
+import IntegrationsPanel from "../components/IntegrationsPanel";
 
 function matchesQuery(item, query) {
   const q = query.toLowerCase();
@@ -53,6 +54,7 @@ export default function Home() {
           <LayoutSelector />
           <ThemePicker />
           <BrandingEditor />
+          <IntegrationsPanel />
           <ConfigPorter />
         </aside>
       )}

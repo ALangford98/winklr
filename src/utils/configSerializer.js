@@ -8,6 +8,7 @@ export function exportConfig(state) {
     tileConfig:   state.tileConfig,
     layoutConfig: state.layoutConfig,
     theme:        state.theme,
+    integrations: state.integrations,
   };
 
   const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
@@ -46,6 +47,7 @@ export function parseConfigFile(file) {
         tileConfig:   raw.tileConfig   ?? null,
         layoutConfig: raw.layoutConfig ?? null,
         theme:        raw.theme        ?? null,
+        integrations: raw.integrations ?? null,
       });
     };
 

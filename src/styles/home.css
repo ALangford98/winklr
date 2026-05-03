@@ -380,3 +380,130 @@
 }
 
 .Editing:hover { border-color: var(--text-primary); }
+
+/* ── IntegrationsPanel ─────────────────────────────────── */
+.integration-panel-notice {
+  margin: 0 0 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  padding: 6px 8px;
+  background: var(--bg-raised);
+  border-radius: 4px;
+}
+
+.integration-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-card);
+  margin-bottom: 8px;
+}
+
+.integration-row--warn {
+  border-color: var(--accent-danger);
+}
+
+.integration-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.integration-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.integration-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.integration-badge--off {
+  background: var(--bg-raised);
+  color: var(--text-muted);
+}
+
+.integration-badge--ok {
+  background: rgba(63, 185, 80, 0.15);
+  color: var(--accent-success);
+}
+
+.integration-badge--warn {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--accent-danger);
+}
+
+.integration-description {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.integration-secret-warn {
+  margin: 0;
+  font-size: 11px;
+  color: var(--accent-danger);
+  line-height: 1.4;
+}
+
+.integration-input-wrap {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.integration-input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 12px;
+  padding: 5px 8px;
+  font-family: monospace;
+  outline: none;
+  min-width: 0;
+  transition: border-color 0.15s;
+}
+
+.integration-input:focus { border-color: var(--accent-primary); }
+.integration-input::placeholder { color: var(--text-muted); }
+
+.integration-toggle {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 3px 6px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.integration-toggle:hover { border-color: var(--border-hover); }
+
+.integration-clear {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  align-self: flex-start;
+}
+
+.integration-clear:hover { color: var(--accent-danger); }

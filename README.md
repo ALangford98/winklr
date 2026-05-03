@@ -110,11 +110,23 @@ Other scripts: `npm test`, `npm run build`.
 - [ ] Mapbox API integration — delivery address autocomplete and validation at checkout
 - [ ] Payment method API integration — Stripe or similar for processing orders
 
+### Integrations
+- [x] Integrations panel in the edit UI — fields for each supported client-side credential (Stripe publishable key, Mapbox access token)
+- [x] Clear labelling distinguishing public keys (safe to export) from secret keys (managed tier only)
+- [x] In-editor warning if a user pastes what looks like a secret key (starts with `sk_`)
+- [x] Integration status indicators — show connected / not configured per service
+- [ ] Stripe publishable key → wires up Stripe Elements in the exported store for card tokenisation
+- [ ] Mapbox access token → enables address autocomplete and validation at checkout in the exported store
+
 ### Deployment pipeline
-- [ ] Static export — bundle the configured store as a self-contained deployable package (no API connections required)
-- [ ] Guided self-deployment — export + step-by-step hosting instructions (Netlify, Vercel, etc.)
-- [ ] Managed deployment subscription tier — automated hosting on Winklr infrastructure for users who don't want to self-host
-- [ ] Version 1.0.0 milestone: full end-to-end deployment pipeline (static export + managed option) live
+- [ ] Static export — generate a single self-contained HTML file from the current config; embeds theme CSS vars, stock data, and client-side API keys; renders a fully functional read-only storefront with basic cart and search in vanilla JS
+- [ ] Static export: Stripe Elements checkout flow (card tokenisation only — no server-side charge)
+- [ ] Static export: Mapbox address autocomplete at checkout
+- [ ] Guided self-deployment — exported file + one-page hosting instructions (Netlify drag-and-drop, Vercel CLI, GitHub Pages)
+- [ ] Managed deployment subscription tier — user provides publishable keys; Winklr hosts the frontend and provides the backend for Stripe charge confirmation, order storage, and email receipts
+- [ ] Managed tier: order management dashboard
+- [ ] Managed tier: webhook handling for Stripe payment confirmation
+- [ ] Version 1.0.0 milestone: both tiers live end-to-end (static export working + at least one managed deployment)
 
 ### Branding
 - [x] Default Winklr branding assets (mark + wordmark) displayed in navbar and footer
@@ -136,6 +148,14 @@ Other scripts: `npm test`, `npm run build`.
 ---
 
 ## Changelog
+
+### [0.1.5] — 2026-05-03
+- Integrations panel in the edit UI — Stripe publishable key and Mapbox access token fields
+- Keys masked by default with a show/hide toggle
+- Status badge per service: "Not configured", "Configured", or "⚠ Secret key detected"
+- Red warning shown inline if a pasted value looks like a secret key (`sk_` or `sk.` prefix)
+- Integration keys stored in `localStorage` (`winklr_integrations`) and included in JSON config export/import
+- Keys intentionally excluded from shareable URL encoding (public keys only travel in downloads)
 
 ### [0.1.4] — 2026-05-03
 - Fixed FAB and Edit Mode button text colour in light mode — all use `--text-on-nav` which is always legible against the navbar background

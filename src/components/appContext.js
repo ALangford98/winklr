@@ -10,8 +10,9 @@ const WIDGET_SLOTS_DEFAULT = {
   left: null, centerLeft: null, center: null, centerRight: null, right: null,
 };
 
-const THEME_DEFAULT  = { palette: "dark", primaryColor: "#316dca", custom: {} };
-const BRAND_DEFAULT  = { logo: null };
+const THEME_DEFAULT        = { palette: "dark", primaryColor: "#316dca", custom: {} };
+const BRAND_DEFAULT        = { logo: null };
+const INTEGRATIONS_DEFAULT = { stripePublishableKey: "", mapboxToken: "" };
 
 const AppContextProvider = ({ children }) => {
   const [widgets, setWidgets]         = useLocalStorage("winklr_widgetSlots", WIDGET_SLOTS_DEFAULT);
@@ -21,8 +22,9 @@ const AppContextProvider = ({ children }) => {
   const [layoutConfig, setLayoutConfig] = useLocalStorage("winklr_layoutConfig", "grid");
   const [theme, setTheme]             = useLocalStorage("winklr_theme", THEME_DEFAULT);
   const [cart, setCart]               = useLocalStorage("winklr_cart", []);
-  const [brand, setBrand]             = useLocalStorage("winklr_brand", BRAND_DEFAULT);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [brand, setBrand]                   = useLocalStorage("winklr_brand", BRAND_DEFAULT);
+  const [integrations, setIntegrations]     = useLocalStorage("winklr_integrations", INTEGRATIONS_DEFAULT);
+  const [searchQuery, setSearchQuery]       = useState("");
   const [cartOpen, setCartOpen]       = useState(false);
   const [helpOpen, setHelpOpen]       = useState(false);
 
@@ -99,6 +101,7 @@ const AppContextProvider = ({ children }) => {
     if (config.tileConfig   !== null) setTileConfig(config.tileConfig);
     if (config.layoutConfig !== null) setLayoutConfig(config.layoutConfig);
     if (config.theme        !== null) setTheme(config.theme);
+    if (config.integrations !== null) setIntegrations(config.integrations);
   };
 
   const setThemeCustom = (variable, value) => {
@@ -110,7 +113,7 @@ const AppContextProvider = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
-        state: { widgets, viewMode, stockList, tileConfig, layoutConfig, theme, cart, brand, searchQuery },
+        state: { widgets, viewMode, stockList, tileConfig, layoutConfig, theme, cart, brand, integrations, searchQuery },
         setWidget,
         clearWidget,
         toggleViewMode,
@@ -124,6 +127,7 @@ const AppContextProvider = ({ children }) => {
         loadConfig,
         setSearchQuery,
         setBrand,
+        setIntegrations,
         setThemeCustom,
         cartOpen, setCartOpen,
         helpOpen, setHelpOpen,
