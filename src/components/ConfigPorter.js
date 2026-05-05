@@ -2,6 +2,7 @@ import React, { useContext, useRef, useState } from "react";
 import { AppContext } from "./appContext";
 import { exportConfig, parseConfigFile } from "../utils/configSerializer";
 import { encodeConfigToHash } from "../utils/shareableUrl";
+import { generateStoreHTML } from "../utils/generateStoreHTML";
 
 export default function ConfigPorter() {
   const { state, loadConfig } = useContext(AppContext);
@@ -11,6 +12,18 @@ export default function ConfigPorter() {
   const handleExport = () => {
     exportConfig(state);
     setStatus({ message: "Config exported.", isError: false });
+  };
+
+  const handleExportSite = () => {
+    const html = generateStoreHTML(state);
+    const blob = new Blob([html], { type: "text/html" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = "store.html";
+    a.click();
+    URL.revokeObjectURL(url);
+    setStatus({ message: "store.html exported — open it in any browser.", isError: false });
   };
 
   const handleImport = async (file) => {
@@ -54,6 +67,9 @@ export default function ConfigPorter() {
       </div>
       <button className="selector-btn config-share-btn" onClick={handleCopyLink}>
         Copy link
+      </button>
+      <button className="selector-btn config-share-btn selector-btn--active" onClick={handleExportSite}>
+        Export website
       </button>
       {status && (
         <p className={`loader-status${status.isError ? " loader-status--error" : ""}`}>

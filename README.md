@@ -146,7 +146,7 @@ Other scripts: `npm test`, `npm run build`.
 - [ ] Static export: embed Mapbox token and `mapbox-gl` / Geocoding API call in the exported storefront
 
 ### Deployment pipeline
-- [ ] Static export — generate a single self-contained HTML file from the current config; embeds theme CSS vars, stock data, and client-side API keys; renders a fully functional read-only storefront with basic cart and search in vanilla JS
+- [x] Static export — generate a single self-contained HTML file from the current config; embeds theme CSS vars, stock data, and client-side API keys; renders a fully functional read-only storefront with basic cart and search in vanilla JS
 - [ ] Static export: Stripe Elements checkout flow (card tokenisation only — no server-side charge)
 - [ ] Static export: Mapbox address autocomplete at checkout
 - [ ] Guided self-deployment — exported file + one-page hosting instructions (Netlify drag-and-drop, Vercel CLI, GitHub Pages)
@@ -187,6 +187,14 @@ Other scripts: `npm test`, `npm run build`.
 - Shipping: free over $50, $5 flat rate otherwise
 - "Continue shopping" on confirmation clears the modal and resets form state
 - Responsive: slides up as a bottom sheet on mobile with summary scrollable at top
+
+### [0.1.7] — 2026-05-05
+- **Export website** button in the Config panel generates a self-contained `store.html` file
+- Exported file is fully offline-capable: embeds live theme CSS variables, all tile/layout/cart/checkout styles, and stock data
+- Vanilla JS storefront renders all 4 layout variants, all 3 tile variants, search filtering, cart drawer, and the 4-step checkout modal
+- Navbar widgets configured in the editor (Cart button, Search, Dropdown) carry over to the exported page
+- Custom logo embedded as a data URL if one is uploaded; falls back to "Store" text
+- Cart state persists to `localStorage` in the exported page
 
 ### [0.1.5] — 2026-05-03
 - Integrations panel in the edit UI — Stripe publishable key and Mapbox access token fields
