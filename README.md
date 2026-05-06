@@ -176,6 +176,17 @@ Other scripts: `npm test`, `npm run build`.
 
 ## Changelog
 
+### [0.1.8] — 2026-05-06
+- Fixed the rendering of branding in the exported site
+
+### [0.1.7] — 2026-05-05
+- **Export website** button in the Config panel generates a self-contained `store.html` file
+- Exported file is fully offline-capable: embeds live theme CSS variables, all tile/layout/cart/checkout styles, and stock data
+- Vanilla JS storefront renders all 4 layout variants, all 3 tile variants, search filtering, cart drawer, and the 4-step checkout modal
+- Navbar widgets configured in the editor (Cart button, Search, Dropdown) carry over to the exported page
+- Custom logo embedded as a data URL if one is uploaded; falls back to "Store" text
+- Cart state persists to `localStorage` in the exported page
+
 ### [0.1.6] — 2026-05-03
 - Checkout modal — 4-step flow (Contact → Delivery → Payment → Confirmation) triggered from the cart drawer
 - Step indicator with completed-step checkmarks and animated connecting lines
@@ -187,14 +198,6 @@ Other scripts: `npm test`, `npm run build`.
 - Shipping: free over $50, $5 flat rate otherwise
 - "Continue shopping" on confirmation clears the modal and resets form state
 - Responsive: slides up as a bottom sheet on mobile with summary scrollable at top
-
-### [0.1.7] — 2026-05-05
-- **Export website** button in the Config panel generates a self-contained `store.html` file
-- Exported file is fully offline-capable: embeds live theme CSS variables, all tile/layout/cart/checkout styles, and stock data
-- Vanilla JS storefront renders all 4 layout variants, all 3 tile variants, search filtering, cart drawer, and the 4-step checkout modal
-- Navbar widgets configured in the editor (Cart button, Search, Dropdown) carry over to the exported page
-- Custom logo embedded as a data URL if one is uploaded; falls back to "Store" text
-- Cart state persists to `localStorage` in the exported page
 
 ### [0.1.5] — 2026-05-03
 - Integrations panel in the edit UI — Stripe publishable key and Mapbox access token fields

@@ -14,8 +14,8 @@ export default function ConfigPorter() {
     setStatus({ message: "Config exported.", isError: false });
   };
 
-  const handleExportSite = () => {
-    const html = generateStoreHTML(state);
+  const handleExportSite = async () => {
+    const html = await generateStoreHTML(state);
     const blob = new Blob([html], { type: "text/html" });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement("a");

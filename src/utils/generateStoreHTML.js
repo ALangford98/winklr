@@ -17,6 +17,21 @@ function esc(str) {
     .replace(/"/g, '&quot;');
 }
 
+async function fetchAsDataUrl(url) {
+  try {
+    const resp = await fetch(url);
+    const blob = await resp.blob();
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
 function buildThemeVarsCSS() {
   const computed = getComputedStyle(document.documentElement);
   return CSS_VARS_LIST
@@ -209,6 +224,17 @@ button { font-family: inherit; }
 .checkout-btn--primary:hover:not(:disabled) { opacity: 0.88; }
 .checkout-btn--primary:disabled { opacity: 0.35; cursor: not-allowed; }
 
+/* Help modal */
+.help-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 299; }
+.help-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); width: min(400px, calc(100vw - 32px)); background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; z-index: 300; display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,0.5); overflow: hidden; }
+.help-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
+.help-modal-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.help-modal-close { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: 4px; line-height: 1; }
+.help-modal-close:hover { color: var(--text-primary); }
+.help-modal-body { padding: 16px 20px 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+.help-fab { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-nav); border: 2px solid var(--border-subtle); color: var(--text-on-nav); font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.15s; font-family: inherit; }
+.help-fab:hover { border-color: var(--accent-primary); }
+
 /* Footer */
 .app-footer { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 20px 24px; margin-top: auto; border-top: 1px solid var(--border-subtle); }
 .footer-text { font-size: 12px; color: var(--text-muted); }
@@ -254,16 +280,18 @@ function buildWidgetHTML(widget) {
       widget.options.map((o) => '<option>' + esc(o) + '</option>').join('') +
       '</select>';
   }
+  if (c === 'Help') {
+    return '<button class="navbar-action-btn" data-action="open-help">Help</button>';
+  }
   return '';
 }
 
-function buildNavbarHTML(state) {
+function buildNavbarHTML(state, logoDataUrl) {
   const SLOTS = ['left', 'centerLeft', 'center', 'centerRight', 'right'];
   const widgets = state.widgets || {};
-  const logo = state.brand?.logo;
 
-  const brandHTML = logo
-    ? '<img class="navbar-brand-logo" src="' + logo + '" alt="Store logo">'
+  const brandHTML = logoDataUrl
+    ? '<img class="navbar-brand-logo" src="' + logoDataUrl + '" alt="Store logo">'
     : '<span class="navbar-brand-text">Store</span>';
 
   const slotsHTML = SLOTS
@@ -482,6 +510,16 @@ function closeCheckout() {
   co.form={name:'',email:'',phone:'',line1:'',line2:'',city:'',postcode:'',country:'',cardName:'',cardNumber:'',cardExpiry:'',cardCvc:''};
   document.getElementById('checkout-container').innerHTML='';
 }
+
+/* ── Help ─────────────────────────────────────────────── */
+function openHelp() {
+  document.getElementById('help-backdrop').style.display='block';
+  document.getElementById('help-modal').style.display='flex';
+}
+function closeHelp() {
+  document.getElementById('help-backdrop').style.display='none';
+  document.getElementById('help-modal').style.display='none';
+}
 function coNext() {
   if(co.step===2){
     co.ref='WK-'+Math.random().toString(36).slice(2,8).toUpperCase();
@@ -611,21 +649,31 @@ document.addEventListener('click', function(e) {
   if(a==='close-checkout')   closeCheckout();
   if(a==='co-next'&&!el.disabled) coNext();
   if(a==='co-back')          coBack();
+  if(a==='open-help')        openHelp();
+  if(a==='close-help')       closeHelp();
 });
 
 /* ── Init ─────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', function() {
   renderTiles(); renderCart(); initSearch(); updateFabs();
+  var hasCartWidget = Object.values(CONFIG.widgets||{}).some(function(w){ return w && w.content==='Cart'; });
+  var hasHelpWidget = Object.values(CONFIG.widgets||{}).some(function(w){ return w && w.content==='Help'; });
+  var cartFab = document.getElementById('cart-fab');
+  if (cartFab && hasCartWidget) cartFab.style.display='none';
+  var helpFab = document.getElementById('help-fab');
+  if (helpFab && hasHelpWidget) helpFab.style.display='none';
 });
 `;
 }
 
 // ── Main export ────────────────────────────────────────────────────────────
 
-export function generateStoreHTML(state) {
+export async function generateStoreHTML(state) {
+  const logoDataUrl = state.brand?.logo
+    ?? await fetchAsDataUrl(`${process.env.PUBLIC_URL}/branding/wordmark-tag.svg`);
   const themeVars = buildThemeVarsCSS();
   const css       = buildStaticCSS();
-  const navbar    = buildNavbarHTML(state);
+  const navbar    = buildNavbarHTML(state, logoDataUrl);
   const script    = buildScriptContent(state);
 
   return `<!DOCTYPE html>
@@ -660,11 +708,22 @@ ${navbar}
   <div id="cart-body"></div>
 </div>
 <div id="checkout-container"></div>
+<div id="help-backdrop" class="help-modal-backdrop" style="display:none" data-action="close-help"></div>
+<div id="help-modal" class="help-modal" style="display:none">
+  <div class="help-modal-header">
+    <span class="help-modal-title">Help</span>
+    <button class="help-modal-close" data-action="close-help">&#10005;</button>
+  </div>
+  <div class="help-modal-body">
+    <p>Browse items and add them to your cart. When you're ready, open your cart and click Checkout to complete your order.</p>
+  </div>
+</div>
 <div class="fab-group">
-  <button class="cart-fab" data-action="open-cart">
+  <button id="cart-fab" class="cart-fab" data-action="open-cart">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
     Cart <span id="cart-fab-badge" class="cart-fab-badge"></span>
   </button>
+  <button id="help-fab" class="help-fab" data-action="open-help">?</button>
 </div>
 <script>
 ${script}
