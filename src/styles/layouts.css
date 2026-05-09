@@ -121,7 +121,7 @@
 }
 
 /* Mobile: single-column everything */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .layout {
     padding: 16px;
   }

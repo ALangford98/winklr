@@ -9,7 +9,7 @@ const EditableWidget = ({ slot, desktopOnly = false }) => {
   const [isEditing, setIsEditing]         = useState(false);
   const [widgetType, setWidgetType]       = useState('none');
   const [widgetContent, setWidgetContent] = useState('');
-  const [dropdownOpts, setDropdownOpts]   = useState('');
+  const [dropdownOpts, setDropdownOpts]   = useState([]);
 
   const handleOpen = () => setIsEditing(true);
 
@@ -17,21 +17,37 @@ const EditableWidget = ({ slot, desktopOnly = false }) => {
     setIsEditing(false);
     setWidgetType('none');
     setWidgetContent('');
-    setDropdownOpts('');
+    setDropdownOpts([]);
   };
 
   const handleSave = () => {
     if (widgetType === 'none' || !widgetContent) return;
     const widget = { type: widgetType, content: widgetContent };
     if (widgetContent === 'Dropdown') {
-      widget.options = dropdownOpts.split(',').map((s) => s.trim()).filter(Boolean);
+      widget.options = dropdownOpts;
     }
     setWidget(slot, widget);
     handleCancel();
   };
 
+  const toggleOpt = (opt) =>
+    setDropdownOpts((prev) =>
+      prev.includes(opt) ? prev.filter((o) => o !== opt) : [...prev, opt]
+    );
+
   const getOptions = (opts) =>
     opts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>);
+
+  const uniqueCategories = [
+    ...new Set(
+      state.stockList.flatMap((item) => item.categories || [])
+    ),
+  ].filter(Boolean);
+
+  const dropdownChoices = [
+    ...linkOptions.map((o) => ({ value: o.value, label: o.label, group: 'Links' })),
+    ...uniqueCategories.map((c) => ({ value: c, label: c, group: 'Categories' })),
+  ];
 
   return (
     <div className="editable-widget">
@@ -58,7 +74,7 @@ const EditableWidget = ({ slot, desktopOnly = false }) => {
 
           <select
             value={widgetType}
-            onChange={(e) => { setWidgetType(e.target.value); setWidgetContent(''); setDropdownOpts(''); }}
+            onChange={(e) => { setWidgetType(e.target.value); setWidgetContent(''); setDropdownOpts([]); }}
           >
             <option value="none" disabled>Type</option>
             <option value="link">Link</option>
@@ -73,13 +89,23 @@ const EditableWidget = ({ slot, desktopOnly = false }) => {
           )}
 
           {widgetContent === 'Dropdown' && (
-            <input
-              className="widget-editor-opts"
-              type="text"
-              placeholder="Option 1, Option 2, ..."
-              value={dropdownOpts}
-              onChange={(e) => setDropdownOpts(e.target.value)}
-            />
+            <div className="widget-dropdown-opts">
+              {dropdownChoices.length === 0 ? (
+                <p className="widget-editor-notice">Add categories to items to enable category filters.</p>
+              ) : (
+                dropdownChoices.map((choice) => (
+                  <label key={choice.value} className="widget-dropdown-opt-label">
+                    <input
+                      type="checkbox"
+                      checked={dropdownOpts.includes(choice.value)}
+                      onChange={() => toggleOpt(choice.value)}
+                    />
+                    <span>{choice.label}</span>
+                    <span className="widget-dropdown-opt-group">{choice.group}</span>
+                  </label>
+                ))
+              )}
+            </div>
           )}
 
           <div className="widget-editor-actions">

@@ -1,3 +1,8 @@
+/* ── Mobile brand bar (hidden on desktop) ──────────────── */
+.mobile-brand-bar {
+  display: none;
+}
+
 /* ── Navbar shell ──────────────────────────────────────── */
 .Navbar {
   display: flex;
@@ -61,22 +66,15 @@
   border-right: 1px dashed rgba(255, 255, 255, 0.1);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .navbar-slot--desktop {
     display: none;
-  }
-
-  .navbar-slots {
-    overflow: hidden;
   }
 
   .navbar-slot {
     flex-shrink: 1;
     min-width: 0;
-  }
-
-  .navbar-search-input {
-    width: 80px;
+    overflow: visible;
   }
 
   /* Keep widget editors inside the viewport on mobile */
@@ -84,6 +82,49 @@
     left: auto;
     right: 0;
     transform: none;
+  }
+
+  /* Brand moves to the scrollable header above — hide it in the navbar */
+  .Navbar .navbar-brand {
+    display: none;
+  }
+
+  /* Sticky navbar stays visible after the brand bar scrolls away */
+  .Navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  /* Show the mobile brand bar */
+  .mobile-brand-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-nav);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .mobile-brand-bar .navbar-brand {
+    padding: 0;
+  }
+
+  .mobile-brand-bar .navbar-brand-logo {
+    height: 40px;
+  }
+
+  /* Bigger tap targets for the + and ✕ slot controls */
+  .widget-add {
+    font-size: 26px;
+    padding: 8px 16px;
+  }
+
+  /* Always show the clear button on touch (no hover state) */
+  .widget-clear {
+    opacity: 1;
+    font-size: 14px;
+    padding: 8px 6px;
   }
 }
 
@@ -125,6 +166,9 @@
   align-items: center;
   justify-content: center;
   min-width: 0;
+  width: 100%;
+  padding: 0 8px;
+  box-sizing: border-box;
 }
 
 .widget-clear {
@@ -290,12 +334,37 @@
   font-size: 13px;
   padding: 4px 10px;
   outline: none;
-  width: 140px;
+  width: 100%;
+  box-sizing: border-box;
   transition: border-color 0.15s;
 }
 
 .navbar-search-input:focus { border-color: var(--accent-primary); }
 .navbar-search-input::placeholder { color: var(--text-muted); }
+
+/* ── Dropdown widget option picker ─────────────────────── */
+.widget-dropdown-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.widget-dropdown-opt-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.widget-dropdown-opt-group {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-muted);
+}
 
 .navbar-dropdown {
   background: var(--bg-input);
@@ -304,5 +373,6 @@
   color: var(--text-primary);
   font-size: 13px;
   padding: 4px 8px;
-  max-width: 120px;
+  width: 100%;
+  box-sizing: border-box;
 }

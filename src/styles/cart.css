@@ -337,6 +337,11 @@
 
 .cart-fab:hover { border-color: var(--accent-primary); }
 
+/* panel-fab: only shown on mobile to open the edit panel sheet */
+.panel-fab {
+  display: none;
+}
+
 .cart-fab-badge {
   display: flex;
   align-items: center;
@@ -405,7 +410,7 @@
 }
 
 /* ── Mobile ────────────────────────────────────────────── */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   /* Cart drawer slides up from the bottom as a sheet */
   .cart-drawer {
     width: 100%;
@@ -440,5 +445,20 @@
     width: 36px;
     height: 36px;
     font-size: 14px;
+  }
+
+  .panel-fab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--accent-primary);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
   }
 }

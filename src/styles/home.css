@@ -14,9 +14,12 @@
 	flex-shrink: 0;
 	padding: 16px 20px;
 	border-right: 1px solid var(--border-subtle);
+	background-color: var(--bg-card);
 	display: flex;
 	flex-direction: column;
 	gap: 0;
+	overflow-x: hidden;
+	box-sizing: border-box;
 }
 
 .content-area {
@@ -30,6 +33,7 @@
 .store-search-wrap {
   position: relative;
   padding: 16px 24px 0;
+  max-width: 560px;
 }
 
 .store-search-input {
@@ -152,17 +156,85 @@
 }
 
 /* ── Responsive ────────────────────────────────────────── */
-@media (max-width: 600px) {
+/* ── Mobile edit panel — bottom sheet ──────────────────── */
+.mobile-panel-backdrop {
+  display: none;
+}
+
+.mobile-panel-close {
+  display: none;
+}
+
+.mobile-panel-handle-bar {
+  display: block;
+  width: 36px;
+  height: 4px;
+  background: var(--border-subtle);
+  border-radius: 2px;
+}
+
+@media (max-width: 768px) {
   .Home {
     flex-direction: column;
   }
 
+  /* Panel sits off-screen at the bottom, slides up when open */
   .edit-panel {
-    width: 100%;
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
     min-height: auto;
+    max-height: 88vh;
+    overflow-y: auto;
+    overflow-x: hidden;
     border-right: none;
-    border-bottom: 1px solid var(--border-subtle);
-    padding: 16px;
+    border-top: 1px solid var(--border-subtle);
+    border-radius: 16px 16px 0 0;
+    padding: 8px 16px 32px;
+    transform: translateY(100%);
+    transition: transform 0.28s ease;
+    z-index: 251;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
+  }
+
+  .edit-panel--open {
+    transform: translateY(0);
+  }
+
+  /* Semi-transparent backdrop */
+  .mobile-panel-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 250;
+  }
+
+  /* Close button / handle at the top of the sheet */
+  .mobile-panel-close {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 8px 0 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* Search bar: tighter padding, full width */
+  .store-search-wrap {
+    max-width: 100%;
+    padding: 12px 16px 0;
+  }
+
+  /* Edit/View Mode toggle button — same size as other FABs */
+  .Editing {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
   }
 }
 
@@ -467,6 +539,71 @@
 
 .image-picker-replace:hover { color: var(--text-primary); }
 
+/* ── Tag input (category chips) ────────────────────────── */
+.tag-input-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  min-height: 34px;
+  padding: 4px 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  cursor: text;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-primary);
+  border-radius: 10px;
+  color: var(--accent-primary);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.tag-chip-remove {
+  background: none;
+  border: none;
+  color: var(--accent-primary);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0;
+}
+
+.tag-input-field {
+  flex: 1;
+  min-width: 80px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+}
+
+/* ── BrandingEditor currency field ─────────────────────── */
+.branding-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.branding-field-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.branding-currency-input {
+  width: 60px !important;
+}
+
 .Editing {
 	height: 40px;
 	padding: 0 16px;
@@ -512,6 +649,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
   gap: 6px;
 }
 
@@ -567,6 +707,8 @@
 
 .integration-input {
   flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
   background: var(--bg-input);
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
@@ -663,6 +805,8 @@
 /* ── CollapsibleSection ────────────────────────────────── */
 .collapsible-section {
   border-bottom: 1px solid var(--border-subtle);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .collapsible-section:last-child {
@@ -673,6 +817,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
   width: 100%;
   background: none;
   border: none;
@@ -704,4 +850,7 @@
 
 .collapsible-body {
   padding-bottom: 16px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }

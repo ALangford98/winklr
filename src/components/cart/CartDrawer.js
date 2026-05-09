@@ -14,6 +14,7 @@ export { CartIcon };
 
 export default function CartDrawer({ open, onClose }) {
   const { state, removeFromCart, updateCartQty, clearCart, setCheckoutOpen } = useContext(AppContext);
+  const cp = state.brand?.currencyPrefix ?? '$';
 
   const cartItems = state.cart
     .map((entry) => ({ ...entry, item: state.stockList.find((i) => i.id === entry.itemId) }))
@@ -47,7 +48,7 @@ export default function CartDrawer({ open, onClose }) {
                   <div className="cart-item-info">
                     <span className="cart-item-name">{item.name}</span>
                     {item.price > 0 && (
-                      <span className="cart-item-price">${(item.price * quantity).toFixed(2)}</span>
+                      <span className="cart-item-price">{cp}{(item.price * quantity).toFixed(2)}</span>
                     )}
                   </div>
                   <div className="cart-item-qty">
@@ -64,7 +65,7 @@ export default function CartDrawer({ open, onClose }) {
               {hasPrice && (
                 <div className="cart-subtotal">
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{cp}{subtotal.toFixed(2)}</span>
                 </div>
               )}
               <button

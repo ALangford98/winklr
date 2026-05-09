@@ -11,7 +11,7 @@ const WIDGET_SLOTS_DEFAULT = {
 };
 
 const THEME_DEFAULT        = { palette: "dark", primaryColor: "#316dca", custom: {} };
-const BRAND_DEFAULT        = { logo: null };
+const BRAND_DEFAULT        = { logo: null, currencyPrefix: '$' };
 const INTEGRATIONS_DEFAULT = { stripePublishableKey: "", mapboxToken: "", firebaseDatabaseUrl: "" };
 
 const AppContextProvider = ({ children }) => {
@@ -27,9 +27,10 @@ const AppContextProvider = ({ children }) => {
   const [websiteType, setWebsiteType]       = useLocalStorage("winklr_websiteType", "store");
   const [reservations, setReservations]     = useLocalStorage("winklr_reservations", []);
   const [searchQuery, setSearchQuery]       = useState("");
-  const [cartOpen, setCartOpen]           = useState(false);
-  const [helpOpen, setHelpOpen]           = useState(false);
-  const [checkoutOpen, setCheckoutOpen]   = useState(false);
+  const [cartOpen, setCartOpen]             = useState(false);
+  const [helpOpen, setHelpOpen]             = useState(false);
+  const [checkoutOpen, setCheckoutOpen]     = useState(false);
+  const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
 
   // On mount: load config from URL hash if present, then clear the hash
   useEffect(() => {
@@ -203,6 +204,7 @@ const AppContextProvider = ({ children }) => {
         cartOpen, setCartOpen,
         helpOpen, setHelpOpen,
         checkoutOpen, setCheckoutOpen,
+        mobilePanelOpen, setMobilePanelOpen,
         addToCart,
         removeFromCart,
         updateCartQty,

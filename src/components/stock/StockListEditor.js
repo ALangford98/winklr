@@ -1,7 +1,7 @@
 import React, { useState, useContext, useRef } from 'react';
 import { AppContext } from '../appContext';
 
-const EMPTY_FORM = { name: '', price: '', image: '' };
+const EMPTY_FORM = { name: '', price: '', image: '', categories: [] };
 
 function readFileAsDataUrl(file) {
   return new Promise((resolve) => {
@@ -63,20 +63,60 @@ function ImagePicker({ value, onChange }) {
   );
 }
 
+function TagInput({ value = [], onChange }) {
+  const [input, setInput] = useState('');
+
+  const addTag = (raw) => {
+    const tag = raw.trim();
+    if (tag && !value.includes(tag)) onChange([...value, tag]);
+    setInput('');
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag(input);
+    } else if (e.key === 'Backspace' && !input && value.length) {
+      onChange(value.slice(0, -1));
+    }
+  };
+
+  return (
+    <div className="tag-input-wrap">
+      {value.map((tag) => (
+        <span key={tag} className="tag-chip">
+          {tag}
+          <button type="button" className="tag-chip-remove" onClick={() => onChange(value.filter(t => t !== tag))}>×</button>
+        </span>
+      ))}
+      <input
+        className="tag-input-field"
+        type="text"
+        placeholder={value.length ? '' : 'Add categories…'}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={() => input.trim() && addTag(input)}
+      />
+    </div>
+  );
+}
+
 function EditItemForm({ item, onSave, onCancel }) {
   const [form, setForm] = useState({
-    name:  item.name  ?? '',
-    price: item.price > 0 ? String(item.price) : '',
-    image: item.image ?? '',
+    name:       item.name       ?? '',
+    price:      item.price > 0  ? String(item.price) : '',
+    image:      item.image      ?? '',
+    categories: item.categories ?? [],
   });
 
   const set = (field) => (val) =>
-    setForm((prev) => ({ ...prev, [field]: typeof val === 'string' ? val : val.target.value }));
+    setForm((prev) => ({ ...prev, [field]: typeof val === 'string' ? val : val.target?.value ?? val }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
-    onSave({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim() });
+    onSave({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories });
   };
 
   return (
@@ -84,6 +124,7 @@ function EditItemForm({ item, onSave, onCancel }) {
       <ImagePicker value={form.image} onChange={set('image')} />
       <input className="editor-add-form-input" placeholder="Name *" value={form.name} onChange={set('name')} autoFocus />
       <input className="editor-add-form-input" placeholder="Price" type="number" min="0" step="0.01" value={form.price} onChange={set('price')} />
+      <TagInput value={form.categories} onChange={(cats) => setForm((p) => ({ ...p, categories: cats }))} />
       <div className="editor-form-actions">
         <button type="submit" disabled={!form.name.trim()}>Save</button>
         <button type="button" onClick={onCancel}>Cancel</button>
@@ -117,13 +158,13 @@ export default function StockListEditor() {
   const handleAdd = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
-    addStockItem({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim() });
+    addStockItem({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories });
     setForm(EMPTY_FORM);
     setShowAdd(false);
   };
 
   const set = (field) => (val) =>
-    setForm((prev) => ({ ...prev, [field]: typeof val === 'string' ? val : val.target.value }));
+    setForm((prev) => ({ ...prev, [field]: typeof val === 'string' ? val : val.target?.value ?? val }));
 
   return (
     <div className="stock-list-editor">
@@ -162,6 +203,7 @@ export default function StockListEditor() {
           <ImagePicker value={form.image} onChange={set('image')} />
           <input className="editor-add-form-input" placeholder="Name *" value={form.name} onChange={set('name')} autoFocus />
           <input className="editor-add-form-input" placeholder="Price" type="number" min="0" step="0.01" value={form.price} onChange={set('price')} />
+          <TagInput value={form.categories} onChange={(cats) => setForm((p) => ({ ...p, categories: cats }))} />
           <div className="editor-form-actions">
             <button type="submit" disabled={!form.name.trim()}>Add</button>
             <button type="button" onClick={() => { setShowAdd(false); setForm(EMPTY_FORM); }}>Cancel</button>

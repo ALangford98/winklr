@@ -15,19 +15,24 @@ const NavbarView = () => {
   const { state } = useContext(AppContext);
 
   return (
-    <div className="Navbar">
-      <NavbarBrand />
-      <div className="navbar-slots">
-        {SLOTS.map(({ key, desktopOnly }) => (
-          <li
-            key={key}
-            className={`navbar-slot${desktopOnly ? ' navbar-slot--desktop' : ''}`}
-          >
-            {renderWidget(state.widgets[key])}
-          </li>
-        ))}
+    <>
+      <div className="mobile-brand-bar">
+        <NavbarBrand />
       </div>
-    </div>
+      <div className="Navbar">
+        <NavbarBrand />
+        <div className="navbar-slots">
+          {SLOTS.map(({ key, desktopOnly }) => (
+            <li
+              key={key}
+              className={`navbar-slot${desktopOnly ? ' navbar-slot--desktop' : ''}`}
+            >
+              {renderWidget(state.widgets[key])}
+            </li>
+          ))}
+        </div>
+      </div>
+    </>
   );
 };
 

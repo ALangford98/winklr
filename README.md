@@ -100,7 +100,7 @@ Other scripts: `npm test`, `npm run build`.
 - [x] When a Cart or Help widget is present in any navbar slot, suppress the corresponding FAB button — the navbar widget is the canonical entry point
 - [x] Remove the "Home" link option (redundant in a single-page app) or replace it with a configurable external URL field
 - [x] When the Search Bar widget is present in any navbar slot, hide the store search bar above the tile grid
-- [x] Review the Dropdown widget — give it configurable options rather than hardcoded placeholders
+- [x] Review the Dropdown widget — options are now chosen from available link actions (Help, Cart) and item categories; selecting an option triggers the action or filters by category
 
 ### Website types / Templates
 - [x] `websiteType` field in app state (persisted to localStorage, included in JSON export/import and shareable URL)
@@ -187,16 +187,21 @@ Other scripts: `npm test`, `npm run build`.
 - [x] Default Winklr branding assets (mark + wordmark) displayed in navbar and footer
 - [x] User logo upload in edit panel — replaces default with any image
 - [x] "Powered by Winklr" footer
+- [x] Configurable currency prefix (default `$`) — shown on tiles, cart, and checkout
 - [ ] Store name / tagline field — displayed in navbar or hero area
 - [ ] Favicon swap when custom logo is uploaded
 
 ### Mobile
-- [ ] Edit panel is too wide for mobile — replace the left-side panel with a bottom sheet or slide-in drawer triggered by a FAB
+- [x] Edit panel is too wide for mobile — replace the left-side panel with a bottom sheet or slide-in drawer triggered by a FAB
 - [x] FAB group reduced to smaller buttons with tighter spacing on small screens
 - [x] Navbar widget slots no longer overflow on narrow screens; widget editor dropdowns pinned to right edge
-- [x] Cart drawer slides up as a full-width bottom sheet on screens ≤ 600 px
+- [x] Cart drawer slides up as a full-width bottom sheet on screens ≤ 768 px
+- [x] Brand header scrolls off screen on mobile; sticky navbar locks to top beneath it
+- [x] Navbar widgets (search, dropdown) fill their slot width — no more fixed pixel widths
+- [x] Edit panel content no longer overflows panel bounds (collapsible sections constrained, integration inputs get `min-width: 0`)
 - [ ] Test and fix tile layout responsiveness in all four layout variants on common mobile screen sizes (375px, 390px, 414px)
 - [ ] Touch target audit — ensure all interactive elements (tile buttons, cart qty controls, widget editor) meet minimum 44px tap target size
+- [ ] Static export: apply updated mobile styles to generated HTML
 
 ### Polish
 - [ ] Basic tests for `AppContext` reducers and the `Tile` / `Layout` components
@@ -204,6 +209,28 @@ Other scripts: `npm test`, `npm run build`.
 ---
 
 ## Changelog
+
+### [0.2.1] — 2026-05-09
+
+#### Mobile
+- Edit panel is now a **bottom sheet** on screens ≤ 768 px — slides up from the bottom with a backdrop, drag handle, and close button; triggered by a new "Edit" FAB
+- Brand header sits above the sticky navbar on mobile; scrolls away naturally, leaving only the navbar locked to the top
+- Same mobile brand bar applied to view mode (`NavbarView`)
+- All mobile breakpoints unified at 768 px (was 600 px) across navbar, layout, cart, and panel styles
+- Navbar widgets (search bar, dropdown) now fill their slot width proportionally — fixed pixel widths removed
+- Edit panel `overflow-x: hidden` at all sizes; collapsible section children get `min-width: 0` to prevent content bleed
+- Navbar widget editor dropdown no longer clipped on mobile (removed `overflow: hidden` on `.navbar-slots`)
+
+#### Items
+- **Category tags** — add comma-separated tags to any item in the editor; displayed as interactive chips with `×` to remove; stored as `item.categories[]`
+- Item search now matches against category tags in addition to name and metadata
+
+#### Dropdown widget
+- Dropdown options are now chosen from a structured checkbox list in the widget editor — available actions are the configured link widgets (Help, Cart) plus any item category in the current stock list
+- Selecting an option triggers the corresponding action (opens Help/Cart) or applies a category filter; resets to placeholder after selection
+
+#### Branding
+- **Currency prefix** — configurable in the Branding panel (default `$`, max 4 chars); applied consistently on tiles, cart drawer, and checkout summary
 
 ### [0.2.0] — 2026-05-09
 

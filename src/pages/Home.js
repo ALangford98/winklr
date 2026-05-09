@@ -16,6 +16,7 @@ import WebsiteTypeSelector from "../components/WebsiteTypeSelector";
 function matchesQuery(item, query) {
   const q = query.toLowerCase();
   if (item.name.toLowerCase().includes(q)) return true;
+  if ((item.categories || []).some((c) => c.toLowerCase().includes(q))) return true;
   return Object.values(item.metadata || {}).some((v) =>
     String(v).toLowerCase().includes(q)
   );
@@ -35,7 +36,7 @@ function Footer() {
 }
 
 export default function Home() {
-  const { state, setStockList, setSearchQuery } = useContext(AppContext);
+  const { state, setStockList, setSearchQuery, mobilePanelOpen, setMobilePanelOpen } = useContext(AppContext);
 
   const hasSearchWidget = Object.values(state.widgets).some(
     (w) => w?.type === 'function' && w?.content === 'Search'
@@ -49,35 +50,43 @@ export default function Home() {
   return (
     <div className="Home">
       {state.viewMode && (
-        <aside className="edit-panel">
-          <CollapsibleSection title="Website Type" storageKey="websiteType" defaultOpen={true}>
-            <WebsiteTypeSelector />
-          </CollapsibleSection>
-          <CollapsibleSection title="Stock List" storageKey="stockLoader" defaultOpen={true}>
-            <StockListLoader />
-          </CollapsibleSection>
-          <CollapsibleSection title={`Items${state.stockList.length ? ` (${state.stockList.length})` : ''}`} storageKey="stockEditor" defaultOpen={true}>
-            <StockListEditor />
-          </CollapsibleSection>
-          <CollapsibleSection title="Tile Style" storageKey="tileConfig" defaultOpen={false}>
-            <TileConfigSelector />
-          </CollapsibleSection>
-          <CollapsibleSection title="Layout" storageKey="layout" defaultOpen={false}>
-            <LayoutSelector />
-          </CollapsibleSection>
-          <CollapsibleSection title="Theme" storageKey="theme" defaultOpen={false}>
-            <ThemePicker />
-          </CollapsibleSection>
-          <CollapsibleSection title="Branding" storageKey="branding" defaultOpen={false}>
-            <BrandingEditor />
-          </CollapsibleSection>
-          <CollapsibleSection title="Integrations" storageKey="integrations" defaultOpen={false}>
-            <IntegrationsPanel />
-          </CollapsibleSection>
-          <CollapsibleSection title="Config" storageKey="config" defaultOpen={false}>
-            <ConfigPorter />
-          </CollapsibleSection>
-        </aside>
+        <>
+          {mobilePanelOpen && (
+            <div className="mobile-panel-backdrop" onClick={() => setMobilePanelOpen(false)} />
+          )}
+          <aside className={`edit-panel${mobilePanelOpen ? ' edit-panel--open' : ''}`}>
+            <button className="mobile-panel-close" onClick={() => setMobilePanelOpen(false)} aria-label="Close panel">
+              <span className="mobile-panel-handle-bar" />
+            </button>
+            <CollapsibleSection title="Website Type" storageKey="websiteType" defaultOpen={true}>
+              <WebsiteTypeSelector />
+            </CollapsibleSection>
+            <CollapsibleSection title="Stock List" storageKey="stockLoader" defaultOpen={true}>
+              <StockListLoader />
+            </CollapsibleSection>
+            <CollapsibleSection title={`Items${state.stockList.length ? ` (${state.stockList.length})` : ''}`} storageKey="stockEditor" defaultOpen={true}>
+              <StockListEditor />
+            </CollapsibleSection>
+            <CollapsibleSection title="Tile Style" storageKey="tileConfig" defaultOpen={false}>
+              <TileConfigSelector />
+            </CollapsibleSection>
+            <CollapsibleSection title="Layout" storageKey="layout" defaultOpen={false}>
+              <LayoutSelector />
+            </CollapsibleSection>
+            <CollapsibleSection title="Theme" storageKey="theme" defaultOpen={false}>
+              <ThemePicker />
+            </CollapsibleSection>
+            <CollapsibleSection title="Branding" storageKey="branding" defaultOpen={false}>
+              <BrandingEditor />
+            </CollapsibleSection>
+            <CollapsibleSection title="Integrations" storageKey="integrations" defaultOpen={false}>
+              <IntegrationsPanel />
+            </CollapsibleSection>
+            <CollapsibleSection title="Config" storageKey="config" defaultOpen={false}>
+              <ConfigPorter />
+            </CollapsibleSection>
+          </aside>
+        </>
       )}
 
       <div className="content-area">

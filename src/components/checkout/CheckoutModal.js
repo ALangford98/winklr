@@ -292,7 +292,7 @@ function ConfirmationStep({ orderRef, form, cartItems }) {
 
 // ── Order summary ──────────────────────────────────────────
 
-function OrderSummary({ cartItems, hasPrice, subtotal }) {
+function OrderSummary({ cartItems, hasPrice, subtotal, cp }) {
   const shippingFree = !hasPrice || subtotal >= 50;
   const shippingCost = shippingFree ? 0 : 5;
   const total = hasPrice ? (subtotal + shippingCost).toFixed(2) : null;
@@ -312,7 +312,7 @@ function OrderSummary({ cartItems, hasPrice, subtotal }) {
             </div>
             <span className="checkout-summary-item-name">{item.name}</span>
             {item.price > 0 && (
-              <span className="checkout-summary-item-price">${(item.price * quantity).toFixed(2)}</span>
+              <span className="checkout-summary-item-price">{cp}{(item.price * quantity).toFixed(2)}</span>
             )}
           </li>
         ))}
@@ -321,15 +321,15 @@ function OrderSummary({ cartItems, hasPrice, subtotal }) {
         <div className="checkout-summary-totals">
           <div className="checkout-summary-row">
             <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>{cp}{subtotal.toFixed(2)}</span>
           </div>
           <div className="checkout-summary-row">
             <span>Shipping</span>
-            <span>{shippingFree ? 'Free' : `$${shippingCost.toFixed(2)}`}</span>
+            <span>{shippingFree ? 'Free' : `${cp}${shippingCost.toFixed(2)}`}</span>
           </div>
           <div className="checkout-summary-row checkout-summary-row--total">
             <span>Total</span>
-            <span>${total}</span>
+            <span>{cp}{total}</span>
           </div>
         </div>
       )}
@@ -341,6 +341,7 @@ function OrderSummary({ cartItems, hasPrice, subtotal }) {
 
 const CheckoutModal = ({ open, onClose }) => {
   const { state, clearCart } = useContext(AppContext);
+  const cp = state.brand?.currencyPrefix ?? '$';
   const [step, setStep]     = useState(0);
   const [form, setForm]     = useState(FORM_DEFAULTS);
   const [orderRef, setOrderRef] = useState('');
@@ -399,7 +400,7 @@ const CheckoutModal = ({ open, onClose }) => {
 
           {!isConfirm && (
             <div className="checkout-summary-col">
-              <OrderSummary cartItems={cartItems} hasPrice={hasPrice} subtotal={subtotal} />
+              <OrderSummary cartItems={cartItems} hasPrice={hasPrice} subtotal={subtotal} cp={cp} />
             </div>
           )}
         </div>

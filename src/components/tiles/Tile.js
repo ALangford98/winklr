@@ -41,7 +41,7 @@ function TileActionBtn({ item, compact = false }) {
   );
 }
 
-function CompactTile({ item }) {
+function CompactTile({ item, cp }) {
   return (
     <div className="tile tile--compact">
       <div className="tile-img-wrap tile-img-wrap--sm">
@@ -49,14 +49,14 @@ function CompactTile({ item }) {
       </div>
       <div className="tile-body">
         <span className="tile-name">{item.name}</span>
-        {item.price > 0 && <span className="tile-price">${item.price.toFixed(2)}</span>}
+        {item.price > 0 && <span className="tile-price">{cp}{item.price.toFixed(2)}</span>}
       </div>
       <TileActionBtn item={item} compact />
     </div>
   );
 }
 
-function StandardTile({ item }) {
+function StandardTile({ item, cp }) {
   return (
     <div className="tile tile--standard">
       <div className="tile-img-wrap">
@@ -64,14 +64,14 @@ function StandardTile({ item }) {
       </div>
       <div className="tile-body">
         <span className="tile-name">{item.name}</span>
-        {item.price > 0 && <span className="tile-price">${item.price.toFixed(2)}</span>}
+        {item.price > 0 && <span className="tile-price">{cp}{item.price.toFixed(2)}</span>}
         <TileActionBtn item={item} />
       </div>
     </div>
   );
 }
 
-function DetailedTile({ item }) {
+function DetailedTile({ item, cp }) {
   const metaEntries = Object.entries(item.metadata || {});
   return (
     <div className="tile tile--detailed">
@@ -80,7 +80,7 @@ function DetailedTile({ item }) {
       </div>
       <div className="tile-body">
         <span className="tile-name">{item.name}</span>
-        {item.price > 0 && <span className="tile-price">${item.price.toFixed(2)}</span>}
+        {item.price > 0 && <span className="tile-price">{cp}{item.price.toFixed(2)}</span>}
         {metaEntries.length > 0 && (
           <dl className="tile-meta">
             {metaEntries.map(([k, v]) => (
@@ -104,6 +104,8 @@ const VARIANTS = {
 };
 
 export default function Tile({ item, config = "standard" }) {
+  const { state } = useContext(AppContext);
+  const cp = state.brand?.currencyPrefix ?? '$';
   const Component = VARIANTS[config] ?? StandardTile;
-  return <Component item={item} />;
+  return <Component item={item} cp={cp} />;
 }

@@ -5,10 +5,11 @@
  * price: numeric value (use 0 if not applicable)
  * metadata: open-ended key/value pairs for any extra fields (e.g. ticker, category, sku)
  */
-export const createStockItem = ({ id, name = '', image = '', price = 0, metadata = {} } = {}) => ({
+export const createStockItem = ({ id, name = '', image = '', price = 0, metadata = {}, categories = [] } = {}) => ({
   id: id ?? crypto.randomUUID(),
   name,
   image,
   price,
   metadata,
+  categories,
 });
