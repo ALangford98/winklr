@@ -3,6 +3,15 @@ import { AppContext } from './appContext';
 
 const SERVICES = [
   {
+    id:          'firebaseDatabaseUrl',
+    label:       'Firebase Realtime Database',
+    description: 'Enables live shared reservation state in Registry mode — guests see each other\'s reservations in real time.',
+    placeholder: 'https://your-project-default-rtdb.firebaseio.com',
+    docsHref:    'https://console.firebase.google.com/',
+    isPublicUrl: true,
+    setupNote:   'In Firebase Console → Realtime Database → Rules, set: { "rules": { ".read": true, ".write": true } }',
+  },
+  {
     id:          'stripePublishableKey',
     label:       'Stripe',
     description: 'Publishable key for Stripe Elements card tokenisation.',
@@ -24,13 +33,13 @@ const SERVICES = [
 
 function StatusBadge({ value, isSecret }) {
   if (!value) return <span className="integration-badge integration-badge--off">Not configured</span>;
-  if (isSecret(value)) return <span className="integration-badge integration-badge--warn">⚠ Secret key detected</span>;
+  if (isSecret && isSecret(value)) return <span className="integration-badge integration-badge--warn">⚠ Secret key detected</span>;
   return <span className="integration-badge integration-badge--ok">Configured</span>;
 }
 
 function ServiceRow({ service, value, onChange }) {
   const [show, setShow] = useState(false);
-  const warn = value && service.isSecret(value);
+  const warn = value && service.isSecret && service.isSecret(value);
 
   return (
     <div className={`integration-row${warn ? ' integration-row--warn' : ''}`}>
@@ -39,35 +48,35 @@ function ServiceRow({ service, value, onChange }) {
         <StatusBadge value={value} isSecret={service.isSecret} />
       </div>
       <p className="integration-description">{service.description}</p>
-
       {warn && <p className="integration-secret-warn">{service.secretWarn}</p>}
+      {service.setupNote && !value && (
+        <p className="integration-setup-note">{service.setupNote}</p>
+      )}
 
       <div className="integration-input-wrap">
         <input
           className="integration-input"
-          type={show ? 'text' : 'password'}
+          type={service.isPublicUrl || show ? 'text' : 'password'}
           placeholder={service.placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           autoComplete="off"
           spellCheck={false}
         />
-        <button
-          className="integration-toggle"
-          type="button"
-          onClick={() => setShow((s) => !s)}
-          title={show ? 'Hide' : 'Show'}
-        >
-          {show ? '🙈' : '👁'}
-        </button>
+        {!service.isPublicUrl && (
+          <button
+            className="integration-toggle"
+            type="button"
+            onClick={() => setShow((s) => !s)}
+            title={show ? 'Hide' : 'Show'}
+          >
+            {show ? '🙈' : '👁'}
+          </button>
+        )}
       </div>
 
       {value && (
-        <button
-          className="integration-clear"
-          type="button"
-          onClick={() => onChange('')}
-        >
+        <button className="integration-clear" type="button" onClick={() => onChange('')}>
           Clear
         </button>
       )}

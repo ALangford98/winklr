@@ -65,6 +65,26 @@
   .navbar-slot--desktop {
     display: none;
   }
+
+  .navbar-slots {
+    overflow: hidden;
+  }
+
+  .navbar-slot {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .navbar-search-input {
+    width: 80px;
+  }
+
+  /* Keep widget editors inside the viewport on mobile */
+  .navbar-slot .widget-editor {
+    left: auto;
+    right: 0;
+    transform: none;
+  }
 }
 
 /* ── Links inside navbar ───────────────────────────────── */

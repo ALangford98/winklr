@@ -11,6 +11,7 @@ import BrandingEditor from "../components/BrandingEditor";
 import ConfigPorter from "../components/ConfigPorter";
 import IntegrationsPanel from "../components/IntegrationsPanel";
 import CollapsibleSection from "../components/CollapsibleSection";
+import WebsiteTypeSelector from "../components/WebsiteTypeSelector";
 
 function matchesQuery(item, query) {
   const q = query.toLowerCase();
@@ -49,6 +50,9 @@ export default function Home() {
     <div className="Home">
       {state.viewMode && (
         <aside className="edit-panel">
+          <CollapsibleSection title="Website Type" storageKey="websiteType" defaultOpen={true}>
+            <WebsiteTypeSelector />
+          </CollapsibleSection>
           <CollapsibleSection title="Stock List" storageKey="stockLoader" defaultOpen={true}>
             <StockListLoader />
           </CollapsibleSection>

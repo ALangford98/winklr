@@ -118,6 +118,8 @@ button { font-family: inherit; }
 .tile-meta-row dd { margin: 0; color: var(--text-meta); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tile-add-btn { background: var(--accent-subtle); border: 1px solid var(--accent-primary); border-radius: 4px; color: var(--accent-primary); font-size: 12px; padding: 4px 8px; cursor: pointer; transition: background 0.15s, color 0.15s; white-space: nowrap; font-family: inherit; }
 .tile-add-btn:hover { background: var(--accent-primary); color: #fff; }
+.tile-add-btn--reserved { background: var(--accent-success); border-color: var(--accent-success); color: #fff; }
+.tile-add-btn--reserved:hover { opacity: 0.82; background: var(--accent-success); color: #fff; }
 .tile-add-btn--compact { padding: 0; width: 26px; height: 26px; font-size: 18px; font-weight: 400; border-radius: 50%; flex-shrink: 0; margin-right: 8px; display: flex; align-items: center; justify-content: center; }
 .tile--standard .tile-add-btn, .tile--detailed .tile-add-btn { margin-top: 6px; width: 100%; }
 
@@ -249,6 +251,11 @@ button { font-family: inherit; }
   .checkout-confirm-details { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
+  .cart-drawer { width: 100%; height: 88vh; top: auto; bottom: 0; right: 0; border-left: none; border-top: 1px solid var(--border-subtle); border-radius: 16px 16px 0 0; transform: translateY(100%); }
+  .cart-drawer--open { transform: translateY(0); }
+  .fab-group { bottom: 12px; right: 12px; gap: 8px; }
+  .cart-fab { height: 36px; padding: 0 12px; font-size: 12px; }
+  .help-fab { width: 36px; height: 36px; font-size: 14px; }
   .layout { padding: 16px; }
   .layout--grid .tile, .layout-featured-grid .tile { width: 100%; }
   .layout--grid .tile--standard .tile-img-wrap, .layout--grid .tile--detailed .tile-img-wrap,
@@ -312,9 +319,11 @@ function buildNavbarHTML(state, logoDataUrl) {
 function buildScriptContent(state) {
   const stockJson  = safeJSON(state.stockList);
   const configJson = safeJSON({
-    tileConfig:   state.tileConfig,
-    layoutConfig: state.layoutConfig,
-    widgets:      state.widgets,
+    websiteType:        state.websiteType,
+    firebaseDatabaseUrl: state.integrations?.firebaseDatabaseUrl?.trim().replace(/\/$/, '') || null,
+    tileConfig:         state.tileConfig,
+    layoutConfig:       state.layoutConfig,
+    widgets:            state.widgets,
   });
 
   return `
@@ -328,7 +337,54 @@ function esc(s) {
 
 /* ── Cart state ───────────────────────────────────────── */
 var cart = JSON.parse(localStorage.getItem('wk_cart') || '[]');
+var reservations = [];
 var query = '';
+var fbUrl = (CONFIG.firebaseDatabaseUrl || '').replace(/\/$/, '') || null;
+
+function initReservations() {
+  if (!fbUrl) {
+    reservations = JSON.parse(localStorage.getItem('wk_reservations') || '[]');
+    return;
+  }
+  var es = new EventSource(fbUrl + '/reservations.json');
+  es.addEventListener('put', function(evt) {
+    var payload = JSON.parse(evt.data), path = payload.path, data = payload.data;
+    if (path === '/') {
+      reservations = (data && typeof data === 'object')
+        ? Object.keys(data).filter(function(k){ return data[k] === true; })
+        : [];
+    } else {
+      var id = path.replace(/^\//, '');
+      if (data === true) { if (reservations.indexOf(id) === -1) reservations.push(id); }
+      else { reservations = reservations.filter(function(x){ return x !== id; }); }
+    }
+    renderTiles();
+  });
+  es.addEventListener('patch', function(evt) {
+    var data = JSON.parse(evt.data).data;
+    Object.keys(data).forEach(function(id) {
+      if (data[id]) { if (reservations.indexOf(id) === -1) reservations.push(id); }
+      else { reservations = reservations.filter(function(x){ return x !== id; }); }
+    });
+    renderTiles();
+  });
+}
+
+function toggleReservation(id) {
+  if (!fbUrl) {
+    var idx = reservations.indexOf(id);
+    if (idx !== -1) reservations.splice(idx, 1); else reservations.push(id);
+    localStorage.setItem('wk_reservations', JSON.stringify(reservations));
+    renderTiles();
+    return;
+  }
+  var reserved = reservations.indexOf(id) !== -1;
+  var opts = reserved
+    ? { method: 'DELETE' }
+    : { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: 'true' };
+  fetch(fbUrl + '/reservations/' + encodeURIComponent(id) + '.json', opts).catch(function(){});
+  // SSE will fire back and update reservations + re-render
+}
 
 function saveCart() { localStorage.setItem('wk_cart', JSON.stringify(cart)); }
 function cartCount() { return cart.reduce(function(s,e){ return s+e.quantity; }, 0); }
@@ -362,13 +418,20 @@ function tileImgHTML(item) {
 
 function renderTile(item) {
   var t = CONFIG.tileConfig;
+  var isRegistry = CONFIG.websiteType === 'registry';
+  var isReserved = isRegistry && reservations.indexOf(item.id) !== -1;
   var price = item.price > 0 ? '<span class="tile-price">$'+item.price.toFixed(2)+'</span>' : '';
-  var addBtn = '<button class="tile-add-btn" data-action="add-to-cart" data-id="'+item.id+'">Add to cart</button>';
+  var addBtn = isRegistry
+    ? '<button class="tile-add-btn'+(isReserved?' tile-add-btn--reserved':'')+'" data-action="toggle-reserve" data-id="'+item.id+'">'+(isReserved?'Reserved &#10003;':'Reserve')+'</button>'
+    : '<button class="tile-add-btn" data-action="add-to-cart" data-id="'+item.id+'">Add to cart</button>';
   if (t === 'compact') {
+    var compactAction = isRegistry
+      ? '<button class="tile-add-btn tile-add-btn--compact'+(isReserved?' tile-add-btn--reserved':'')+'" data-action="toggle-reserve" data-id="'+item.id+'" title="'+(isReserved?'Reserved':'Reserve')+'">'+(isReserved?'&#10003;':'+')+'</button>'
+      : '<button class="tile-add-btn tile-add-btn--compact" data-action="add-to-cart" data-id="'+item.id+'" title="Add to cart">+</button>';
     return '<div class="tile tile--compact">' +
       '<div class="tile-img-wrap--sm">'+tileImgHTML(item)+'</div>' +
       '<div class="tile-body"><span class="tile-name">'+esc(item.name)+'</span>'+price+'</div>' +
-      '<button class="tile-add-btn tile-add-btn--compact" data-action="add-to-cart" data-id="'+item.id+'" title="Add to cart">+</button>' +
+      compactAction +
     '</div>';
   }
   var meta = '';
@@ -651,17 +714,25 @@ document.addEventListener('click', function(e) {
   if(a==='co-back')          coBack();
   if(a==='open-help')        openHelp();
   if(a==='close-help')       closeHelp();
+  if(a==='toggle-reserve')   toggleReservation(id);
+  if(a==='copy-share-link') {
+    try { navigator.clipboard.writeText(window.location.href).catch(function(){}); } catch(e) {}
+  }
 });
 
 /* ── Init ─────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', function() {
+  initReservations();
   renderTiles(); renderCart(); initSearch(); updateFabs();
   var hasCartWidget = Object.values(CONFIG.widgets||{}).some(function(w){ return w && w.content==='Cart'; });
   var hasHelpWidget = Object.values(CONFIG.widgets||{}).some(function(w){ return w && w.content==='Help'; });
+  var isRegistry = CONFIG.websiteType === 'registry';
   var cartFab = document.getElementById('cart-fab');
-  if (cartFab && hasCartWidget) cartFab.style.display='none';
+  if (cartFab && (hasCartWidget || isRegistry)) cartFab.style.display='none';
   var helpFab = document.getElementById('help-fab');
   if (helpFab && hasHelpWidget) helpFab.style.display='none';
+  var shareFab = document.getElementById('share-fab');
+  if (shareFab && isRegistry) shareFab.style.display='flex';
 });
 `;
 }
@@ -724,6 +795,10 @@ ${navbar}
     Cart <span id="cart-fab-badge" class="cart-fab-badge"></span>
   </button>
   <button id="help-fab" class="help-fab" data-action="open-help">?</button>
+  <button id="share-fab" class="cart-fab" style="display:none" data-action="copy-share-link">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    Share
+  </button>
 </div>
 <script>
 ${script}

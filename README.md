@@ -102,6 +102,33 @@ Other scripts: `npm test`, `npm run build`.
 - [x] When the Search Bar widget is present in any navbar slot, hide the store search bar above the tile grid
 - [x] Review the Dropdown widget — give it configurable options rather than hardcoded placeholders
 
+### Website types / Templates
+- [x] `websiteType` field in app state (persisted to localStorage, included in JSON export/import and shareable URL)
+- [x] Website type selector in the edit panel — choosing a type applies that type's default config (widgets, FABs, tile action label)
+- [ ] "Reset to defaults for this type" button — re-applies the selected type's full default config on demand
+- [x] Website type carried through to the static export so exported behaviour matches the selected type
+
+#### Online Store *(default — existing behaviour)*
+- Default FABs: Cart, Help
+- Default tile action: "Add to cart"
+- Default panels visible: all
+
+#### Portfolio
+- [ ] Default FABs: Contact (opens contact popup), Help; cart and checkout suppressed by default
+- [ ] Default tile action: "View" button — links to an optional `url` field on each stock item
+- [ ] Contact popup — name, email, message fields; no backend; submits via `mailto:` fallback or shows a thank-you state; exportable to the static file
+- [ ] Item model extension: optional `url` field for external project / case-study links (visible in `StockListEditor` and rendered on tiles)
+- [ ] Static export: Contact popup with `mailto:` submission
+
+#### Registry
+- [x] Default FABs: Help, Share (copies shareable URL); cart and checkout suppressed by default
+- [x] Default tile action: "Reserve" — marks an item as reserved; reserved items show a green filled button
+- [x] Reservation state persisted to `localStorage` in the static export; syncs live via Firebase when configured
+- [x] Share registry: Share FAB copies the registry URL with full config encoded in the hash
+- [ ] "Mark as purchased" action in edit mode — registry owner can permanently mark items fulfilled (removes from public reservation pool)
+- [ ] Optional quantity cap per item — e.g. "need 3, 1 reserved" counter visible on the tile
+- [ ] RSVP / message popup — name + message field (same Contact component as Portfolio, re-used)
+
 ### Functionality
 - [x] Shopping cart — add/remove items, quantity management, cart sidebar or modal
 - [x] Help popup / onboarding guide for first-time users
@@ -113,6 +140,7 @@ Other scripts: `npm test`, `npm run build`.
 - [x] Clear labelling distinguishing public keys (safe to export) from secret keys (managed tier only)
 - [x] In-editor warning if a user pastes what looks like a secret key (starts with `sk_`)
 - [x] Integration status indicators — show connected / not configured per service
+- [x] Firebase Realtime Database URL — live shared reservation state synced across all visitors via SSE; setup note with required security rules shown inline; embedded in static export; falls back to `localStorage` when not configured
 
 ### Checkout
 - [x] Checkout modal — triggered from the "Checkout" button in the cart drawer; overlays the page (not a new route)
@@ -164,8 +192,9 @@ Other scripts: `npm test`, `npm run build`.
 
 ### Mobile
 - [ ] Edit panel is too wide for mobile — replace the left-side panel with a bottom sheet or slide-in drawer triggered by a FAB
-- [ ] FAB group (Cart, Help, Edit Mode toggle) needs repositioning on small screens to avoid overlapping tile content
-- [ ] Navbar widget slots collapse poorly on mobile — review slot visibility and overflow behaviour at narrow widths
+- [x] FAB group reduced to smaller buttons with tighter spacing on small screens
+- [x] Navbar widget slots no longer overflow on narrow screens; widget editor dropdowns pinned to right edge
+- [x] Cart drawer slides up as a full-width bottom sheet on screens ≤ 600 px
 - [ ] Test and fix tile layout responsiveness in all four layout variants on common mobile screen sizes (375px, 390px, 414px)
 - [ ] Touch target audit — ensure all interactive elements (tile buttons, cart qty controls, widget editor) meet minimum 44px tap target size
 
@@ -175,6 +204,37 @@ Other scripts: `npm test`, `npm run build`.
 ---
 
 ## Changelog
+
+### [0.2.0] — 2026-05-09
+
+#### Website types
+- New **Website Type** selector in the edit panel — Online Store and Registry; type is persisted to localStorage, included in JSON config export/import, and carried through to the static export
+- Switching types applies default FAB and tile-action behaviour for that type without touching items, theme, or layout
+
+#### Registry mode
+- Tile action changes from "Add to cart" to "Reserve / Reserved ✓" in registry mode; reserved items show a green filled button; tapping again unreserves
+- Cart FAB and checkout modal suppressed in registry mode; **Share FAB** added — copies the full config-encoded registry URL to the clipboard
+- Reservation state persisted to `localStorage` in the editor and in the static export
+
+#### Firebase integration
+- **Firebase Realtime Database URL** field added to the Integrations panel — public URL input (not masked), with inline security-rules setup note
+- When configured, reservations sync live across all visitors via Server-Sent Events (SSE); the Firebase URL is embedded in the static export
+- Falls back to `localStorage`-only when no URL is configured
+
+#### Item management
+- **Photo upload** — file picker in the Add item and Edit item forms; images stored as embedded data URLs (no server required); works in both the editor and static export
+- **Inline item editing** — new ✎ button on each item row opens an edit form; change name, price, or photo without deleting and re-adding
+- **Item thumbnails** — each row in the editor list now shows a small preview image (or initial letter if no image is set)
+
+#### Mobile
+- Cart drawer slides up as a full-width bottom sheet on screens ≤ 600 px (matching the checkout modal pattern)
+- FAB group uses smaller buttons and tighter spacing on small screens
+- Navbar widget slots no longer overflow on narrow screens; widget editor dropdowns pinned to the right edge to stay in viewport
+
+#### Export fixes
+- Winklr wordmark SVG now fetched and embedded as a data URL at export time — was falling back to plain "Store" text
+- Help navbar widget now renders correctly in the exported HTML
+- Help FAB and help modal added to the exported HTML; FAB is suppressed when a Help widget is present in the navbar (matching the React app behaviour)
 
 ### [0.1.8] — 2026-05-06
 - Fixed the rendering of branding in the exported site

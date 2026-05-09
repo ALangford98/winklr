@@ -14,12 +14,27 @@ function TileImage({ item }) {
   return <img className="tile-img" src={item.image} alt={item.name} />;
 }
 
-function AddToCartBtn({ itemId, compact = false }) {
-  const { addToCart } = useContext(AppContext);
+function TileActionBtn({ item, compact = false }) {
+  const { state, addToCart, toggleReservation } = useContext(AppContext);
+  const isRegistry = state.websiteType === "registry";
+  const isReserved = isRegistry && (state.reservations || []).includes(item.id);
+
+  if (isRegistry) {
+    return (
+      <button
+        className={`tile-add-btn${compact ? " tile-add-btn--compact" : ""}${isReserved ? " tile-add-btn--reserved" : ""}`}
+        onClick={(e) => { e.stopPropagation(); toggleReservation(item.id); }}
+        title={isReserved ? "Reserved — click to unreserve" : "Reserve this item"}
+      >
+        {compact ? (isReserved ? "✓" : "+") : (isReserved ? "Reserved ✓" : "Reserve")}
+      </button>
+    );
+  }
+
   return (
     <button
       className={`tile-add-btn${compact ? " tile-add-btn--compact" : ""}`}
-      onClick={(e) => { e.stopPropagation(); addToCart(itemId); }}
+      onClick={(e) => { e.stopPropagation(); addToCart(item.id); }}
     >
       {compact ? "+" : "Add to cart"}
     </button>
@@ -36,7 +51,7 @@ function CompactTile({ item }) {
         <span className="tile-name">{item.name}</span>
         {item.price > 0 && <span className="tile-price">${item.price.toFixed(2)}</span>}
       </div>
-      <AddToCartBtn itemId={item.id} compact />
+      <TileActionBtn item={item} compact />
     </div>
   );
 }
@@ -50,7 +65,7 @@ function StandardTile({ item }) {
       <div className="tile-body">
         <span className="tile-name">{item.name}</span>
         {item.price > 0 && <span className="tile-price">${item.price.toFixed(2)}</span>}
-        <AddToCartBtn itemId={item.id} />
+        <TileActionBtn item={item} />
       </div>
     </div>
   );
@@ -76,7 +91,7 @@ function DetailedTile({ item }) {
             ))}
           </dl>
         )}
-        <AddToCartBtn itemId={item.id} />
+        <TileActionBtn item={item} />
       </div>
     </div>
   );

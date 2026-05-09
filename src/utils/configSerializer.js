@@ -3,6 +3,7 @@ const CONFIG_VERSION = 1;
 export function exportConfig(state) {
   const config = {
     version:      CONFIG_VERSION,
+    websiteType:  state.websiteType,
     widgets:      state.widgets,
     stockList:    state.stockList,
     tileConfig:   state.tileConfig,
@@ -42,6 +43,7 @@ export function parseConfigFile(file) {
 
       // Loose validation: accept whatever fields are present, null out the rest
       resolve({
+        websiteType:  raw.websiteType  ?? null,
         widgets:      raw.widgets      ?? null,
         stockList:    Array.isArray(raw.stockList) ? raw.stockList : null,
         tileConfig:   raw.tileConfig   ?? null,

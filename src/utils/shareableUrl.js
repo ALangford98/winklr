@@ -15,6 +15,7 @@ function fromBase64(b64) {
 
 export function encodeConfigToHash(state) {
   const config = {
+    websiteType:  state.websiteType,
     widgets:      state.widgets,
     stockList:    state.stockList,
     tileConfig:   state.tileConfig,
@@ -30,6 +31,7 @@ export function decodeConfigFromHash(hash) {
     const raw = fromBase64(hash.slice(HASH_PREFIX.length));
     const config = JSON.parse(raw);
     return {
+      websiteType:  config.websiteType  ?? null,
       widgets:      config.widgets      ?? null,
       stockList:    Array.isArray(config.stockList) ? config.stockList : null,
       tileConfig:   config.tileConfig   ?? null,
