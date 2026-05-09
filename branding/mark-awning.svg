@@ -1,0 +1,7 @@
+<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Winklr mark">
+  <rect width="40" height="40" rx="6" fill="#2C2C2A"/>
+  <path d="M 9 13 L 31 13 L 33 22 L 7 22 Z" fill="#FFFFFF"/>
+  <path d="M 14 13 L 12 22" stroke="#2C2C2A" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M 20 13 L 20 22" stroke="#2C2C2A" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M 26 13 L 28 22" stroke="#2C2C2A" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

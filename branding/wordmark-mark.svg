@@ -1,0 +1,8 @@
+<svg viewBox="0 0 170 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Winklr">
+  <rect width="170" height="40" rx="6" fill="#2C2C2A"/>
+  <rect x="12" y="12" width="7" height="7" rx="1" fill="#FFFFFF"/>
+  <rect x="21" y="12" width="7" height="7" rx="1" fill="#FFFFFF" opacity="0.55"/>
+  <rect x="12" y="21" width="7" height="7" rx="1" fill="#FFFFFF" opacity="0.55"/>
+  <rect x="21" y="21" width="7" height="7" rx="1" fill="#FFFFFF"/>
+  <text x="38" y="26" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="17" font-weight="500" fill="#FFFFFF" letter-spacing="0.2">Winklr</text>
+</svg>
