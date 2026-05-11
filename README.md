@@ -126,7 +126,7 @@ Other scripts: `npm test`, `npm run build`.
 - [x] Reservation state persisted to `localStorage` in the static export; syncs live via Firebase when configured
 - [x] Share registry: Share FAB copies the registry URL with full config encoded in the hash
 - [ ] "Mark as purchased" action in edit mode — registry owner can permanently mark items fulfilled (removes from public reservation pool)
-- [ ] Optional quantity cap per item — e.g. "need 3, 1 reserved" counter visible on the tile
+- [x] Optional quantity per item — set how many are needed (0 = unlimited); tile shows "X of Y reserved" with +/− stepper; fully reserved items show a locked "Fully Reserved ✓" state
 - [ ] RSVP / message popup — name + message field (same Contact component as Portfolio, re-used)
 
 ### Functionality
@@ -209,6 +209,14 @@ Other scripts: `npm test`, `npm run build`.
 ---
 
 ## Changelog
+
+### [0.2.2] — 2026-05-11
+
+#### Registry
+- **Item quantities** — each item now has a `quantity` field (0 = unlimited); set it in the Add/Edit item form with a context-aware placeholder ("Quantity needed" in registry mode)
+- Registry tiles replaced the single reserve toggle with a `−` / `Reserve` / `+` stepper: shows "X of Y reserved" when a quantity is set, plain "X reserved" when unlimited
+- "Fully Reserved ✓" state locks the tile when the reserved count reaches the target quantity
+- Reservation state changed from a flat `string[]` to `{ [itemId]: number }` — Firebase now stores counts; SSE listener updated to parse numbers instead of booleans
 
 ### [0.2.1] — 2026-05-09
 

@@ -1,7 +1,7 @@
 import React, { useState, useContext, useRef } from 'react';
 import { AppContext } from '../appContext';
 
-const EMPTY_FORM = { name: '', price: '', image: '', categories: [] };
+const EMPTY_FORM = { name: '', price: '', image: '', categories: [], quantity: '' };
 
 function readFileAsDataUrl(file) {
   return new Promise((resolve) => {
@@ -103,11 +103,15 @@ function TagInput({ value = [], onChange }) {
 }
 
 function EditItemForm({ item, onSave, onCancel }) {
+  const { state } = useContext(AppContext);
+  const isRegistry = state.websiteType === 'registry';
+
   const [form, setForm] = useState({
-    name:       item.name       ?? '',
-    price:      item.price > 0  ? String(item.price) : '',
-    image:      item.image      ?? '',
-    categories: item.categories ?? [],
+    name:       item.name          ?? '',
+    price:      item.price > 0     ? String(item.price) : '',
+    image:      item.image         ?? '',
+    categories: item.categories    ?? [],
+    quantity:   item.quantity > 0  ? String(item.quantity) : '',
   });
 
   const set = (field) => (val) =>
@@ -116,7 +120,7 @@ function EditItemForm({ item, onSave, onCancel }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
-    onSave({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories });
+    onSave({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories, quantity: Number(form.quantity) || 0 });
   };
 
   return (
@@ -124,6 +128,7 @@ function EditItemForm({ item, onSave, onCancel }) {
       <ImagePicker value={form.image} onChange={set('image')} />
       <input className="editor-add-form-input" placeholder="Name *" value={form.name} onChange={set('name')} autoFocus />
       <input className="editor-add-form-input" placeholder="Price" type="number" min="0" step="0.01" value={form.price} onChange={set('price')} />
+      <input className="editor-add-form-input" placeholder={isRegistry ? 'Quantity needed (0 = unlimited)' : 'Stock quantity (0 = unlimited)'} type="number" min="0" step="1" value={form.quantity} onChange={set('quantity')} />
       <TagInput value={form.categories} onChange={(cats) => setForm((p) => ({ ...p, categories: cats }))} />
       <div className="editor-form-actions">
         <button type="submit" disabled={!form.name.trim()}>Save</button>
@@ -158,7 +163,7 @@ export default function StockListEditor() {
   const handleAdd = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
-    addStockItem({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories });
+    addStockItem({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories, quantity: Number(form.quantity) || 0 });
     setForm(EMPTY_FORM);
     setShowAdd(false);
   };
@@ -203,6 +208,7 @@ export default function StockListEditor() {
           <ImagePicker value={form.image} onChange={set('image')} />
           <input className="editor-add-form-input" placeholder="Name *" value={form.name} onChange={set('name')} autoFocus />
           <input className="editor-add-form-input" placeholder="Price" type="number" min="0" step="0.01" value={form.price} onChange={set('price')} />
+          <input className="editor-add-form-input" placeholder="Quantity needed (0 = unlimited)" type="number" min="0" step="1" value={form.quantity} onChange={set('quantity')} />
           <TagInput value={form.categories} onChange={(cats) => setForm((p) => ({ ...p, categories: cats }))} />
           <div className="editor-form-actions">
             <button type="submit" disabled={!form.name.trim()}>Add</button>

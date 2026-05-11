@@ -15,19 +15,52 @@ function TileImage({ item }) {
 }
 
 function TileActionBtn({ item, compact = false }) {
-  const { state, addToCart, toggleReservation } = useContext(AppContext);
+  const { state, addToCart, reserveItem } = useContext(AppContext);
   const isRegistry = state.websiteType === "registry";
-  const isReserved = isRegistry && (state.reservations || []).includes(item.id);
 
   if (isRegistry) {
+    const reserved  = (state.reservations || {})[item.id] || 0;
+    const needed    = item.quantity || 0;
+    const full      = needed > 0 && reserved >= needed;
+
+    if (compact) {
+      return (
+        <div className="tile-reserve-compact" onClick={(e) => e.stopPropagation()}>
+          {reserved > 0 && (
+            <button className="tile-reserve-step" onClick={() => reserveItem(item.id, -1)}>−</button>
+          )}
+          {reserved > 0 && <span className="tile-reserve-count">{reserved}{needed > 0 ? `/${needed}` : ''}</span>}
+          {!full && (
+            <button className="tile-reserve-step tile-reserve-step--add" onClick={() => reserveItem(item.id, 1)}>+</button>
+          )}
+          {full && <span className="tile-reserve-full">✓</span>}
+        </div>
+      );
+    }
+
     return (
-      <button
-        className={`tile-add-btn${compact ? " tile-add-btn--compact" : ""}${isReserved ? " tile-add-btn--reserved" : ""}`}
-        onClick={(e) => { e.stopPropagation(); toggleReservation(item.id); }}
-        title={isReserved ? "Reserved — click to unreserve" : "Reserve this item"}
-      >
-        {compact ? (isReserved ? "✓" : "+") : (isReserved ? "Reserved ✓" : "Reserve")}
-      </button>
+      <div className="tile-reserve-wrap" onClick={(e) => e.stopPropagation()}>
+        {needed > 0 && (
+          <span className="tile-reserve-label">
+            {reserved} of {needed} reserved
+          </span>
+        )}
+        {needed === 0 && reserved > 0 && (
+          <span className="tile-reserve-label">{reserved} reserved</span>
+        )}
+        <div className="tile-reserve-controls">
+          {reserved > 0 && (
+            <button className="tile-reserve-step" onClick={() => reserveItem(item.id, -1)} title="Remove one reservation">−</button>
+          )}
+          {full ? (
+            <span className="tile-add-btn tile-add-btn--reserved">Fully Reserved ✓</span>
+          ) : (
+            <button className="tile-add-btn" onClick={() => reserveItem(item.id, 1)}>
+              Reserve
+            </button>
+          )}
+        </div>
+      </div>
     );
   }
 

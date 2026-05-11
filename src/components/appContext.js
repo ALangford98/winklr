@@ -25,7 +25,7 @@ const AppContextProvider = ({ children }) => {
   const [brand, setBrand]                   = useLocalStorage("winklr_brand", BRAND_DEFAULT);
   const [integrations, setIntegrations]     = useLocalStorage("winklr_integrations", INTEGRATIONS_DEFAULT);
   const [websiteType, setWebsiteType]       = useLocalStorage("winklr_websiteType", "store");
-  const [reservations, setReservations]     = useLocalStorage("winklr_reservations", []);
+  const [reservations, setReservations]     = useLocalStorage("winklr_reservations", {});
   const [searchQuery, setSearchQuery]       = useState("");
   const [cartOpen, setCartOpen]             = useState(false);
   const [helpOpen, setHelpOpen]             = useState(false);
@@ -108,26 +108,27 @@ const AppContextProvider = ({ children }) => {
       if (path === '/') {
         setReservations(
           data && typeof data === 'object'
-            ? Object.keys(data).filter((k) => data[k] === true)
-            : []
+            ? Object.fromEntries(Object.entries(data).filter(([, v]) => v > 0))
+            : {}
         );
       } else {
         const itemId = path.replace(/^\//, '');
-        setReservations((prev) =>
-          data === true
-            ? prev.includes(itemId) ? prev : [...prev, itemId]
-            : prev.filter((id) => id !== itemId)
-        );
+        setReservations((prev) => {
+          const next = { ...prev };
+          if (data > 0) next[itemId] = data;
+          else delete next[itemId];
+          return next;
+        });
       }
     });
 
     es.addEventListener('patch', (e) => {
       const data = JSON.parse(e.data).data;
       setReservations((prev) => {
-        let next = [...prev];
+        const next = { ...prev };
         Object.entries(data).forEach(([id, val]) => {
-          if (val) { if (!next.includes(id)) next.push(id); }
-          else { next = next.filter((x) => x !== id); }
+          if (val > 0) next[id] = val;
+          else delete next[id];
         });
         return next;
       });
@@ -136,26 +137,29 @@ const AppContextProvider = ({ children }) => {
     return () => es.close();
   }, [firebaseUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const toggleReservation = async (itemId) => {
-    if (!firebaseUrl) {
-      setReservations((prev) =>
-        prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
-      );
-      return;
-    }
-    const reserved = reservations.includes(itemId);
+  const reserveItem = async (itemId, delta = 1) => {
+    const current = (reservations[itemId] || 0);
+    const next = Math.max(0, current + delta);
+
+    const applyLocal = () =>
+      setReservations((prev) => {
+        const updated = { ...prev };
+        if (next === 0) delete updated[itemId];
+        else updated[itemId] = next;
+        return updated;
+      });
+
+    if (!firebaseUrl) { applyLocal(); return; }
+
     try {
       await fetch(`${firebaseUrl}/reservations/${encodeURIComponent(itemId)}.json`, {
-        method: reserved ? 'DELETE' : 'PUT',
-        ...(reserved ? {} : { headers: { 'Content-Type': 'application/json' }, body: 'true' }),
+        method: next === 0 ? 'DELETE' : 'PUT',
+        ...(next > 0 ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) } : {}),
       });
     } catch {
-      // Network error — optimistic local update
-      setReservations((prev) =>
-        prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
-      );
+      applyLocal();
     }
-    // State is updated by the SSE put/patch event that Firebase sends back
+    // State updated by the SSE event Firebase sends back
   };
 
   const updateStockItem = (id, changes) => {
@@ -199,7 +203,7 @@ const AppContextProvider = ({ children }) => {
         setBrand,
         setIntegrations,
         setWebsiteType,
-        toggleReservation,
+        reserveItem,
         setThemeCustom,
         cartOpen, setCartOpen,
         helpOpen, setHelpOpen,

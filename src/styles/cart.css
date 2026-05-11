@@ -387,6 +387,81 @@
   color: #fff;
 }
 
+/* ── Registry reservation stepper ─────────────────────── */
+.tile-reserve-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.tile-reserve-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.tile-reserve-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tile-reserve-controls .tile-add-btn {
+  flex: 1;
+}
+
+.tile-reserve-step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.tile-reserve-step:hover { border-color: var(--accent-primary); }
+
+.tile-reserve-step--add {
+  background: var(--accent-subtle);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* Compact tile stepper */
+.tile-reserve-compact {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tile-reserve-compact .tile-reserve-step {
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.tile-reserve-count {
+  font-size: 11px;
+  color: var(--text-secondary);
+  min-width: 20px;
+  text-align: center;
+}
+
+.tile-reserve-full {
+  font-size: 13px;
+  color: var(--accent-success);
+  font-weight: 600;
+}
+
 /* compact: icon button tucked to the right inside the row */
 .tile-add-btn--compact {
   padding: 0;
