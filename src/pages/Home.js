@@ -12,6 +12,7 @@ import ConfigPorter from "../components/ConfigPorter";
 import IntegrationsPanel from "../components/IntegrationsPanel";
 import CollapsibleSection from "../components/CollapsibleSection";
 import WebsiteTypeSelector from "../components/WebsiteTypeSelector";
+import CategoryConfig from "../components/CategoryConfig";
 
 function matchesQuery(item, query) {
   const q = query.toLowerCase();
@@ -35,6 +36,98 @@ function Footer() {
   );
 }
 
+function CategorySection({ cat, items, state, onReorder }) {
+  const cfg = state.categoryConfig?.[cat] || {};
+  return (
+    <div className="category-section">
+      <div className="category-section-header">
+        <h2 className="category-section-title">
+          {cfg.label || cat}
+        </h2>
+        {cfg.description && <p className="category-section-desc">{cfg.description}</p>}
+      </div>
+      <Layout
+        config={state.layoutConfig}
+        items={items}
+        tileConfig={state.tileConfig}
+        isEditMode={state.viewMode}
+        onReorder={onReorder}
+      />
+    </div>
+  );
+}
+
+function GroupedContent({ state, filtered, setStockList }) {
+  const orderedCats = [
+    ...new Set(state.stockList.flatMap((i) => i.categories || [])),
+  ].filter(Boolean);
+
+  const makeReorder = (cat) => (reorderedItems) => {
+    setStockList((prev) => {
+      const result = [...prev];
+      const indices = prev.reduce((acc, item, idx) => {
+        if ((item.categories || []).includes(cat)) acc.push(idx);
+        return acc;
+      }, []);
+      indices.forEach((origIdx, newPos) => { result[origIdx] = reorderedItems[newPos]; });
+      return result;
+    });
+  };
+
+  const makeUncatReorder = (reorderedItems) => {
+    setStockList((prev) => {
+      const result = [...prev];
+      const indices = prev.reduce((acc, item, idx) => {
+        if (!(item.categories || []).length) acc.push(idx);
+        return acc;
+      }, []);
+      indices.forEach((origIdx, newPos) => { result[origIdx] = reorderedItems[newPos]; });
+      return result;
+    });
+  };
+
+  const sections = orderedCats
+    .map((cat) => ({
+      cat,
+      items: filtered.filter((i) => (i.categories || []).includes(cat)),
+    }))
+    .filter(({ items }) => items.length > 0);
+
+  const uncategorized = filtered.filter((i) => !(i.categories || []).length);
+
+  if (sections.length === 0 && uncategorized.length === 0) return null;
+
+  return (
+    <div className="category-groups">
+      {sections.map(({ cat, items }, idx) => (
+        <React.Fragment key={cat}>
+          {idx > 0 && <div className="category-divider" />}
+          <CategorySection
+            cat={cat}
+            items={items}
+            state={state}
+            onReorder={makeReorder(cat)}
+          />
+        </React.Fragment>
+      ))}
+      {uncategorized.length > 0 && (
+        <>
+          {sections.length > 0 && <div className="category-divider" />}
+          <div className="category-section">
+            <Layout
+              config={state.layoutConfig}
+              items={uncategorized}
+              tileConfig={state.tileConfig}
+              isEditMode={state.viewMode}
+              onReorder={makeUncatReorder}
+            />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function Home() {
   const { state, setStockList, setSearchQuery, mobilePanelOpen, setMobilePanelOpen } = useContext(AppContext);
 
@@ -46,6 +139,8 @@ export default function Home() {
   const filtered = query
     ? state.stockList.filter((item) => matchesQuery(item, query))
     : state.stockList;
+
+  const hasCategoryItems = state.stockList.some((i) => i.categories?.length > 0);
 
   return (
     <div className="Home">
@@ -73,6 +168,9 @@ export default function Home() {
             <CollapsibleSection title="Layout" storageKey="layout" defaultOpen={false}>
               <LayoutSelector />
             </CollapsibleSection>
+            <CollapsibleSection title="Categories" storageKey="categories" defaultOpen={false}>
+              <CategoryConfig />
+            </CollapsibleSection>
             <CollapsibleSection title="Theme" storageKey="theme" defaultOpen={false}>
               <ThemePicker />
             </CollapsibleSection>
@@ -90,6 +188,13 @@ export default function Home() {
       )}
 
       <div className="content-area">
+        {(state.brand?.pageTitle || state.brand?.pageSubtitle) && (
+          <div className="page-header">
+            {state.brand.pageTitle    && <h1 className="page-header-title">{state.brand.pageTitle}</h1>}
+            {state.brand.pageSubtitle && <p  className="page-header-subtitle">{state.brand.pageSubtitle}</p>}
+          </div>
+        )}
+
         {state.stockList.length > 0 && !hasSearchWidget && (
           <div className="store-search-wrap">
             <input
@@ -114,13 +219,17 @@ export default function Home() {
         {state.stockList.length === 0 ? (
           <EmptyState />
         ) : filtered.length > 0 ? (
-          <Layout
-            config={state.layoutConfig}
-            items={filtered}
-            tileConfig={state.tileConfig}
-            isEditMode={state.viewMode}
-            onReorder={setStockList}
-          />
+          state.groupByCategory && hasCategoryItems ? (
+            <GroupedContent state={state} filtered={filtered} setStockList={setStockList} />
+          ) : (
+            <Layout
+              config={state.layoutConfig}
+              items={filtered}
+              tileConfig={state.tileConfig}
+              isEditMode={state.viewMode}
+              onReorder={setStockList}
+            />
+          )
         ) : (
           <p className="search-no-results">No items match "{state.searchQuery}"</p>
         )}

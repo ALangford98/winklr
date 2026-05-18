@@ -3,13 +3,15 @@ const CONFIG_VERSION = 1;
 export function exportConfig(state) {
   const config = {
     version:      CONFIG_VERSION,
-    websiteType:  state.websiteType,
-    widgets:      state.widgets,
-    stockList:    state.stockList,
-    tileConfig:   state.tileConfig,
-    layoutConfig: state.layoutConfig,
-    theme:        state.theme,
-    integrations: state.integrations,
+    websiteType:     state.websiteType,
+    widgets:         state.widgets,
+    stockList:       state.stockList,
+    tileConfig:      state.tileConfig,
+    layoutConfig:    state.layoutConfig,
+    theme:           state.theme,
+    integrations:    state.integrations,
+    groupByCategory: state.groupByCategory,
+    categoryConfig:  state.categoryConfig,
   };
 
   const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
@@ -43,13 +45,15 @@ export function parseConfigFile(file) {
 
       // Loose validation: accept whatever fields are present, null out the rest
       resolve({
-        websiteType:  raw.websiteType  ?? null,
-        widgets:      raw.widgets      ?? null,
-        stockList:    Array.isArray(raw.stockList) ? raw.stockList : null,
-        tileConfig:   raw.tileConfig   ?? null,
-        layoutConfig: raw.layoutConfig ?? null,
-        theme:        raw.theme        ?? null,
-        integrations: raw.integrations ?? null,
+        websiteType:     raw.websiteType     ?? null,
+        widgets:         raw.widgets         ?? null,
+        stockList:       Array.isArray(raw.stockList) ? raw.stockList : null,
+        tileConfig:      raw.tileConfig      ?? null,
+        layoutConfig:    raw.layoutConfig    ?? null,
+        theme:           raw.theme           ?? null,
+        integrations:    raw.integrations    ?? null,
+        groupByCategory: raw.groupByCategory ?? null,
+        categoryConfig:  raw.categoryConfig  ?? null,
       });
     };
 

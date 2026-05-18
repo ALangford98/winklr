@@ -18,9 +18,26 @@ export default function BrandingEditor() {
 
   const logoSrc = state.brand?.logo ?? `${process.env.PUBLIC_URL}/branding/wordmark.svg`;
   const currencyPrefix = state.brand?.currencyPrefix ?? '$';
+  const pageTitle = state.brand?.pageTitle ?? '';
+  const pageSubtitle = state.brand?.pageSubtitle ?? '';
 
   return (
     <div className="branding-editor">
+      <input
+        className="editor-add-form-input"
+        type="text"
+        placeholder="Page heading (e.g. Our Wedding Registry)"
+        value={pageTitle}
+        onChange={(e) => update('pageTitle', e.target.value)}
+      />
+      <input
+        className="editor-add-form-input"
+        type="text"
+        placeholder="Subheading (optional)"
+        value={pageSubtitle}
+        onChange={(e) => update('pageSubtitle', e.target.value)}
+      />
+
       <div className="branding-preview">
         <img src={logoSrc} alt="Brand logo" className="branding-preview-img" />
       </div>

@@ -11,7 +11,7 @@ const WIDGET_SLOTS_DEFAULT = {
 };
 
 const THEME_DEFAULT        = { palette: "dark", primaryColor: "#316dca", custom: {} };
-const BRAND_DEFAULT        = { logo: null, currencyPrefix: '$' };
+const BRAND_DEFAULT        = { logo: null, currencyPrefix: '$', pageTitle: '', pageSubtitle: '' };
 const INTEGRATIONS_DEFAULT = { stripePublishableKey: "", mapboxToken: "", firebaseDatabaseUrl: "" };
 
 const AppContextProvider = ({ children }) => {
@@ -26,6 +26,8 @@ const AppContextProvider = ({ children }) => {
   const [integrations, setIntegrations]     = useLocalStorage("winklr_integrations", INTEGRATIONS_DEFAULT);
   const [websiteType, setWebsiteType]       = useLocalStorage("winklr_websiteType", "store");
   const [reservations, setReservations]     = useLocalStorage("winklr_reservations", {});
+  const [groupByCategory, setGroupByCategory] = useLocalStorage("winklr_groupByCategory", true);
+  const [categoryConfig, setCategoryConfig]   = useLocalStorage("winklr_categoryConfig", {});
   const [searchQuery, setSearchQuery]       = useState("");
   const [cartOpen, setCartOpen]             = useState(false);
   const [helpOpen, setHelpOpen]             = useState(false);
@@ -162,6 +164,13 @@ const AppContextProvider = ({ children }) => {
     // State updated by the SSE event Firebase sends back
   };
 
+  const updateCategoryConfig = (category, changes) => {
+    setCategoryConfig((prev) => ({
+      ...prev,
+      [category]: { ...(prev[category] || {}), ...changes },
+    }));
+  };
+
   const updateStockItem = (id, changes) => {
     setStockList((prev) =>
       prev.map((item) => (item.id === id ? { ...item, ...changes, id } : item))
@@ -175,7 +184,9 @@ const AppContextProvider = ({ children }) => {
     if (config.layoutConfig !== null) setLayoutConfig(config.layoutConfig);
     if (config.theme        !== null) setTheme(config.theme);
     if (config.integrations !== null) setIntegrations(config.integrations);
-    if (config.websiteType  !== null) setWebsiteType(config.websiteType);
+    if (config.websiteType    !== null) setWebsiteType(config.websiteType);
+    if (config.groupByCategory != null) setGroupByCategory(config.groupByCategory);
+    if (config.categoryConfig  != null) setCategoryConfig(config.categoryConfig);
   };
 
   const setThemeCustom = (variable, value) => {
@@ -187,7 +198,7 @@ const AppContextProvider = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
-        state: { widgets, viewMode, stockList, tileConfig, layoutConfig, theme, cart, brand, integrations, websiteType, reservations, searchQuery },
+        state: { widgets, viewMode, stockList, tileConfig, layoutConfig, theme, cart, brand, integrations, websiteType, reservations, searchQuery, groupByCategory, categoryConfig },
         setWidget,
         clearWidget,
         toggleViewMode,
@@ -204,6 +215,8 @@ const AppContextProvider = ({ children }) => {
         setIntegrations,
         setWebsiteType,
         reserveItem,
+        setGroupByCategory,
+        updateCategoryConfig,
         setThemeCustom,
         cartOpen, setCartOpen,
         helpOpen, setHelpOpen,
