@@ -213,5 +213,12 @@
     "currencyPrefix": "R",
     "pageTitle": "Our Baby Shower Registry",
     "pageSubtitle": "Thank you for celebrating with us - here's our wish list!"
-  }
+  },
+  "giftSuggestionsEnabled": true,
+  "accessGate": {
+    "enabled": false,
+    "password": ""
+  },
+  "layoutAlign": "center",
+  "searchAlign": "center"
 }

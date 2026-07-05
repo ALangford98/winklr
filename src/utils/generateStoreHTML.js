@@ -191,6 +191,23 @@ button { font-family: inherit; }
 .owner-view-release-btn { background: none; border: 1px solid var(--border-subtle); color: var(--text-secondary); border-radius: 4px; font-size: 11px; padding: 2px 6px; cursor: pointer; font-family: inherit; }
 .owner-view-release-btn:hover { border-color: var(--accent-danger); color: var(--accent-danger); }
 .owner-view-empty { font-size: 13px; color: var(--text-muted); text-align: center; padding: 20px 0; }
+.owner-view-section-title { margin: 4px 0 -6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.suggestion-qty-input { width: 56px; box-sizing: border-box; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 4px; color: var(--text-primary); font-size: 12px; padding: 4px; }
+
+/* Suggest-a-gift form */
+.suggest-gift-form { max-width: 420px; margin: 32px 24px; padding: 16px; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--bg-card); display: flex; flex-direction: column; gap: 8px; }
+.suggest-gift-heading { margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.suggest-gift-hint { margin: 0 0 4px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.suggest-gift-email-note { margin: 0; font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+.suggest-gift-error { margin: 0; font-size: 12px; color: var(--accent-danger); }
+.suggest-gift-form--done { align-items: center; text-align: center; }
+.suggest-gift-thanks { margin: 0; font-size: 13px; color: var(--text-secondary); }
+
+/* Guest access gate */
+.access-gate-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-app); padding: 24px; box-sizing: border-box; }
+.access-gate-card { width: 100%; max-width: 360px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 28px 24px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
+.access-gate-title { margin: 0 0 2px; font-size: 19px; font-weight: 700; color: var(--text-primary); text-align: center; font-family: var(--font-heading, inherit); }
+.access-gate-body { margin: 0 0 6px; font-size: 13px; color: var(--text-secondary); text-align: center; }
 
 /* Cart drawer */
 .cart-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 199; display: none; }
@@ -400,6 +417,11 @@ function buildScriptContent(state) {
     currencyPrefix:     state.brand?.currencyPrefix || '$',
     ownerPasscode:      state.integrations?.ownerPasscode || '',
     telemetryUrl:       TELEMETRY_FIREBASE_URL || '',
+    pageTitle:          state.brand?.pageTitle || '',
+    giftSuggestionsEnabled: state.giftSuggestionsEnabled !== false,
+    accessGate:         state.accessGate?.enabled
+      ? { enabled: true, password: state.accessGate.password || '' }
+      : { enabled: false, password: '' },
   });
 
   // The template below is emitted verbatim into the exported <script> tag, so its
@@ -483,6 +505,18 @@ function reserveItem(id, delta, name) {
   var current = itemReservations[guest] || 0;
   var next = Math.max(0, current + delta);
 
+  if (delta > 0) {
+    var item = STOCK.find(function(i){ return i.id === id; });
+    var needed = item ? (item.quantity || 0) : 0;
+    if (needed > 0) {
+      var othersTotal = 0;
+      Object.keys(itemReservations).forEach(function(g){ if (g !== guest) othersTotal += itemReservations[g]; });
+      var maxForGuest = Math.max(0, needed - othersTotal);
+      next = Math.min(next, maxForGuest);
+      if (next === current) return;
+    }
+  }
+
   function applyLocal() {
     var nextReservations = Object.assign({}, reservations);
     var itemRes = Object.assign({}, nextReservations[id] || {});
@@ -501,6 +535,111 @@ function reserveItem(id, delta, name) {
     : { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) };
   fetch(fbUrl + '/reservations/' + encodeURIComponent(id) + '/' + encodeURIComponent(guest) + '.json', opts).catch(function(){});
   // SSE will fire back and update reservations + re-render
+}
+
+/* ── Gift suggestions ───────────────────────────────────── */
+var suggestions = {};
+
+function applySuggestionAtPath(path, data) {
+  var segments = path.split('/').filter(function(s){ return s; });
+  if (segments.length === 0) {
+    suggestions = (data && typeof data === 'object') ? data : {};
+  } else if (segments.length === 1) {
+    var id = segments[0];
+    if (data) suggestions[id] = data; else delete suggestions[id];
+  } else {
+    var sid = segments[0], field = segments[1];
+    suggestions[sid] = Object.assign({}, suggestions[sid] || {});
+    suggestions[sid][field] = data;
+  }
+  renderOwnerView();
+}
+
+function initSuggestions() {
+  if (!fbUrl) {
+    suggestions = JSON.parse(localStorage.getItem('wk_suggestions') || '{}');
+    return;
+  }
+  var es = new EventSource(fbUrl + '/suggestions.json');
+  es.addEventListener('put', function(evt) {
+    var payload = JSON.parse(evt.data);
+    applySuggestionAtPath(payload.path, payload.data);
+  });
+  es.addEventListener('patch', function(evt) {
+    var payload = JSON.parse(evt.data);
+    var data = payload.data;
+    if (!data || typeof data !== 'object') return;
+    Object.keys(data).forEach(function(key) {
+      applySuggestionAtPath(payload.path === '/' ? '/'+key : payload.path+'/'+key, data[key]);
+    });
+  });
+}
+
+function suggestGift(name, quantity, email) {
+  var id = 'sg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  var suggestion = { name: name, quantity: Math.max(0, Number(quantity) || 0), email: email, status: 'pending', createdAt: Date.now() };
+  if (!fbUrl) {
+    suggestions[id] = suggestion;
+    localStorage.setItem('wk_suggestions', JSON.stringify(suggestions));
+    return;
+  }
+  fetch(fbUrl + '/suggestions/' + id + '.json', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(suggestion),
+  }).catch(function(){});
+}
+
+function setSuggestionStatus(id, status) {
+  if (!suggestions[id]) return;
+  suggestions[id].status = status;
+  if (!fbUrl) {
+    localStorage.setItem('wk_suggestions', JSON.stringify(suggestions));
+    renderOwnerView();
+    return;
+  }
+  fetch(fbUrl + '/suggestions/' + id + '/status.json', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(status),
+  }).catch(function(){});
+}
+
+function approveSuggestionAction(id, finalQuantity) {
+  var s = suggestions[id];
+  if (!s) return;
+  STOCK.push({ id: 'approved_' + id, name: s.name, image: '', price: 0, metadata: {}, categories: [], quantity: Math.max(0, Number(finalQuantity) || 0), nameRequired: true, is_sample: false });
+  setSuggestionStatus(id, 'approved');
+  renderTiles();
+}
+
+function initSuggestGiftForm() {
+  var container = document.getElementById('suggest-gift-container');
+  if (!container) return;
+  if (CONFIG.websiteType !== 'registry' || !CONFIG.giftSuggestionsEnabled) { container.style.display = 'none'; return; }
+  container.style.display = 'block';
+  container.innerHTML =
+    '<form class="suggest-gift-form" id="suggest-gift-form">' +
+      '<p class="suggest-gift-heading">Suggest a gift</p>' +
+      '<p class="suggest-gift-hint">Don’t see something you’d like to give? Suggest it below - the registry owner reviews every suggestion before it’s added.</p>' +
+      '<input class="editor-add-form-input" type="text" placeholder="Item name" id="sg-name">' +
+      '<input class="editor-add-form-input" type="number" min="0" step="1" placeholder="Suggested quantity" id="sg-qty" value="1">' +
+      '<input class="editor-add-form-input" type="email" placeholder="Your email" id="sg-email">' +
+      '<p class="suggest-gift-email-note">We only check this looks like a real email address - it isn’t verified. Used so the owner can follow up about your suggestion.</p>' +
+      '<p class="suggest-gift-error" id="sg-error" style="display:none"></p>' +
+      '<button type="submit" class="selector-btn selector-btn--active">Submit suggestion</button>' +
+    '</form>';
+  document.getElementById('suggest-gift-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var name = document.getElementById('sg-name').value.trim();
+    var qty = document.getElementById('sg-qty').value;
+    var email = document.getElementById('sg-email').value.trim();
+    var err = document.getElementById('sg-error');
+    if (!name) { err.textContent = 'Add an item name.'; err.style.display = 'block'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'That doesn’t look like a valid email address.'; err.style.display = 'block'; return; }
+    suggestGift(name, qty, email);
+    container.innerHTML = '<div class="suggest-gift-form suggest-gift-form--done"><p class="suggest-gift-thanks">Thanks! Your suggestion has been sent to the registry owner for approval.</p></div>';
+  });
 }
 
 /* ── Guest name prompt ─────────────────────────────────── */
@@ -542,7 +681,7 @@ function openOwnerGate() {
     '<div class="owner-gate-modal" role="dialog" aria-modal="true">' +
       '<form id="owner-gate-form">' +
         '<p class="owner-gate-title">Owner access</p>' +
-        '<p class="owner-gate-body">Enter the owner passcode to view reservations.</p>' +
+        '<p class="owner-gate-body">Enter the owner passcode to view reservations and gift suggestions.</p>' +
         '<input type="password" class="owner-gate-input" id="owner-gate-input" autofocus>' +
         '<p class="owner-gate-error" id="owner-gate-error" style="display:none">Incorrect passcode.</p>' +
         '<div class="owner-gate-actions">' +
@@ -571,7 +710,7 @@ function openOwnerView() {
   document.getElementById('owner-view-container').innerHTML =
     '<div class="modal-backdrop" data-action="close-owner-view"></div>' +
     '<div class="owner-view-modal" role="dialog" aria-modal="true">' +
-      '<div class="owner-view-header"><span class="owner-view-title">Reservations</span>' +
+      '<div class="owner-view-header"><span class="owner-view-title">Registry activity</span>' +
         '<button class="owner-view-close" data-action="close-owner-view">✕</button></div>' +
       '<div class="owner-view-body" id="owner-view-body"></div>' +
     '</div>';
@@ -586,18 +725,42 @@ function renderOwnerView() {
   if (!ownerViewOpen) return;
   var body = document.getElementById('owner-view-body');
   if (!body) return;
-  var withReservations = STOCK.filter(function(i){ return reservations[i.id] && Object.keys(reservations[i.id]).length; });
-  if (!withReservations.length) { body.innerHTML = '<p class="owner-view-empty">No reservations yet.</p>'; return; }
+
   var html = '';
-  withReservations.forEach(function(item) {
-    var byGuest = reservations[item.id];
-    html += '<div class="owner-view-item"><div class="owner-view-item-name">' + esc(item.name) + '</div>';
-    Object.keys(byGuest).forEach(function(guest) {
-      html += '<div class="owner-view-row"><span>' + esc(guest) + ' &times; ' + byGuest[guest] + '</span>' +
-        '<button class="owner-view-release-btn" data-action="release-reservation" data-id="' + item.id + '" data-guest="' + esc(guest) + '">Release</button></div>';
+
+  var pendingIds = Object.keys(suggestions).filter(function(id){ return suggestions[id].status === 'pending'; });
+  if (pendingIds.length) {
+    html += '<p class="owner-view-section-title">Gift suggestions</p>';
+    pendingIds.forEach(function(id) {
+      var s = suggestions[id];
+      html += '<div class="owner-view-item"><div class="owner-view-item-name">' + esc(s.name) + '</div>' +
+        '<div class="owner-view-row"><span>Suggested qty ' + s.quantity + ' &middot; ' + esc(s.email) + '</span></div>' +
+        '<div class="owner-view-row">' +
+          '<input type="number" min="0" step="1" class="suggestion-qty-input" id="qty-' + id + '" value="' + s.quantity + '">' +
+          '<button class="owner-view-release-btn" data-action="approve-suggestion" data-id="' + id + '">Approve</button>' +
+          '<button class="owner-view-release-btn" data-action="reject-suggestion" data-id="' + id + '">Reject</button>' +
+        '</div></div>';
     });
-    html += '</div>';
-  });
+  }
+
+  var withReservations = STOCK.filter(function(i){ return reservations[i.id] && Object.keys(reservations[i.id]).length; });
+  if (withReservations.length) {
+    html += '<p class="owner-view-section-title">Reservations</p>';
+    withReservations.forEach(function(item) {
+      var byGuest = reservations[item.id];
+      html += '<div class="owner-view-item"><div class="owner-view-item-name">' + esc(item.name) + '</div>';
+      Object.keys(byGuest).forEach(function(guest) {
+        html += '<div class="owner-view-row"><span>' + esc(guest) + ' &times; ' + byGuest[guest] + '</span>' +
+          '<button class="owner-view-release-btn" data-action="release-reservation" data-id="' + item.id + '" data-guest="' + esc(guest) + '">Release</button></div>';
+      });
+      html += '</div>';
+    });
+  }
+
+  if (!pendingIds.length && !withReservations.length) {
+    html = '<p class="owner-view-empty">Nothing to review yet.</p>';
+  }
+
   body.innerHTML = html;
 }
 
@@ -1032,6 +1195,12 @@ document.addEventListener('click', function(e) {
   if(a==='close-owner-gate')     closeOwnerGate();
   if(a==='close-owner-view')     closeOwnerView();
   if(a==='release-reservation')  releaseReservation(id, el.dataset.guest);
+  if(a==='approve-suggestion') {
+    var qtyInput = document.getElementById('qty-'+id);
+    var finalQty = qtyInput ? Number(qtyInput.value) || 0 : (suggestions[id] ? suggestions[id].quantity : 0);
+    approveSuggestionAction(id, finalQty);
+  }
+  if(a==='reject-suggestion')    setSuggestionStatus(id, 'rejected');
   if(a==='copy-share-link') {
     try { navigator.clipboard.writeText(window.location.href).catch(function(){}); } catch(e) {}
   }
@@ -1060,10 +1229,56 @@ function logTelemetry() {
   }).catch(function(){});
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+/* ── Guest access gate ──────────────────────────────────── */
+function accessGatePassed() {
+  if (!CONFIG.accessGate || !CONFIG.accessGate.enabled) return true;
+  try { return localStorage.getItem('wk_gate_passed') === '1'; } catch (e) { return false; }
+}
+
+function logGuestAccess(email, handle) {
+  if (!fbUrl) return;
+  var id = 'g_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  fetch(fbUrl + '/guests/' + id + '.json', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, handle: handle, timestamp: Date.now() }),
+  }).catch(function(){});
+}
+
+function renderAccessGate() {
+  document.body.innerHTML =
+    '<div class="access-gate-screen"><form class="access-gate-card" id="access-gate-form">' +
+      '<h1 class="access-gate-title">' + esc(CONFIG.pageTitle || 'This registry is private') + '</h1>' +
+      '<p class="access-gate-body">Enter your details and the registry password to continue.</p>' +
+      '<input class="editor-add-form-input" type="email" placeholder="Your email" id="gate-email" autofocus>' +
+      '<input class="editor-add-form-input" type="text" placeholder="Display name" id="gate-handle">' +
+      '<input class="editor-add-form-input" type="password" placeholder="Registry password" id="gate-password">' +
+      '<p class="owner-gate-error" id="gate-error" style="display:none"></p>' +
+      '<button type="submit" class="selector-btn selector-btn--active">Continue</button>' +
+    '</form></div>';
+
+  document.getElementById('access-gate-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var email = document.getElementById('gate-email').value.trim();
+    var handle = document.getElementById('gate-handle').value.trim();
+    var password = document.getElementById('gate-password').value;
+    var err = document.getElementById('gate-error');
+    function showErr(msg) { err.textContent = msg; err.style.display = 'block'; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('Enter a valid email address.'); return; }
+    if (!handle) { showErr('Pick a display name.'); return; }
+    if (password !== CONFIG.accessGate.password) { showErr('Incorrect password.'); return; }
+    try { localStorage.setItem('wk_gate_passed', '1'); } catch (e2) {}
+    localStorage.setItem('wk_guestName', handle);
+    logGuestAccess(email, handle);
+    window.location.reload();
+  });
+}
+
+function initApp() {
   initReservations();
+  initSuggestions();
   logTelemetry();
-  renderTiles(); renderCart(); initSearch(); updateFabs();
+  renderTiles(); renderCart(); initSearch(); updateFabs(); initSuggestGiftForm();
   var hasCartWidget = Object.values(CONFIG.widgets||{}).some(function(w){ return w && w.content==='Cart'; });
   var hasHelpWidget = Object.values(CONFIG.widgets||{}).some(function(w){ return w && w.content==='Help'; });
   var isRegistry = CONFIG.websiteType === 'registry';
@@ -1074,6 +1289,10 @@ document.addEventListener('DOMContentLoaded', function() {
   var shareFab = document.getElementById('share-fab');
   if (shareFab && isRegistry) shareFab.style.display='flex';
   if (window.location.hash === '#owner') openOwnerGate();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (accessGatePassed()) initApp(); else renderAccessGate();
 });
 `;
   /* eslint-enable no-useless-escape */
@@ -1147,6 +1366,7 @@ ${navbar}
   ${pageHeader}
   <div id="search-wrap" class="store-search-wrap" style="display:none"></div>
   <div id="tile-grid"></div>
+  <div id="suggest-gift-container" style="display:none"></div>
   <footer class="app-footer">
     <span class="footer-text">Powered by</span>
     <span class="footer-brand">Winklr</span>

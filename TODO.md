@@ -42,8 +42,12 @@ README for a dated history of what shipped when.
 - [x] Reservations are keyed per guest name (`{ [itemId]: { [guestName]: quantity } }`), not just a raw count — a guest can only add to or remove *their own* reservation, not anyone else's
 - [x] Per-item `nameRequired` toggle — when on (default), reserving prompts the guest for their name before it's recorded
 - [x] Owner view of reservations by name — visible inline in the Items panel (edit mode) and via a hidden `#owner` view + passcode on the exported static site, with a "Release" action per reservation
+- [x] Reservation quantity cap enforced in state (not just hidden by the UI) — a guest can no longer push total reservations past an item's needed quantity
+- [x] Gift Suggestions — guests submit a name/quantity/email; owner approves (with an editable final quantity) or rejects from the Items panel or the exported site's owner view
+- [x] Guest Access gate — optional email + display name + shared password screen in front of the whole registry, toggleable per registry; owner can generate a random password
 - [ ] "Mark as purchased" action in edit mode — registry owner can permanently mark items fulfilled (removes from public reservation pool)
 - [ ] RSVP / message popup — name + message field (same Contact component as Portfolio, re-used)
+- [ ] Real email verification for suggestions/access gate (currently format-validated only) — would need Firebase Auth email-link sign-in or similar; a real backend dependency, not built yet
 
 ### Trust & safety
 - [x] `is_sample` flag on demo/placeholder items — stripped out of JSON export, the shareable link, and the exported static site, so sample data can never leak into a real deployment; visible "Sample" badge + one-click removal in the Items panel

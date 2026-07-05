@@ -26,6 +26,11 @@ export function encodeConfigToHash(state) {
     integrations:    state.integrations,
     groupByCategory: state.groupByCategory,
     categoryConfig:  state.categoryConfig,
+    giftSuggestionsEnabled: state.giftSuggestionsEnabled,
+    // accessGate is deliberately NOT included here: this link IS the thing the
+    // gate is meant to require a separately-shared password alongside, so
+    // baking the password into the same link would defeat it entirely. It's
+    // only carried through JSON export/import and the static site export.
   };
   return HASH_PREFIX + toBase64(JSON.stringify(config));
 }
@@ -47,6 +52,7 @@ export function decodeConfigFromHash(hash) {
       integrations:    config.integrations    ?? null,
       groupByCategory: config.groupByCategory ?? null,
       categoryConfig:  config.categoryConfig  ?? null,
+      giftSuggestionsEnabled: config.giftSuggestionsEnabled ?? null,
     };
   } catch {
     return null;

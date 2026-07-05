@@ -16,6 +16,14 @@ const WIDGET_SLOTS_DEFAULT = {
 const THEME_DEFAULT        = { palette: "dark", primaryColor: "#316dca", custom: {} };
 const BRAND_DEFAULT        = { logo: null, currencyPrefix: '$', pageTitle: '', pageSubtitle: '' };
 const INTEGRATIONS_DEFAULT = { stripePublishableKey: "", mapboxToken: "", firebaseDatabaseUrl: "", ownerPasscode: "" };
+const ACCESS_GATE_DEFAULT  = { enabled: false, password: "" };
+
+const WORDS = ["Otter", "Comet", "Maple", "Willow", "Pixel", "Harbor", "Lumen", "Cedar", "Coral", "Ember", "Aspen", "Nova"];
+export function generateAccessPassword() {
+  const word = WORDS[Math.floor(Math.random() * WORDS.length)];
+  const num = Math.floor(100 + Math.random() * 900);
+  return `${word}${num}`;
+}
 
 const AppContextProvider = ({ children }) => {
   const [widgets, setWidgets]         = useLocalStorage("winklr_widgetSlots", WIDGET_SLOTS_DEFAULT);
@@ -36,6 +44,10 @@ const AppContextProvider = ({ children }) => {
   const [groupByCategory, setGroupByCategory] = useLocalStorage("winklr_groupByCategory", true);
   const [categoryConfig, setCategoryConfig]   = useLocalStorage("winklr_categoryConfig", {});
   const [decals, setDecals]                   = useLocalStorage("winklr_decals", []);
+  const [suggestions, setSuggestions]         = useLocalStorage("winklr_suggestions", {});
+  const [giftSuggestionsEnabled, setGiftSuggestionsEnabled] = useLocalStorage("winklr_giftSuggestionsEnabled", true);
+  const [accessGate, setAccessGate]           = useLocalStorage("winklr_accessGate", ACCESS_GATE_DEFAULT);
+  const [gatePassed, setGatePassed]           = useLocalStorage("winklr_gatePassed", false);
   const [searchQuery, setSearchQuery]       = useState("");
   const [cartOpen, setCartOpen]             = useState(false);
   const [helpOpen, setHelpOpen]             = useState(false);
@@ -58,6 +70,7 @@ const AppContextProvider = ({ children }) => {
     if (config.integrations)    setIntegrations(config.integrations);
     if (config.groupByCategory != null) setGroupByCategory(config.groupByCategory);
     if (config.categoryConfig)  setCategoryConfig(config.categoryConfig);
+    if (config.giftSuggestionsEnabled != null) setGiftSuggestionsEnabled(config.giftSuggestionsEnabled);
     window.history.replaceState(null, "", window.location.pathname);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -186,8 +199,25 @@ const AppContextProvider = ({ children }) => {
 
   const reserveItem = async (itemId, delta = 1, name) => {
     const guest = (name ?? guestName ?? '').trim() || 'Anonymous';
-    const current = (reservations[itemId] || {})[guest] || 0;
-    const next = Math.max(0, current + delta);
+    const itemReservations = reservations[itemId] || {};
+    const current = itemReservations[guest] || 0;
+    let next = Math.max(0, current + delta);
+
+    // Cap the total reserved across all guests at the item's needed quantity
+    // (0 = unlimited). This was previously only enforced by hiding the "+"
+    // button in the UI, not in state - a guest reservation could exceed the
+    // requested quantity if triggered any other way.
+    if (delta > 0) {
+      const item = stockList.find((i) => i.id === itemId);
+      const needed = item?.quantity || 0;
+      if (needed > 0) {
+        const othersTotal = Object.entries(itemReservations)
+          .reduce((sum, [g, q]) => (g === guest ? sum : sum + q), 0);
+        const maxForGuest = Math.max(0, needed - othersTotal);
+        next = Math.min(next, maxForGuest);
+        if (next === current) return;
+      }
+    }
 
     const applyLocal = () =>
       setReservations((prev) => {
@@ -211,6 +241,102 @@ const AppContextProvider = ({ children }) => {
       applyLocal();
     }
     // State updated by the SSE event Firebase sends back
+  };
+
+  // Keep gift suggestions in sync with Firebase when configured. Falls back
+  // to localStorage-only (visible on this device only) otherwise.
+  // Shape: { [suggestionId]: { name, quantity, email, status, createdAt } }
+  useEffect(() => {
+    if (!firebaseUrl) return;
+
+    const es = new EventSource(`${firebaseUrl}/suggestions.json`);
+
+    const applyAtPath = (path, data) => {
+      const segments = path.split('/').filter(Boolean);
+      setSuggestions((prev) => {
+        if (segments.length === 0) {
+          return (data && typeof data === 'object') ? data : {};
+        }
+        const [id, ...rest] = segments;
+        const next = { ...prev };
+        if (rest.length === 0) {
+          if (data) next[id] = data; else delete next[id];
+        } else {
+          next[id] = { ...(next[id] || {}), [rest[0]]: data };
+        }
+        return next;
+      });
+    };
+
+    es.addEventListener('put', (e) => {
+      const { path, data } = JSON.parse(e.data);
+      applyAtPath(path, data);
+    });
+    es.addEventListener('patch', (e) => {
+      const { path, data } = JSON.parse(e.data);
+      if (!data || typeof data !== 'object') return;
+      Object.entries(data).forEach(([key, val]) => {
+        applyAtPath(path === '/' ? `/${key}` : `${path}/${key}`, val);
+      });
+    });
+
+    return () => es.close();
+  }, [firebaseUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const suggestGift = async ({ name, quantity, email }) => {
+    const id = crypto.randomUUID();
+    const suggestion = {
+      name: (name || '').trim(),
+      quantity: Math.max(0, Number(quantity) || 0),
+      email: (email || '').trim(),
+      status: 'pending',
+      createdAt: Date.now(),
+    };
+
+    const applyLocal = () => setSuggestions((prev) => ({ ...prev, [id]: suggestion }));
+
+    if (!firebaseUrl) { applyLocal(); return; }
+    try {
+      await fetch(`${firebaseUrl}/suggestions/${id}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(suggestion),
+      });
+    } catch {
+      applyLocal();
+    }
+  };
+
+  const setSuggestionStatus = async (id, status) => {
+    setSuggestions((prev) => (prev[id] ? { ...prev, [id]: { ...prev[id], status } } : prev));
+    if (!firebaseUrl) return;
+    try {
+      await fetch(`${firebaseUrl}/suggestions/${id}/status.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(status),
+      });
+    } catch {
+      // local state already updated above
+    }
+  };
+
+  const approveSuggestion = (id, finalQuantity) => {
+    const suggestion = suggestions[id];
+    if (!suggestion) return;
+    addStockItem({
+      name: suggestion.name,
+      quantity: Math.max(0, Number(finalQuantity) || 0),
+      nameRequired: true,
+    });
+    setSuggestionStatus(id, 'approved');
+  };
+
+  const rejectSuggestion = (id) => setSuggestionStatus(id, 'rejected');
+
+  const passAccessGate = (handle) => {
+    setGatePassed(true);
+    if (handle?.trim()) setGuestName(handle.trim());
   };
 
   const updateCategoryConfig = (category, changes) => {
@@ -269,6 +395,8 @@ const AppContextProvider = ({ children }) => {
     if (config.categoryConfig  != null) setCategoryConfig(config.categoryConfig);
     if (config.brand         != null) setBrand(config.brand);
     if (config.decals        != null) setDecals(config.decals);
+    if (config.giftSuggestionsEnabled != null) setGiftSuggestionsEnabled(config.giftSuggestionsEnabled);
+    if (config.accessGate    != null) setAccessGate((prev) => ({ ...prev, ...config.accessGate }));
   };
 
   const setThemeCustom = (variable, value) => {
@@ -280,7 +408,7 @@ const AppContextProvider = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
-        state: { widgets, viewMode, stockList, tileConfig, layoutConfig, layoutAlign, searchAlign, theme, customTheme, cart, brand, integrations, websiteType, reservations, guestName, searchQuery, groupByCategory, categoryConfig, decals },
+        state: { widgets, viewMode, stockList, tileConfig, layoutConfig, layoutAlign, searchAlign, theme, customTheme, cart, brand, integrations, websiteType, reservations, guestName, searchQuery, groupByCategory, categoryConfig, decals, suggestions, giftSuggestionsEnabled, accessGate, gatePassed },
         setWidget,
         clearWidget,
         toggleViewMode,
@@ -308,6 +436,12 @@ const AppContextProvider = ({ children }) => {
         addDecal,
         updateDecal,
         removeDecal,
+        suggestGift,
+        approveSuggestion,
+        rejectSuggestion,
+        setGiftSuggestionsEnabled,
+        setAccessGate,
+        passAccessGate,
         setThemeCustom,
         cartOpen, setCartOpen,
         helpOpen, setHelpOpen,

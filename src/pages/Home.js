@@ -15,6 +15,9 @@ import WebsiteTypeSelector from "../components/WebsiteTypeSelector";
 import CategoryConfig from "../components/CategoryConfig";
 import DecalsPanel from "../components/decals/DecalsPanel";
 import DecalsLayer from "../components/decals/DecalsLayer";
+import SuggestionsPanel from "../components/suggestions/SuggestionsPanel";
+import SuggestGiftForm from "../components/suggestions/SuggestGiftForm";
+import AccessGatePanel from "../components/access/AccessGatePanel";
 
 const SEARCH_MARGIN_CSS = { left: "0", center: "0 auto", right: "0 0 0 auto" };
 
@@ -149,6 +152,7 @@ export default function Home() {
     : state.stockList;
 
   const hasCategoryItems = state.stockList.some((i) => i.categories?.length > 0);
+  const isRegistry = state.websiteType === 'registry';
 
   return (
     <div className="Home">
@@ -164,12 +168,24 @@ export default function Home() {
             <CollapsibleSection title="Website Type" storageKey="websiteType" defaultOpen={true}>
               <WebsiteTypeSelector />
             </CollapsibleSection>
+            <CollapsibleSection title="Guest Access" storageKey="accessGate" defaultOpen={false}>
+              <AccessGatePanel />
+            </CollapsibleSection>
             <CollapsibleSection title="Stock List" storageKey="stockLoader" defaultOpen={true}>
               <StockListLoader />
             </CollapsibleSection>
             <CollapsibleSection title={`Items${state.stockList.length ? ` (${state.stockList.length})` : ''}`} storageKey="stockEditor" defaultOpen={true}>
               <StockListEditor />
             </CollapsibleSection>
+            {isRegistry && (
+              <CollapsibleSection
+                title={`Gift Suggestions${Object.values(state.suggestions || {}).some((s) => s.status === 'pending') ? ' •' : ''}`}
+                storageKey="suggestions"
+                defaultOpen={false}
+              >
+                <SuggestionsPanel />
+              </CollapsibleSection>
+            )}
             <CollapsibleSection title="Tile Style" storageKey="tileConfig" defaultOpen={false}>
               <TileConfigSelector />
             </CollapsibleSection>
@@ -246,6 +262,8 @@ export default function Home() {
         ) : (
           <p className="search-no-results">No items match "{state.searchQuery}"</p>
         )}
+
+        {isRegistry && state.giftSuggestionsEnabled && <SuggestGiftForm />}
 
         <Footer />
       </div>

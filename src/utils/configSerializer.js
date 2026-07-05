@@ -17,6 +17,8 @@ export function exportConfig(state) {
     categoryConfig:  state.categoryConfig,
     brand:           state.brand,
     decals:          state.decals,
+    giftSuggestionsEnabled: state.giftSuggestionsEnabled,
+    accessGate:      state.accessGate,
   };
 
   const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
@@ -64,6 +66,8 @@ export function parseConfigFile(file) {
         categoryConfig:  raw.categoryConfig  ?? null,
         brand:           raw.brand           ?? null,
         decals:          Array.isArray(raw.decals) ? raw.decals : null,
+        giftSuggestionsEnabled: raw.giftSuggestionsEnabled ?? null,
+        accessGate:      raw.accessGate       ?? null,
       });
     };
 

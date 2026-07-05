@@ -105,6 +105,28 @@ See **[TODO.md](TODO.md)** for the full, up-to-date public roadmap.
 
 ## Changelog
 
+### [0.6.0] — 2026-07-05
+
+#### Gift suggestions
+- New **Gift Suggestions** panel (registry mode) — guests submit an item name, a suggested quantity, and an email address via a form on the storefront; the owner reviews pending suggestions in Edit Mode (or via the exported site's owner view) and can Approve (adding it to the registry with an owner-editable quantity) or Reject
+- Synced via the same optional Firebase Realtime Database as reservations, with a localStorage-only fallback (see caveat below)
+- Email is format-validated only, not verified - the UI is explicit about this rather than implying real verification
+- On the exported static site, approving a suggestion adds it to the live view immediately for that browser session, but this does not persist across reloads or to other visitors - the owner needs to add it for real in the live editor and re-export to make it permanent
+
+#### Guest access gate
+- New **Guest Access** toggle - requires anyone visiting the registry (live app or exported site) to enter an email, a display name, and a shared password before seeing anything, including the Edit Mode toggle
+- Owner sets the password manually or generates a random one; display name doubles as the reservation guest name so guests aren't asked twice
+- Deliberately excluded from the "Copy link" shareable URL, since that link is the exact thing the gate is meant to require a separately-shared password alongside - baking the password into the same link would defeat it. Only works via JSON export/import and the exported static site
+- This is a spam/casual-access deterrent, not real security and **not DDoS protection** - documented as such in the panel itself
+
+#### Correctness fix
+- Reservation quantity cap is now enforced in state (both the live app and the exported site), not just by hiding the "+" button in the UI - a guest could previously reserve past an item's needed quantity if triggered any other way. Found while writing the new reservation test suite
+
+#### Testing
+- Added `src/__tests__/reservations.test.js` - real (non-mocked) tests against `appContext`'s reservation logic: unlimited items, quantity-capped items, multiple guests sharing a capped item, a guest unable to decrement another guest's reservation, and the anonymous-guest fallback
+- Fixed `App.test.js`, which was broken on two counts: it asserted text from the original create-react-app template that no longer exists, and it rendered `<App />` without the required `AppContextProvider` ancestor
+- Added a `crypto.randomUUID` polyfill in `setupTests.js` for jsdom environments where it isn't available
+
 ### [0.5.0] — 2026-07-05
 
 #### Decals

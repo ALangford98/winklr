@@ -1,0 +1,66 @@
+/* ── Owner-facing Access panel ────────────────────────── */
+.access-gate-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.access-gate-caveat {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.access-gate-password-row {
+  display: flex;
+  gap: 6px;
+}
+
+.access-gate-password-row .editor-add-form-input {
+  flex: 1;
+}
+
+.access-gate-password-row .selector-btn {
+  width: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── Guest-facing full-page gate ──────────────────────── */
+.access-gate-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-app);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.access-gate-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.access-gate-title {
+  margin: 0 0 2px;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  font-family: var(--font-heading, inherit);
+}
+
+.access-gate-body {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+}

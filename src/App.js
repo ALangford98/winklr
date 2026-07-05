@@ -6,6 +6,8 @@ import './styles/layouts.css';
 import './styles/cart.css';
 import './styles/checkout.css';
 import './styles/admin.css';
+import './styles/suggestions.css';
+import './styles/access.css';
 
 import React, { useContext, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -16,6 +18,7 @@ import CartDrawer, { CartIcon } from './components/cart/CartDrawer';
 import HelpModal from './components/HelpModal';
 import CheckoutModal from './components/checkout/CheckoutModal';
 import OwnerGateModal from './components/OwnerGateModal';
+import AccessGateScreen from './components/access/AccessGateScreen';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
 import { encodeConfigToHash } from './utils/shareableUrl';
@@ -82,6 +85,10 @@ function StoreApp() {
     setGateOpen(false);
     toggleViewMode();
   };
+
+  if (state.accessGate?.enabled && !state.gatePassed) {
+    return <AccessGateScreen />;
+  }
 
   return (
     <div className="App">
