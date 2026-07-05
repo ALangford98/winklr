@@ -1,0 +1,133 @@
+[
+  {
+    "id": "item-001",
+    "name": "KitchenAid Stand Mixer",
+    "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80",
+    "price": 449.99,
+    "categories": ["Kitchen"],
+    "quantity": 1,
+    "metadata": {
+      "colour": "Empire Red",
+      "model": "KSM150PS"
+    }
+  },
+  {
+    "id": "item-002",
+    "name": "Cast Iron Skillet Set",
+    "image": "https://images.unsplash.com/photo-1585515320310-259814833e62?w=400&q=80",
+    "price": 89.99,
+    "categories": ["Kitchen"],
+    "quantity": 1,
+    "metadata": {
+      "brand": "Lodge",
+      "sizes": "8\", 10\", 12\""
+    }
+  },
+  {
+    "id": "item-003",
+    "name": "Espresso Machine",
+    "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80",
+    "price": 299.00,
+    "categories": ["Kitchen"],
+    "quantity": 1,
+    "metadata": {
+      "brand": "De'Longhi",
+      "model": "EC685M"
+    }
+  },
+  {
+    "id": "item-004",
+    "name": "Linen Duvet Cover — Queen",
+    "image": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&q=80",
+    "price": 135.00,
+    "categories": ["Bedroom"],
+    "quantity": 1,
+    "metadata": {
+      "colour": "Stone",
+      "size": "Queen"
+    }
+  },
+  {
+    "id": "item-005",
+    "name": "Pillow Set (Set of 4)",
+    "image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&q=80",
+    "price": 79.00,
+    "categories": ["Bedroom"],
+    "quantity": 2,
+    "metadata": {
+      "fill": "Down alternative",
+      "firmness": "Medium"
+    }
+  },
+  {
+    "id": "item-006",
+    "name": "Blackout Curtains (Pair)",
+    "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
+    "price": 64.00,
+    "categories": ["Bedroom"],
+    "quantity": 3,
+    "metadata": {
+      "colour": "Charcoal",
+      "size": "52\" x 84\""
+    }
+  },
+  {
+    "id": "item-007",
+    "name": "Fluffy Bath Towels (Set of 6)",
+    "image": "https://images.unsplash.com/photo-1600369671236-e74521d4b6ad?w=400&q=80",
+    "price": 55.00,
+    "categories": ["Bathroom"],
+    "quantity": 2,
+    "metadata": {
+      "colour": "White",
+      "material": "Egyptian cotton"
+    }
+  },
+  {
+    "id": "item-008",
+    "name": "Bamboo Bath Mat",
+    "image": "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=400&q=80",
+    "price": 34.00,
+    "categories": ["Bathroom"],
+    "quantity": 1,
+    "metadata": {
+      "material": "Bamboo",
+      "size": "17\" x 24\""
+    }
+  },
+  {
+    "id": "item-009",
+    "name": "Honeymoon Fund",
+    "image": "https://images.unsplash.com/photo-1488085061387-422e29b40080?w=400&q=80",
+    "price": 50.00,
+    "categories": ["Experiences"],
+    "quantity": 0,
+    "metadata": {
+      "destination": "Amalfi Coast",
+      "note": "Any amount welcome!"
+    }
+  },
+  {
+    "id": "item-010",
+    "name": "Cooking Class for Two",
+    "image": "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=400&q=80",
+    "price": 120.00,
+    "categories": ["Experiences"],
+    "quantity": 1,
+    "metadata": {
+      "location": "Local",
+      "duration": "3 hours"
+    }
+  },
+  {
+    "id": "item-011",
+    "name": "Indoor Plant Trio",
+    "image": "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=400&q=80",
+    "price": 45.00,
+    "categories": [],
+    "quantity": 1,
+    "metadata": {
+      "includes": "Monstera, Pothos, Snake plant"
+    }
+  }
+]
