@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { AppContext } from "./appContext";
+import { buildDemoItems } from "../data/demoItems";
 
 function TileGridIcon() {
   return (
@@ -13,7 +14,7 @@ function TileGridIcon() {
 }
 
 export default function EmptyState() {
-  const { state } = useContext(AppContext);
+  const { state, setStockList } = useContext(AppContext);
   const isEditMode = state.viewMode;
 
   return (
@@ -27,6 +28,11 @@ export default function EmptyState() {
           ? "Upload a .json, .csv, or .xlsx file using the panel on the left."
           : "Switch to Edit Mode to load a stock list."}
       </p>
+      {isEditMode && (
+        <button className="empty-state-demo-btn" onClick={() => setStockList(buildDemoItems())}>
+          Load sample items
+        </button>
+      )}
     </div>
   );
 }

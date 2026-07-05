@@ -5,7 +5,7 @@ const SERVICES = [
   {
     id:          'firebaseDatabaseUrl',
     label:       'Firebase Realtime Database',
-    description: 'Enables live shared reservation state in Registry mode — guests see each other\'s reservations in real time.',
+    description: 'Enables live shared reservation state in Registry mode: guests see each other\'s reservations in real time.',
     placeholder: 'https://your-project-default-rtdb.firebaseio.com',
     docsHref:    'https://console.firebase.google.com/',
     isPublicUrl: true,
@@ -18,7 +18,7 @@ const SERVICES = [
     placeholder: 'pk_live_… or pk_test_…',
     docsHref:    'https://dashboard.stripe.com/apikeys',
     isSecret:    (v) => v.startsWith('sk_'),
-    secretWarn:  'This looks like a Stripe secret key (starts with sk_). Only paste publishable keys (pk_) here — secret keys must never leave your server.',
+    secretWarn:  'This looks like a Stripe secret key (starts with sk_). Only paste publishable keys (pk_) here - secret keys must never leave your server.',
   },
   {
     id:          'mapboxToken',
@@ -28,6 +28,12 @@ const SERVICES = [
     docsHref:    'https://account.mapbox.com/access-tokens/',
     isSecret:    (v) => v.startsWith('sk.'),
     secretWarn:  'This looks like a Mapbox secret token (starts with sk.). Use a public access token instead.',
+  },
+  {
+    id:          'ownerPasscode',
+    label:       'Owner passcode',
+    description: 'Optional. When set, switching into Edit Mode (and the owner view in an exported site) asks for this passcode first. This only stops casual guests from wandering into owner controls - it is checked in the browser, not on a server, so do not reuse a password you care about and do not treat it as real security.',
+    placeholder: 'e.g. a short word or phrase',
   },
 ];
 
@@ -96,7 +102,7 @@ const IntegrationsPanel = () => {
     <div className="integrations-panel">
       <p className="integration-panel-notice">
         Keys entered here are stored in your browser and included in exported config files.
-        Only use <strong>public / publishable</strong> keys — never paste secret keys.
+        Only use <strong>public / publishable</strong> keys - never paste secret keys.
       </p>
       {SERVICES.map((svc) => (
         <ServiceRow

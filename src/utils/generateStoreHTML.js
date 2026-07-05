@@ -1,8 +1,12 @@
+import { TELEMETRY_FIREBASE_URL } from "../config/telemetry";
+import { googleFontFamilyFor } from "../theme/fonts";
+
 const CSS_VARS_LIST = [
   '--bg-app', '--bg-card', '--bg-nav', '--bg-raised', '--bg-input',
   '--text-primary', '--text-secondary', '--text-muted', '--text-meta', '--text-on-nav',
   '--accent-primary', '--accent-subtle', '--accent-success', '--accent-danger',
   '--border-subtle', '--border-hover',
+  '--font-body', '--font-heading', '--font-nav',
 ];
 
 function safeJSON(data) {
@@ -35,7 +39,13 @@ async function fetchAsDataUrl(url) {
 function buildThemeVarsCSS() {
   const computed = getComputedStyle(document.documentElement);
   return CSS_VARS_LIST
-    .map((v) => `  ${v}: ${computed.getPropertyValue(v).trim()};`)
+    .map((v) => {
+      const val = computed.getPropertyValue(v).trim();
+      // Skip unset vars entirely - a declared-but-empty custom property makes
+      // var(--x, fallback) resolve to invalid rather than using the fallback.
+      return val ? `  ${v}: ${val};` : null;
+    })
+    .filter(Boolean)
     .join('\n');
 }
 
@@ -44,12 +54,12 @@ function buildThemeVarsCSS() {
 function buildStaticCSS() {
   return `
 *, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; background: var(--bg-app); color: var(--text-primary); font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; display: flex; flex-direction: column; }
+body { margin: 0; min-height: 100vh; background: var(--bg-app); color: var(--text-primary); font-family: var(--font-body, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif); font-size: 16px; display: flex; flex-direction: column; }
 a { text-decoration: none; color: inherit; }
 button { font-family: inherit; }
 
 /* Navbar */
-.Navbar { display: flex; background: var(--bg-nav); height: 56px; align-items: stretch; position: sticky; top: 0; z-index: 10; }
+.Navbar { display: flex; background: var(--bg-nav); height: 56px; align-items: stretch; position: sticky; top: 0; z-index: 10; font-family: var(--font-nav, inherit); }
 .navbar-brand { flex-shrink: 0; padding: 0 16px; display: flex; align-items: center; border-right: 1px solid rgba(255,255,255,0.08); }
 .navbar-brand-logo { height: 30px; width: auto; display: block; }
 .navbar-brand-text { font-size: 17px; font-weight: 700; color: var(--text-on-nav); }
@@ -65,8 +75,10 @@ button { font-family: inherit; }
 .navbar-dropdown { background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-primary); font-size: 13px; padding: 4px 8px; max-width: 120px; }
 
 /* App layout */
-.app-content { flex: 1; display: flex; flex-direction: column; }
-.store-search-wrap { position: relative; padding: 16px 24px 0; }
+.app-content { flex: 1; display: flex; flex-direction: column; position: relative; }
+.decal { position: absolute; z-index: 5; pointer-events: none; }
+.decal img { width: 100%; height: auto; display: block; }
+.store-search-wrap { position: relative; padding: 16px 24px 0; max-width: 560px; box-sizing: border-box; }
 .store-search-input { width: 100%; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-size: 14px; padding: 8px 36px 8px 14px; outline: none; transition: border-color 0.15s; font-family: inherit; }
 .store-search-input:focus { border-color: var(--accent-primary); }
 .store-search-input::placeholder { color: var(--text-muted); }
@@ -74,13 +86,30 @@ button { font-family: inherit; }
 .store-search-clear:hover { color: var(--text-primary); }
 .search-no-results { flex: 1; text-align: center; padding: 60px 24px; font-size: 13px; color: var(--text-muted); }
 
+/* Page header */
+.page-header { padding: 40px 24px 8px; display: flex; flex-direction: column; gap: 8px; }
+.page-header-title { margin: 0; font-size: 28px; font-weight: 700; color: var(--text-primary); line-height: 1.15; font-family: var(--font-heading, inherit); }
+.page-header-subtitle { margin: 0; font-size: 15px; color: var(--text-secondary); line-height: 1.5; max-width: 560px; }
+@media (max-width: 768px) {
+  .page-header { padding: 24px 16px 4px; }
+  .page-header-title { font-size: 22px; }
+}
+
+/* Category grouping */
+.category-groups { display: flex; flex-direction: column; gap: 0; }
+.category-section { padding: 0; }
+.category-section-header { padding: 28px 24px 10px; display: flex; flex-direction: column; gap: 6px; }
+.category-section-title { margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-primary); line-height: 1; font-family: var(--font-heading, inherit); }
+.category-section-desc { margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.5; max-width: 600px; font-weight: 400; text-transform: none; letter-spacing: 0; }
+.category-divider { height: 1px; background: var(--border-subtle); margin: 8px 24px 0; }
+
 /* Layout */
 .layout { flex: 1; padding: 24px; min-width: 0; }
-.layout--grid { display: flex; flex-wrap: wrap; gap: 16px; align-content: flex-start; }
-.layout--strip { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 16px; align-items: flex-start; padding-bottom: 20px; }
+.layout--grid { display: flex; flex-wrap: wrap; gap: 16px; align-content: flex-start; justify-content: center; }
+.layout--strip { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 16px; align-items: flex-start; justify-content: center; padding-bottom: 20px; }
 .layout--strip::-webkit-scrollbar { height: 5px; }
 .layout--strip::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
-.layout--stacked { display: flex; flex-direction: column; gap: 10px; max-width: 860px; }
+.layout--stacked { display: flex; flex-direction: column; gap: 10px; max-width: 860px; margin: 0 auto; }
 .layout--stacked .tile { width: 100%; flex-direction: row; }
 .layout--stacked .tile-img-wrap, .layout--stacked .tile-img-wrap--sm { width: 80px; min-width: 80px; height: 80px; }
 .layout--stacked .tile--detailed .tile-img-wrap { width: 100px; min-width: 100px; height: 100px; }
@@ -91,7 +120,7 @@ button { font-family: inherit; }
 .layout-featured-slot .tile-name { font-size: 22px !important; font-weight: 700 !important; }
 .layout-featured-slot .tile-price { font-size: 17px !important; }
 .layout-featured-slot .tile-meta { margin-top: 10px; }
-.layout-featured-grid { display: flex; flex-wrap: wrap; gap: 16px; align-content: flex-start; }
+.layout-featured-grid { display: flex; flex-wrap: wrap; gap: 16px; align-content: flex-start; justify-content: center; }
 
 /* Tiles */
 .tile { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px; overflow: hidden; display: flex; color: var(--text-primary); }
@@ -100,6 +129,7 @@ button { font-family: inherit; }
 .tile--compact { flex-direction: row; align-items: center; width: 220px; height: 60px; }
 .tile-img-wrap--sm { width: 60px; height: 60px; flex-shrink: 0; }
 .tile--compact .tile-body { padding: 0 12px 0 10px; display: flex; flex-direction: column; gap: 2px; overflow: hidden; flex: 1; }
+.tile--compact .tile-name, .tile--standard .tile-name, .tile--detailed .tile-name { font-family: var(--font-heading, inherit); }
 .tile--compact .tile-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tile--compact .tile-price { font-size: 12px; color: var(--text-secondary); }
 .tile--standard { flex-direction: column; width: 180px; }
@@ -122,6 +152,45 @@ button { font-family: inherit; }
 .tile-add-btn--reserved:hover { opacity: 0.82; background: var(--accent-success); color: #fff; }
 .tile-add-btn--compact { padding: 0; width: 26px; height: 26px; font-size: 18px; font-weight: 400; border-radius: 50%; flex-shrink: 0; margin-right: 8px; display: flex; align-items: center; justify-content: center; }
 .tile--standard .tile-add-btn, .tile--detailed .tile-add-btn { margin-top: 6px; width: 100%; }
+.tile-reserve-wrap { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.tile-reserve-label { font-size: 11px; color: var(--text-secondary); text-align: center; }
+.tile-reserve-controls { display: flex; align-items: center; gap: 6px; }
+.tile-reserve-controls .tile-add-btn { flex: 1; }
+.tile-reserve-step { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 6px; background: var(--bg-raised); border: 1px solid var(--border-subtle); color: var(--text-primary); font-size: 16px; cursor: pointer; transition: border-color 0.15s; }
+.tile-reserve-step:hover { border-color: var(--accent-primary); }
+.tile-reserve-step--add { background: var(--accent-subtle); border-color: var(--accent-primary); color: var(--accent-primary); }
+.tile-reserve-compact { display: flex; align-items: center; gap: 4px; }
+.tile-reserve-compact .tile-reserve-step { width: 24px; height: 24px; font-size: 14px; border-radius: 4px; }
+.tile-reserve-count { font-size: 11px; color: var(--text-secondary); min-width: 20px; text-align: center; }
+.tile-reserve-full { font-size: 13px; color: var(--accent-success); font-weight: 600; }
+
+/* Shared modal backdrop */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 299; }
+
+/* Name prompt / owner gate */
+.owner-gate-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(320px, calc(100vw - 32px)); background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; z-index: 300; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+.owner-gate-modal form { display: flex; flex-direction: column; gap: 10px; }
+.owner-gate-title { margin: 0; font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.owner-gate-body { margin: 0 0 4px; font-size: 13px; color: var(--text-secondary); }
+.owner-gate-error { margin: 0; font-size: 12px; color: var(--accent-danger); }
+.owner-gate-actions { display: flex; gap: 8px; margin-top: 4px; }
+.owner-gate-actions .selector-btn { width: auto; flex: 1; }
+.owner-gate-input { width: 100%; box-sizing: border-box; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 6px; color: var(--text-primary); font-size: 14px; padding: 8px 10px; font-family: inherit; outline: none; }
+.owner-gate-input:focus { border-color: var(--accent-primary); }
+
+/* Owner view panel */
+.owner-view-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 64px); background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; z-index: 300; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+.owner-view-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0; }
+.owner-view-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.owner-view-close { background: none; border: none; color: var(--text-muted); font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: 4px; line-height: 1; }
+.owner-view-close:hover { color: var(--text-primary); }
+.owner-view-body { overflow-y: auto; padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 14px; }
+.owner-view-item { border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; }
+.owner-view-item-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.owner-view-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+.owner-view-release-btn { background: none; border: 1px solid var(--border-subtle); color: var(--text-secondary); border-radius: 4px; font-size: 11px; padding: 2px 6px; cursor: pointer; font-family: inherit; }
+.owner-view-release-btn:hover { border-color: var(--accent-danger); color: var(--accent-danger); }
+.owner-view-empty { font-size: 13px; color: var(--text-muted); text-align: center; padding: 20px 0; }
 
 /* Cart drawer */
 .cart-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 199; display: none; }
@@ -317,15 +386,25 @@ function buildNavbarHTML(state, logoDataUrl) {
 // ── Vanilla JS storefront ──────────────────────────────────────────────────
 
 function buildScriptContent(state) {
-  const stockJson  = safeJSON(state.stockList);
+  const stockJson  = safeJSON((state.stockList || []).filter((item) => !item.is_sample));
   const configJson = safeJSON({
     websiteType:        state.websiteType,
     firebaseDatabaseUrl: state.integrations?.firebaseDatabaseUrl?.trim().replace(/\/$/, '') || null,
     tileConfig:         state.tileConfig,
     layoutConfig:       state.layoutConfig,
+    layoutAlign:        state.layoutAlign || 'center',
+    searchAlign:        state.searchAlign || 'center',
     widgets:            state.widgets,
+    groupByCategory:    state.groupByCategory,
+    categoryConfig:     state.categoryConfig,
+    currencyPrefix:     state.brand?.currencyPrefix || '$',
+    ownerPasscode:      state.integrations?.ownerPasscode || '',
+    telemetryUrl:       TELEMETRY_FIREBASE_URL || '',
   });
 
+  // The template below is emitted verbatim into the exported <script> tag, so its
+  // `\/` escapes are real regex syntax for that runtime, not stray string escapes here.
+  /* eslint-disable no-useless-escape */
   return `
 var STOCK  = ${stockJson};
 var CONFIG = ${configJson};
@@ -337,53 +416,205 @@ function esc(s) {
 
 /* ── Cart state ───────────────────────────────────────── */
 var cart = JSON.parse(localStorage.getItem('wk_cart') || '[]');
-var reservations = [];
+var reservations = {}; // itemId -> { guestName: reservedCount }
+var guestName = localStorage.getItem('wk_guestName') || '';
 var query = '';
 var fbUrl = (CONFIG.firebaseDatabaseUrl || '').replace(/\/$/, '') || null;
+var CP = CONFIG.currencyPrefix || '$';
+
+function applyReservationAtPath(path, data) {
+  var segments = path.split('/').filter(function(s){ return s; });
+
+  if (segments.length === 0) {
+    var next = {};
+    if (data && typeof data === 'object') {
+      Object.keys(data).forEach(function(itemId){
+        var guests = data[itemId];
+        if (!guests || typeof guests !== 'object') return;
+        var cleaned = {};
+        Object.keys(guests).forEach(function(g){ if (guests[g] > 0) cleaned[g] = guests[g]; });
+        if (Object.keys(cleaned).length) next[itemId] = cleaned;
+      });
+    }
+    reservations = next;
+  } else if (segments.length === 1) {
+    var itemId = segments[0];
+    if (data && typeof data === 'object') {
+      var cleaned2 = {};
+      Object.keys(data).forEach(function(g){ if (data[g] > 0) cleaned2[g] = data[g]; });
+      if (Object.keys(cleaned2).length) reservations[itemId] = cleaned2; else delete reservations[itemId];
+    } else {
+      delete reservations[itemId];
+    }
+  } else {
+    var iid = segments[0], guest = segments[1];
+    var itemRes = reservations[iid] || {};
+    if (data > 0) itemRes[guest] = data; else delete itemRes[guest];
+    if (Object.keys(itemRes).length) reservations[iid] = itemRes; else delete reservations[iid];
+  }
+
+  renderTiles();
+  renderOwnerView();
+}
 
 function initReservations() {
   if (!fbUrl) {
-    reservations = JSON.parse(localStorage.getItem('wk_reservations') || '[]');
+    reservations = JSON.parse(localStorage.getItem('wk_reservations') || '{}');
     return;
   }
   var es = new EventSource(fbUrl + '/reservations.json');
   es.addEventListener('put', function(evt) {
-    var payload = JSON.parse(evt.data), path = payload.path, data = payload.data;
-    if (path === '/') {
-      reservations = (data && typeof data === 'object')
-        ? Object.keys(data).filter(function(k){ return data[k] === true; })
-        : [];
-    } else {
-      var id = path.replace(/^\//, '');
-      if (data === true) { if (reservations.indexOf(id) === -1) reservations.push(id); }
-      else { reservations = reservations.filter(function(x){ return x !== id; }); }
-    }
-    renderTiles();
+    var payload = JSON.parse(evt.data);
+    applyReservationAtPath(payload.path, payload.data);
   });
   es.addEventListener('patch', function(evt) {
-    var data = JSON.parse(evt.data).data;
-    Object.keys(data).forEach(function(id) {
-      if (data[id]) { if (reservations.indexOf(id) === -1) reservations.push(id); }
-      else { reservations = reservations.filter(function(x){ return x !== id; }); }
+    var payload = JSON.parse(evt.data);
+    var data = payload.data;
+    if (!data || typeof data !== 'object') return;
+    Object.keys(data).forEach(function(key) {
+      applyReservationAtPath(payload.path === '/' ? '/' + key : payload.path + '/' + key, data[key]);
     });
-    renderTiles();
   });
 }
 
-function toggleReservation(id) {
-  if (!fbUrl) {
-    var idx = reservations.indexOf(id);
-    if (idx !== -1) reservations.splice(idx, 1); else reservations.push(id);
+function reserveItem(id, delta, name) {
+  var guest = (name || guestName || '').trim() || 'Anonymous';
+  var itemReservations = reservations[id] || {};
+  var current = itemReservations[guest] || 0;
+  var next = Math.max(0, current + delta);
+
+  function applyLocal() {
+    var nextReservations = Object.assign({}, reservations);
+    var itemRes = Object.assign({}, nextReservations[id] || {});
+    if (next === 0) delete itemRes[guest]; else itemRes[guest] = next;
+    if (Object.keys(itemRes).length) nextReservations[id] = itemRes; else delete nextReservations[id];
+    reservations = nextReservations;
     localStorage.setItem('wk_reservations', JSON.stringify(reservations));
     renderTiles();
+    renderOwnerView();
+  }
+
+  if (!fbUrl) { applyLocal(); return; }
+
+  var opts = next === 0
+    ? { method: 'DELETE' }
+    : { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) };
+  fetch(fbUrl + '/reservations/' + encodeURIComponent(id) + '/' + encodeURIComponent(guest) + '.json', opts).catch(function(){});
+  // SSE will fire back and update reservations + re-render
+}
+
+/* ── Guest name prompt ─────────────────────────────────── */
+function openNameModal(itemId) {
+  var item = STOCK.find(function(i){ return i.id === itemId; });
+  document.getElementById('name-modal-container').innerHTML =
+    '<div class="modal-backdrop" data-action="close-name-modal"></div>' +
+    '<div class="owner-gate-modal" role="dialog" aria-modal="true">' +
+      '<form id="name-modal-form">' +
+        '<p class="owner-gate-title">Reserve ' + (item ? '&quot;' + esc(item.name) + '&quot;' : 'item') + '</p>' +
+        '<p class="owner-gate-body">Add your name so the registry owner can see who reserved what. This helps avoid duplicate or bad-faith reservations.</p>' +
+        '<input type="text" class="owner-gate-input" id="name-modal-input" placeholder="Your name" autofocus>' +
+        '<div class="owner-gate-actions">' +
+          '<button type="submit" class="selector-btn selector-btn--active">Reserve</button>' +
+          '<button type="button" class="selector-btn" data-action="close-name-modal">Cancel</button>' +
+        '</div>' +
+      '</form>' +
+    '</div>';
+  document.getElementById('name-modal-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var val = document.getElementById('name-modal-input').value.trim();
+    if (!val) return;
+    guestName = val;
+    localStorage.setItem('wk_guestName', val);
+    reserveItem(itemId, 1, val);
+    closeNameModal();
+  });
+}
+function closeNameModal() { document.getElementById('name-modal-container').innerHTML = ''; }
+
+/* ── Owner gate + owner view ───────────────────────────── */
+var ownerUnlocked = false;
+var ownerViewOpen  = false;
+
+function openOwnerGate() {
+  if (!CONFIG.ownerPasscode) return;
+  document.getElementById('owner-gate-container').innerHTML =
+    '<div class="modal-backdrop" data-action="close-owner-gate"></div>' +
+    '<div class="owner-gate-modal" role="dialog" aria-modal="true">' +
+      '<form id="owner-gate-form">' +
+        '<p class="owner-gate-title">Owner access</p>' +
+        '<p class="owner-gate-body">Enter the owner passcode to view reservations.</p>' +
+        '<input type="password" class="owner-gate-input" id="owner-gate-input" autofocus>' +
+        '<p class="owner-gate-error" id="owner-gate-error" style="display:none">Incorrect passcode.</p>' +
+        '<div class="owner-gate-actions">' +
+          '<button type="submit" class="selector-btn selector-btn--active">Unlock</button>' +
+          '<button type="button" class="selector-btn" data-action="close-owner-gate">Cancel</button>' +
+        '</div>' +
+      '</form>' +
+    '</div>';
+  document.getElementById('owner-gate-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var val = document.getElementById('owner-gate-input').value;
+    if (val === CONFIG.ownerPasscode) {
+      ownerUnlocked = true;
+      closeOwnerGate();
+      openOwnerView();
+    } else {
+      document.getElementById('owner-gate-error').style.display = 'block';
+    }
+  });
+}
+function closeOwnerGate() { document.getElementById('owner-gate-container').innerHTML = ''; }
+
+function openOwnerView() {
+  if (!ownerUnlocked) return;
+  ownerViewOpen = true;
+  document.getElementById('owner-view-container').innerHTML =
+    '<div class="modal-backdrop" data-action="close-owner-view"></div>' +
+    '<div class="owner-view-modal" role="dialog" aria-modal="true">' +
+      '<div class="owner-view-header"><span class="owner-view-title">Reservations</span>' +
+        '<button class="owner-view-close" data-action="close-owner-view">✕</button></div>' +
+      '<div class="owner-view-body" id="owner-view-body"></div>' +
+    '</div>';
+  renderOwnerView();
+}
+function closeOwnerView() {
+  ownerViewOpen = false;
+  document.getElementById('owner-view-container').innerHTML = '';
+}
+
+function renderOwnerView() {
+  if (!ownerViewOpen) return;
+  var body = document.getElementById('owner-view-body');
+  if (!body) return;
+  var withReservations = STOCK.filter(function(i){ return reservations[i.id] && Object.keys(reservations[i.id]).length; });
+  if (!withReservations.length) { body.innerHTML = '<p class="owner-view-empty">No reservations yet.</p>'; return; }
+  var html = '';
+  withReservations.forEach(function(item) {
+    var byGuest = reservations[item.id];
+    html += '<div class="owner-view-item"><div class="owner-view-item-name">' + esc(item.name) + '</div>';
+    Object.keys(byGuest).forEach(function(guest) {
+      html += '<div class="owner-view-row"><span>' + esc(guest) + ' &times; ' + byGuest[guest] + '</span>' +
+        '<button class="owner-view-release-btn" data-action="release-reservation" data-id="' + item.id + '" data-guest="' + esc(guest) + '">Release</button></div>';
+    });
+    html += '</div>';
+  });
+  body.innerHTML = html;
+}
+
+function releaseReservation(itemId, guest) {
+  var itemRes = reservations[itemId] || {};
+  if (!(itemRes[guest] > 0)) return;
+
+  if (!fbUrl) {
+    delete itemRes[guest];
+    if (Object.keys(itemRes).length) reservations[itemId] = itemRes; else delete reservations[itemId];
+    localStorage.setItem('wk_reservations', JSON.stringify(reservations));
+    renderTiles();
+    renderOwnerView();
     return;
   }
-  var reserved = reservations.indexOf(id) !== -1;
-  var opts = reserved
-    ? { method: 'DELETE' }
-    : { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: 'true' };
-  fetch(fbUrl + '/reservations/' + encodeURIComponent(id) + '.json', opts).catch(function(){});
-  // SSE will fire back and update reservations + re-render
+
+  fetch(fbUrl + '/reservations/' + encodeURIComponent(itemId) + '/' + encodeURIComponent(guest) + '.json', { method: 'DELETE' }).catch(function(){});
 }
 
 function saveCart() { localStorage.setItem('wk_cart', JSON.stringify(cart)); }
@@ -416,17 +647,47 @@ function tileImgHTML(item) {
   return '<div class="tile-img-placeholder">'+esc((item.name||'?')[0].toUpperCase())+'</div>';
 }
 
+function tileReserveWrapHTML(item) {
+  var byGuest = reservations[item.id] || {};
+  var reserved = Object.values(byGuest).reduce(function(s, n){ return s + n; }, 0);
+  var mine = byGuest[guestName || 'Anonymous'] || 0;
+  var needed = item.quantity || 0;
+  var full = needed > 0 && reserved >= needed;
+  var html = '<div class="tile-reserve-wrap">';
+  if (needed > 0) html += '<span class="tile-reserve-label">'+reserved+' of '+needed+' reserved</span>';
+  else if (reserved > 0) html += '<span class="tile-reserve-label">'+reserved+' reserved</span>';
+  html += '<div class="tile-reserve-controls">';
+  if (mine > 0) html += '<button class="tile-reserve-step" data-action="reserve-dec" data-id="'+item.id+'">−</button>';
+  if (full) html += '<span class="tile-add-btn tile-add-btn--reserved">Fully Reserved ✓</span>';
+  else html += '<button class="tile-add-btn" data-action="reserve-inc" data-id="'+item.id+'">Reserve</button>';
+  html += '</div></div>';
+  return html;
+}
+
+function tileReserveCompactHTML(item) {
+  var byGuest = reservations[item.id] || {};
+  var reserved = Object.values(byGuest).reduce(function(s, n){ return s + n; }, 0);
+  var mine = byGuest[guestName || 'Anonymous'] || 0;
+  var needed = item.quantity || 0;
+  var full = needed > 0 && reserved >= needed;
+  var html = '<div class="tile-reserve-compact">';
+  if (mine > 0) html += '<button class="tile-reserve-step" data-action="reserve-dec" data-id="'+item.id+'">−</button>';
+  if (reserved > 0) html += '<span class="tile-reserve-count">'+reserved+(needed>0?'/'+needed:'')+'</span>';
+  if (!full) html += '<button class="tile-reserve-step tile-reserve-step--add" data-action="reserve-inc" data-id="'+item.id+'">+</button>';
+  if (full) html += '<span class="tile-reserve-full">✓</span>';
+  return html + '</div>';
+}
+
 function renderTile(item) {
   var t = CONFIG.tileConfig;
   var isRegistry = CONFIG.websiteType === 'registry';
-  var isReserved = isRegistry && reservations.indexOf(item.id) !== -1;
-  var price = item.price > 0 ? '<span class="tile-price">$'+item.price.toFixed(2)+'</span>' : '';
+  var price = item.price > 0 ? '<span class="tile-price">'+CP+item.price.toFixed(2)+'</span>' : '';
   var addBtn = isRegistry
-    ? '<button class="tile-add-btn'+(isReserved?' tile-add-btn--reserved':'')+'" data-action="toggle-reserve" data-id="'+item.id+'">'+(isReserved?'Reserved &#10003;':'Reserve')+'</button>'
+    ? tileReserveWrapHTML(item)
     : '<button class="tile-add-btn" data-action="add-to-cart" data-id="'+item.id+'">Add to cart</button>';
   if (t === 'compact') {
     var compactAction = isRegistry
-      ? '<button class="tile-add-btn tile-add-btn--compact'+(isReserved?' tile-add-btn--reserved':'')+'" data-action="toggle-reserve" data-id="'+item.id+'" title="'+(isReserved?'Reserved':'Reserve')+'">'+(isReserved?'&#10003;':'+')+'</button>'
+      ? tileReserveCompactHTML(item)
       : '<button class="tile-add-btn tile-add-btn--compact" data-action="add-to-cart" data-id="'+item.id+'" title="Add to cart">+</button>';
     return '<div class="tile tile--compact">' +
       '<div class="tile-img-wrap--sm">'+tileImgHTML(item)+'</div>' +
@@ -446,19 +707,61 @@ function renderTile(item) {
   return '<div class="tile '+cls+'">'+imgH+'<div class="tile-body"><span class="tile-name">'+esc(item.name)+'</span>'+price+meta+addBtn+'</div></div>';
 }
 
+var JUSTIFY_CSS = { left: 'flex-start', center: 'center', right: 'flex-end' };
+var STACKED_MARGIN_CSS = { left: '0', center: '0 auto', right: '0 0 0 auto' };
+
 function renderLayout(items) {
   var l = CONFIG.layoutConfig;
+  var align = CONFIG.layoutAlign || 'center';
+  var justify = JUSTIFY_CSS[align] || 'center';
   var tiles = items.map(renderTile).join('');
-  if (l === 'strip')    return '<div class="layout layout--strip">'+tiles+'</div>';
-  if (l === 'stacked')  return '<div class="layout layout--stacked">'+tiles+'</div>';
+  if (l === 'strip')    return '<div class="layout layout--strip" style="justify-content:'+justify+'">'+tiles+'</div>';
+  if (l === 'stacked')  return '<div class="layout layout--stacked" style="margin:'+(STACKED_MARGIN_CSS[align] || '0 auto')+'">'+tiles+'</div>';
   if (l === 'featured') {
     if (!items.length)  return '<div class="layout layout--featured"></div>';
     var rest = items.slice(1).map(renderTile).join('');
     return '<div class="layout layout--featured">' +
       '<div class="layout-featured-slot">'+renderTile(items[0])+'</div>' +
-      '<div class="layout-featured-grid">'+rest+'</div></div>';
+      '<div class="layout-featured-grid" style="justify-content:'+justify+'">'+rest+'</div></div>';
   }
-  return '<div class="layout layout--grid">'+tiles+'</div>';
+  return '<div class="layout layout--grid" style="justify-content:'+justify+'">'+tiles+'</div>';
+}
+
+/* ── Category grouping ───────────────────────────────── */
+function orderedCategories() {
+  var seen = {}, list = [];
+  Object.keys(CONFIG.categoryConfig || {}).forEach(function(c){ if (c && !seen[c]) { seen[c] = true; list.push(c); } });
+  STOCK.forEach(function(i){
+    (i.categories||[]).forEach(function(c){ if (c && !seen[c]) { seen[c] = true; list.push(c); } });
+  });
+  return list;
+}
+
+function renderCategorySection(cat, items) {
+  var cfg = (CONFIG.categoryConfig || {})[cat] || {};
+  var html = '<div class="category-section"><div class="category-section-header">' +
+    '<h2 class="category-section-title">'+esc(cfg.label || cat)+'</h2>';
+  if (cfg.description) html += '<p class="category-section-desc">'+esc(cfg.description)+'</p>';
+  return html + '</div>' + renderLayout(items) + '</div>';
+}
+
+function renderGrouped(items) {
+  var sections = orderedCategories().map(function(cat){
+    return { cat: cat, items: items.filter(function(i){ return (i.categories||[]).indexOf(cat) !== -1; }) };
+  }).filter(function(s){ return s.items.length > 0; });
+  var uncategorized = items.filter(function(i){ return !(i.categories||[]).length; });
+  if (!sections.length && !uncategorized.length) return '';
+
+  var html = '<div class="category-groups">';
+  sections.forEach(function(s, idx){
+    if (idx > 0) html += '<div class="category-divider"></div>';
+    html += renderCategorySection(s.cat, s.items);
+  });
+  if (uncategorized.length) {
+    if (sections.length) html += '<div class="category-divider"></div>';
+    html += '<div class="category-section">'+renderLayout(uncategorized)+'</div>';
+  }
+  return html + '</div>';
 }
 
 /* ── Search ───────────────────────────────────────────── */
@@ -466,14 +769,18 @@ function matchesQuery(item, q) {
   if (!q) return true;
   var lower = q.toLowerCase();
   if (item.name.toLowerCase().indexOf(lower) !== -1) return true;
+  if ((item.categories||[]).some(function(c){ return c.toLowerCase().indexOf(lower) !== -1; })) return true;
   return Object.values(item.metadata||{}).some(function(v){ return String(v).toLowerCase().indexOf(lower) !== -1; });
 }
 
 function renderTiles() {
   var filtered = STOCK.filter(function(i){ return matchesQuery(i, query); });
   var grid = document.getElementById('tile-grid');
+  var hasCategoryItems = STOCK.some(function(i){ return (i.categories||[]).length > 0; });
   if (!filtered.length && query) {
     grid.innerHTML = '<p class="search-no-results">No items match &ldquo;'+esc(query)+'&rdquo;</p>';
+  } else if (CONFIG.groupByCategory && hasCategoryItems) {
+    grid.innerHTML = renderGrouped(filtered);
   } else {
     grid.innerHTML = renderLayout(filtered);
   }
@@ -485,6 +792,7 @@ function initSearch() {
   if (hasWidget || !STOCK.length) { if(wrap) wrap.style.display='none'; return; }
   if (wrap) {
     wrap.style.display = 'block';
+    wrap.style.margin = ({ left: '0', center: '0 auto', right: '0 0 0 auto' })[CONFIG.searchAlign] || '0 auto';
     wrap.innerHTML = '<input class="store-search-input" type="text" placeholder="Search items..." id="search-input">' +
       '<button class="store-search-clear" id="search-clear" style="display:none">&#10005;</button>';
     document.getElementById('search-input').addEventListener('input', function(){
@@ -529,13 +837,13 @@ function renderCart() {
     var e=x.e, item=x.item;
     html += '<li class="cart-item">' +
       '<div class="cart-item-img-wrap">'+(item.image?'<img class="cart-item-img" src="'+esc(item.image)+'" alt="'+esc(item.name)+'">' : '<div class="cart-item-img-placeholder">'+esc((item.name||'?')[0].toUpperCase())+'</div>')+'</div>' +
-      '<div class="cart-item-info"><span class="cart-item-name">'+esc(item.name)+'</span>'+(item.price>0?'<span class="cart-item-price">$'+(item.price*e.quantity).toFixed(2)+'</span>':'')+'</div>' +
+      '<div class="cart-item-info"><span class="cart-item-name">'+esc(item.name)+'</span>'+(item.price>0?'<span class="cart-item-price">'+CP+(item.price*e.quantity).toFixed(2)+'</span>':'')+'</div>' +
       '<div class="cart-item-qty"><button data-action="dec-qty" data-id="'+e.itemId+'">−</button><span>'+e.quantity+'</span><button data-action="inc-qty" data-id="'+e.itemId+'">+</button></div>' +
       '<button class="cart-item-remove" data-action="remove-from-cart" data-id="'+e.itemId+'">✕</button>' +
     '</li>';
   });
   html += '</ul><div class="cart-footer">';
-  if (hasPrice) html += '<div class="cart-subtotal"><span>Subtotal</span><span>$'+subtotal.toFixed(2)+'</span></div>';
+  if (hasPrice) html += '<div class="cart-subtotal"><span>Subtotal</span><span>'+CP+subtotal.toFixed(2)+'</span></div>';
   html += '<button class="selector-btn selector-btn--active" data-action="open-checkout">Checkout</button>' +
     '<button class="selector-btn" data-action="clear-cart">Clear cart</button></div>';
   body.innerHTML = html;
@@ -662,14 +970,14 @@ function coSummaryHTML() {
       '<div class="checkout-summary-img-wrap">'+(item.image?'<img class="checkout-summary-img" src="'+esc(item.image)+'" alt="'+esc(item.name)+'">':'<div class="checkout-summary-img-placeholder">'+esc((item.name||'?')[0].toUpperCase())+'</div>')+
       '<span class="checkout-summary-qty-badge">'+qty+'</span></div>'+
       '<span class="checkout-summary-item-name">'+esc(item.name)+'</span>'+
-      (item.price>0?'<span class="checkout-summary-item-price">$'+(item.price*qty).toFixed(2)+'</span>':'')+
+      (item.price>0?'<span class="checkout-summary-item-price">'+CP+(item.price*qty).toFixed(2)+'</span>':'')+
     '</li>';
   });
   html+='</ul>';
   if(hasPrice) html+='<div class="checkout-summary-totals">'+
-    '<div class="checkout-summary-row"><span>Subtotal</span><span>$'+subtotal.toFixed(2)+'</span></div>'+
-    '<div class="checkout-summary-row"><span>Shipping</span><span>'+(free?'Free':'$5.00')+'</span></div>'+
-    '<div class="checkout-summary-row checkout-summary-row--total"><span>Total</span><span>$'+total+'</span></div></div>';
+    '<div class="checkout-summary-row"><span>Subtotal</span><span>'+CP+subtotal.toFixed(2)+'</span></div>'+
+    '<div class="checkout-summary-row"><span>Shipping</span><span>'+(free?'Free':CP+'5.00')+'</span></div>'+
+    '<div class="checkout-summary-row checkout-summary-row--total"><span>Total</span><span>'+CP+total+'</span></div></div>';
   return html+'</div>';
 }
 
@@ -714,15 +1022,47 @@ document.addEventListener('click', function(e) {
   if(a==='co-back')          coBack();
   if(a==='open-help')        openHelp();
   if(a==='close-help')       closeHelp();
-  if(a==='toggle-reserve')   toggleReservation(id);
+  if(a==='reserve-inc') {
+    var item = STOCK.find(function(i){ return i.id===id; });
+    var needsName = item && item.nameRequired !== false && !guestName;
+    if (needsName) openNameModal(id); else reserveItem(id, 1);
+  }
+  if(a==='reserve-dec')          reserveItem(id, -1);
+  if(a==='close-name-modal')     closeNameModal();
+  if(a==='close-owner-gate')     closeOwnerGate();
+  if(a==='close-owner-view')     closeOwnerView();
+  if(a==='release-reservation')  releaseReservation(id, el.dataset.guest);
   if(a==='copy-share-link') {
     try { navigator.clipboard.writeText(window.location.href).catch(function(){}); } catch(e) {}
   }
 });
 
 /* ── Init ─────────────────────────────────────────────── */
+function logTelemetry() {
+  var url = CONFIG.telemetryUrl;
+  if (!url) return;
+  try {
+    if (sessionStorage.getItem('winklr_telemetry_sent')) return;
+    sessionStorage.setItem('winklr_telemetry_sent', '1');
+  } catch (e) {}
+  fetch(url.replace(/\/$/, '') + '/events.json', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      hostname: window.location.hostname || 'unknown',
+      websiteType: CONFIG.websiteType || null,
+      itemCount: STOCK.length,
+      tileConfig: CONFIG.tileConfig || null,
+      layoutConfig: CONFIG.layoutConfig || null,
+      timestamp: Date.now(),
+      source: 'exported-site'
+    })
+  }).catch(function(){});
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   initReservations();
+  logTelemetry();
   renderTiles(); renderCart(); initSearch(); updateFabs();
   var hasCartWidget = Object.values(CONFIG.widgets||{}).some(function(w){ return w && w.content==='Cart'; });
   var hasHelpWidget = Object.values(CONFIG.widgets||{}).some(function(w){ return w && w.content==='Help'; });
@@ -733,8 +1073,34 @@ document.addEventListener('DOMContentLoaded', function() {
   if (helpFab && hasHelpWidget) helpFab.style.display='none';
   var shareFab = document.getElementById('share-fab');
   if (shareFab && isRegistry) shareFab.style.display='flex';
+  if (window.location.hash === '#owner') openOwnerGate();
 });
 `;
+  /* eslint-enable no-useless-escape */
+}
+
+// ── Page header HTML ──────────────────────────────────────────────────────
+
+function buildPageHeaderHTML(state) {
+  const title = state.brand?.pageTitle;
+  const subtitle = state.brand?.pageSubtitle;
+  if (!title && !subtitle) return '';
+  return '<div class="page-header">' +
+    (title ? '<h1 class="page-header-title">' + esc(title) + '</h1>' : '') +
+    (subtitle ? '<p class="page-header-subtitle">' + esc(subtitle) + '</p>' : '') +
+    '</div>';
+}
+
+// ── Decals HTML ────────────────────────────────────────────────────────────
+
+function buildDecalsHTML(state) {
+  const decals = state.decals || [];
+  if (!decals.length) return '';
+  return decals.map((d) =>
+    `<div class="decal" style="left:${d.x}px;top:${d.y}px;width:${d.width}px;transform:rotate(${d.rotation || 0}deg)">` +
+    `<img src="${esc(d.image)}" alt="">` +
+    `</div>`
+  ).join('');
 }
 
 // ── Main export ────────────────────────────────────────────────────────────
@@ -742,17 +1108,31 @@ document.addEventListener('DOMContentLoaded', function() {
 export async function generateStoreHTML(state) {
   const logoDataUrl = state.brand?.logo
     ?? await fetchAsDataUrl(`${process.env.PUBLIC_URL}/branding/wordmark-tag.svg`);
-  const themeVars = buildThemeVarsCSS();
-  const css       = buildStaticCSS();
-  const navbar    = buildNavbarHTML(state, logoDataUrl);
-  const script    = buildScriptContent(state);
+  const themeVars   = buildThemeVarsCSS();
+  const css         = buildStaticCSS();
+  const navbar      = buildNavbarHTML(state, logoDataUrl);
+  const script      = buildScriptContent(state);
+  const pageHeader  = buildPageHeaderHTML(state);
+  const decalsHTML  = buildDecalsHTML(state);
+  const pageTitle   = state.brand?.pageTitle || 'Store';
+
+  const googleFontFamilies = [...new Set(
+    ['--font-body', '--font-heading', '--font-nav']
+      .map((v) => googleFontFamilyFor(state.theme?.custom?.[v]))
+      .filter(Boolean)
+  )];
+  const fontLinks = googleFontFamilies.length
+    ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?${googleFontFamilies.map((f) => `family=${f}`).join('&')}&display=swap" rel="stylesheet">`
+    : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Store</title>
+<title>${esc(pageTitle)}</title>
+${fontLinks}
 <style>
 :root {
 ${themeVars}
@@ -763,6 +1143,8 @@ ${css}
 <body>
 ${navbar}
 <div class="app-content">
+  ${decalsHTML}
+  ${pageHeader}
   <div id="search-wrap" class="store-search-wrap" style="display:none"></div>
   <div id="tile-grid"></div>
   <footer class="app-footer">
@@ -800,6 +1182,9 @@ ${navbar}
     Share
   </button>
 </div>
+<div id="name-modal-container"></div>
+<div id="owner-gate-container"></div>
+<div id="owner-view-container"></div>
 <script>
 ${script}
 </script>

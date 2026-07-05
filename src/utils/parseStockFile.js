@@ -65,7 +65,7 @@ export function parseStockFile(file) {
         try {
           resolve(parseJSON(e.target.result));
         } catch {
-          reject(new Error("Invalid JSON — check the file and try again."));
+          reject(new Error("Invalid JSON - check the file and try again."));
         }
       };
       reader.readAsText(file);
@@ -74,7 +74,7 @@ export function parseStockFile(file) {
         try {
           resolve(parseSpreadsheet(e.target.result));
         } catch {
-          reject(new Error(`Could not parse ${ext.toUpperCase()} — check the file and try again.`));
+          reject(new Error(`Could not parse ${ext.toUpperCase()} - check the file and try again.`));
         }
       };
       reader.readAsArrayBuffer(file);

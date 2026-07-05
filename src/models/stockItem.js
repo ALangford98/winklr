@@ -4,8 +4,10 @@
  * image: URL or relative path to an image
  * price: numeric value (use 0 if not applicable)
  * metadata: open-ended key/value pairs for any extra fields (e.g. ticker, category, sku)
+ * nameRequired: registry mode only - whether a guest must give their name to reserve this item
+ * is_sample: marks placeholder/demo data - stripped out of every exported or shared config
  */
-export const createStockItem = ({ id, name = '', image = '', price = 0, metadata = {}, categories = [], quantity = 0 } = {}) => ({
+export const createStockItem = ({ id, name = '', image = '', price = 0, metadata = {}, categories = [], quantity = 0, nameRequired = true, is_sample = false } = {}) => ({
   id: id ?? crypto.randomUUID(),
   name,
   image,
@@ -13,4 +15,6 @@ export const createStockItem = ({ id, name = '', image = '', price = 0, metadata
   metadata,
   categories,
   quantity,
+  nameRequired,
+  is_sample,
 });

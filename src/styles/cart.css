@@ -80,6 +80,57 @@
   line-height: 1.55;
 }
 
+/* ── Owner gate modal ──────────────────────────────────── */
+.owner-gate-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(320px, calc(100vw - 32px));
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  z-index: 300;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.owner-gate-modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.owner-gate-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.owner-gate-body {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.owner-gate-error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--accent-danger);
+}
+
+.owner-gate-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.owner-gate-actions .selector-btn {
+  width: auto;
+  flex: 1;
+}
+
 /* ── Help FAB button ───────────────────────────────────── */
 .help-fab {
   width: 40px;

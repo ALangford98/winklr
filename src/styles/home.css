@@ -1,16 +1,18 @@
 .Home {
 	background-color: var(--bg-app);
-	min-height: 100vh;
+	flex: 1;
+	min-height: 0;
 	display: flex;
 	flex-direction: row;
-	align-items: flex-start;
+	align-items: stretch;
 	font-size: calc(10px + 2vmin);
 	color: var(--text-primary);
+	overflow: hidden;
 }
 
 .edit-panel {
 	width: 260px;
-	min-height: 100vh;
+	height: 100%;
 	flex-shrink: 0;
 	padding: 16px 20px;
 	border-right: 1px solid var(--border-subtle);
@@ -19,14 +21,73 @@
 	flex-direction: column;
 	gap: 0;
 	overflow-x: hidden;
+	overflow-y: auto;
 	box-sizing: border-box;
 }
 
 .content-area {
   flex: 1;
+  height: 100%;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* ── Decals ────────────────────────────────────────────── */
+.decal {
+  position: absolute;
+  z-index: 5;
+  touch-action: none;
+  user-select: none;
+}
+
+.decal-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none;
+}
+
+.decal--editable {
+  cursor: grab;
+  outline: 1px dashed transparent;
+  transition: outline-color 0.15s;
+}
+
+.decal--editable:hover {
+  outline-color: var(--accent-primary);
+}
+
+.decal--dragging {
+  cursor: grabbing;
+  z-index: 6;
+  outline-color: var(--accent-primary);
+}
+
+.decal-remove {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-danger);
+  color: #fff;
+  border: none;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.decal--editable:hover .decal-remove {
+  opacity: 1;
 }
 
 /* ── Page header ───────────────────────────────────────── */
@@ -43,6 +104,7 @@
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.15;
+  font-family: var(--font-heading, inherit);
 }
 
 .page-header-subtitle {
@@ -67,6 +129,7 @@
   position: relative;
   padding: 16px 24px 0;
   max-width: 560px;
+  box-sizing: border-box;
 }
 
 .store-search-input {
@@ -137,6 +200,88 @@
   opacity: 0.6;
 }
 
+/* ── DecalsPanel ───────────────────────────────────────── */
+.decals-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.decals-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.decals-add-btn {
+  text-align: center;
+  cursor: pointer;
+}
+
+.decals-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.decals-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  background: var(--bg-raised);
+  position: relative;
+}
+
+.decals-list-thumb {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+
+.decals-list-controls {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.decals-size-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.decals-size-label input[type="range"] {
+  flex: 1;
+}
+
+.decals-remove-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+.decals-remove-btn:hover {
+  color: var(--accent-danger);
+}
+
 /* ── BrandingEditor ────────────────────────────────────── */
 .branding-editor {
   display: flex;
@@ -149,15 +294,45 @@
   align-items: center;
   justify-content: center;
   padding: 12px;
+  min-height: 64px;
   background: var(--bg-raised);
-  border: 1px solid var(--border-subtle);
+  border: 1.5px dashed var(--border-subtle);
   border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.branding-preview:hover,
+.branding-preview:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+}
+
+.branding-preview--filled {
+  border-style: solid;
 }
 
 .branding-preview-img {
   max-height: 40px;
   max-width: 100%;
   object-fit: contain;
+}
+
+.branding-preview-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.branding-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 /* EmptyState */
@@ -186,6 +361,24 @@
   text-align: center;
   max-width: 260px;
   line-height: 1.5;
+}
+
+.empty-state-demo-btn {
+  margin-top: 4px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px dashed var(--border-subtle);
+  background: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.empty-state-demo-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
 }
 
 /* ── Responsive ────────────────────────────────────────── */
@@ -218,6 +411,7 @@
     right: 0 !important;
     bottom: 0 !important;
     width: 100% !important;
+    height: auto;
     min-height: auto;
     max-height: 88vh;
     overflow-y: auto;
@@ -404,12 +598,64 @@
   color: var(--border-hover);
 }
 
-.editor-item-name {
+.editor-item-info {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.editor-item-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--text-primary);
+}
+
+.editor-item-reserved {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.editor-item-sample-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+.editor-sample-notice {
+  margin: 0 0 8px;
+  padding: 6px 8px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.editor-sample-remove-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent-primary);
+  font-size: 11px;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .editor-item-actions {
@@ -449,6 +695,21 @@
 .editor-add-btn:hover {
   border-color: var(--border-hover);
   color: var(--text-primary);
+}
+
+.editor-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.editor-demo-btn {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 /* ── Add / edit form ────────────────────────────────────── */
@@ -624,13 +885,18 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 10px;
 }
 
 .branding-field-label {
   font-size: 12px;
+  font-weight: 600;
   color: var(--text-secondary);
   white-space: nowrap;
+  margin-top: 6px;
+}
+
+.branding-field-label:first-child {
+  margin-top: 0;
 }
 
 .branding-currency-input {
@@ -914,6 +1180,7 @@
   letter-spacing: 0.1em;
   color: var(--accent-primary);
   line-height: 1;
+  font-family: var(--font-heading, inherit);
 }
 
 .category-section-desc {
@@ -982,11 +1249,35 @@
 }
 
 .category-config-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--accent-primary);
+}
+
+.category-config-empty-tag {
+  text-transform: none;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0;
+}
+
+.category-config-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.category-config-remove:hover {
+  color: var(--accent-danger);
 }
 
 .category-config-textarea {

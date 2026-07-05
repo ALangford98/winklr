@@ -1,0 +1,109 @@
+.admin-page {
+  min-height: 100vh;
+  background: var(--bg-app);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 24px;
+  box-sizing: border-box;
+}
+
+.admin-card {
+  width: 100%;
+  max-width: 340px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-card--wide {
+  max-width: 900px;
+}
+
+.admin-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.admin-body {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.admin-body code {
+  background: var(--bg-raised);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 12px;
+}
+
+.admin-unlock-btn {
+  width: 100%;
+}
+
+.admin-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 16px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  min-width: 90px;
+}
+
+.admin-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.admin-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.admin-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 10px;
+}
+
+.admin-table td {
+  color: var(--text-primary);
+}

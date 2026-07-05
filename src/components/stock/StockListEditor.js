@@ -1,7 +1,8 @@
 import React, { useState, useContext, useRef } from 'react';
 import { AppContext } from '../appContext';
+import { buildDemoItems } from '../../data/demoItems';
 
-const EMPTY_FORM = { name: '', price: '', image: '', categories: [], quantity: '' };
+const EMPTY_FORM = { name: '', price: '', image: '', categories: [], quantity: '', nameRequired: true };
 
 function readFileAsDataUrl(file) {
   return new Promise((resolve) => {
@@ -107,11 +108,12 @@ function EditItemForm({ item, onSave, onCancel }) {
   const isRegistry = state.websiteType === 'registry';
 
   const [form, setForm] = useState({
-    name:       item.name          ?? '',
-    price:      item.price > 0     ? String(item.price) : '',
-    image:      item.image         ?? '',
-    categories: item.categories    ?? [],
-    quantity:   item.quantity > 0  ? String(item.quantity) : '',
+    name:         item.name            ?? '',
+    price:        item.price > 0       ? String(item.price) : '',
+    image:        item.image           ?? '',
+    categories:   item.categories      ?? [],
+    quantity:     item.quantity > 0    ? String(item.quantity) : '',
+    nameRequired: item.nameRequired    !== false,
   });
 
   const set = (field) => (val) =>
@@ -120,7 +122,7 @@ function EditItemForm({ item, onSave, onCancel }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
-    onSave({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories, quantity: Number(form.quantity) || 0 });
+    onSave({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories, quantity: Number(form.quantity) || 0, nameRequired: form.nameRequired });
   };
 
   return (
@@ -130,6 +132,16 @@ function EditItemForm({ item, onSave, onCancel }) {
       <input className="editor-add-form-input" placeholder="Price" type="number" min="0" step="0.01" value={form.price} onChange={set('price')} />
       <input className="editor-add-form-input" placeholder={isRegistry ? 'Quantity needed (0 = unlimited)' : 'Stock quantity (0 = unlimited)'} type="number" min="0" step="1" value={form.quantity} onChange={set('quantity')} />
       <TagInput value={form.categories} onChange={(cats) => setForm((p) => ({ ...p, categories: cats }))} />
+      {isRegistry && (
+        <label className="editor-checkbox-row">
+          <input
+            type="checkbox"
+            checked={form.nameRequired}
+            onChange={(e) => setForm((p) => ({ ...p, nameRequired: e.target.checked }))}
+          />
+          <span>Require reserver's name</span>
+        </label>
+      )}
       <div className="editor-form-actions">
         <button type="submit" disabled={!form.name.trim()}>Save</button>
         <button type="button" onClick={onCancel}>Cancel</button>
@@ -140,6 +152,7 @@ function EditItemForm({ item, onSave, onCancel }) {
 
 export default function StockListEditor() {
   const { state, removeStockItem, updateStockItem, setStockList, addStockItem } = useContext(AppContext);
+  const isRegistry = state.websiteType === 'registry';
   const [editingId, setEditingId] = useState(null);
   const [showAdd, setShowAdd]     = useState(false);
   const [form, setForm]           = useState(EMPTY_FORM);
@@ -148,9 +161,14 @@ export default function StockListEditor() {
     return (
       <div className="stock-list-editor">
         <button className="editor-add-btn" onClick={() => setShowAdd(true)}>+ Add item</button>
+        <button className="editor-add-btn editor-demo-btn" onClick={() => setStockList(buildDemoItems())}>
+          Load sample items
+        </button>
       </div>
     );
   }
+
+  const sampleCount = state.stockList.filter((i) => i.is_sample).length;
 
   const moveItem = (index, delta) => {
     const next = [...state.stockList];
@@ -163,7 +181,7 @@ export default function StockListEditor() {
   const handleAdd = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
-    addStockItem({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories, quantity: Number(form.quantity) || 0 });
+    addStockItem({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories, quantity: Number(form.quantity) || 0, nameRequired: form.nameRequired });
     setForm(EMPTY_FORM);
     setShowAdd(false);
   };
@@ -173,6 +191,18 @@ export default function StockListEditor() {
 
   return (
     <div className="stock-list-editor">
+      {sampleCount > 0 && (
+        <p className="editor-sample-notice">
+          {sampleCount} sample item{sampleCount !== 1 ? 's' : ''} won't be included in exports or shared links.{' '}
+          <button
+            type="button"
+            className="editor-sample-remove-btn"
+            onClick={() => setStockList(state.stockList.filter((i) => !i.is_sample))}
+          >
+            Remove them now
+          </button>
+        </p>
+      )}
       <ul className="editor-list">
         {state.stockList.map((item, i) => (
           <li key={item.id}>
@@ -190,7 +220,18 @@ export default function StockListEditor() {
                     : <span className="editor-thumb-placeholder">{(item.name || '?')[0].toUpperCase()}</span>
                   }
                 </div>
-                <span className="editor-item-name" title={item.name}>{item.name || 'Unnamed'}</span>
+                <div className="editor-item-info">
+                  <span className="editor-item-name" title={item.name}>
+                    {item.name || 'Unnamed'}
+                    {item.is_sample && <span className="editor-item-sample-badge" title="Sample item - excluded from exports and shared links">Sample</span>}
+                  </span>
+                  {isRegistry && (() => {
+                    const byGuest = state.reservations?.[item.id];
+                    if (!byGuest || !Object.keys(byGuest).length) return null;
+                    const summary = Object.entries(byGuest).map(([name, qty]) => `${name} (${qty})`).join(', ');
+                    return <span className="editor-item-reserved" title={summary}>Reserved by {summary}</span>;
+                  })()}
+                </div>
                 <div className="editor-item-actions">
                   <button onClick={() => setEditingId(item.id)} title="Edit">✎</button>
                   <button onClick={() => moveItem(i, -1)} disabled={i === 0} title="Move up">↑</button>
@@ -210,6 +251,16 @@ export default function StockListEditor() {
           <input className="editor-add-form-input" placeholder="Price" type="number" min="0" step="0.01" value={form.price} onChange={set('price')} />
           <input className="editor-add-form-input" placeholder="Quantity needed (0 = unlimited)" type="number" min="0" step="1" value={form.quantity} onChange={set('quantity')} />
           <TagInput value={form.categories} onChange={(cats) => setForm((p) => ({ ...p, categories: cats }))} />
+          {isRegistry && (
+            <label className="editor-checkbox-row">
+              <input
+                type="checkbox"
+                checked={form.nameRequired}
+                onChange={(e) => setForm((p) => ({ ...p, nameRequired: e.target.checked }))}
+              />
+              <span>Require reserver's name</span>
+            </label>
+          )}
           <div className="editor-form-actions">
             <button type="submit" disabled={!form.name.trim()}>Add</button>
             <button type="button" onClick={() => { setShowAdd(false); setForm(EMPTY_FORM); }}>Cancel</button>

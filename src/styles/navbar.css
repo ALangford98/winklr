@@ -1,6 +1,7 @@
 /* ── Mobile brand bar (hidden on desktop) ──────────────── */
 .mobile-brand-bar {
   display: none;
+  font-family: var(--font-nav, inherit);
 }
 
 /* ── Navbar shell ──────────────────────────────────────── */
@@ -12,6 +13,7 @@
   position: relative;
   z-index: 10;
   overflow: visible;
+  font-family: var(--font-nav, inherit);
 }
 
 /* ── Brand ─────────────────────────────────────────────── */

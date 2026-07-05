@@ -49,6 +49,12 @@
   overflow: hidden;
 }
 
+.tile--compact .tile-name,
+.tile--standard .tile-name,
+.tile--detailed .tile-name {
+  font-family: var(--font-heading, inherit);
+}
+
 .tile--compact .tile-name {
   font-size: 13px;
   font-weight: 600;
@@ -201,6 +207,7 @@
 
 .palette-swatches {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -220,18 +227,23 @@
 
 .palette-swatch:hover { transform: scale(1.08); }
 
+.palette-swatch--custom {
+  border-style: dashed;
+  border-color: var(--border-hover);
+}
+
+.theme-custom-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
 .palette-swatch-accent {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   display: block;
   flex-shrink: 0;
-}
-
-.colour-picker-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 .colour-input {
@@ -244,10 +256,16 @@
   cursor: pointer;
 }
 
-.colour-hex {
-  font-size: 12px;
-  color: var(--text-secondary);
-  font-family: monospace;
+.font-select {
+  width: 130px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 11px;
+  padding: 2px 4px;
+  cursor: pointer;
 }
 
 /* ── Custom colour pickers ─────────────────────────────── */
@@ -266,4 +284,9 @@
 .custom-colour-label {
   font-size: 12px;
   color: var(--text-secondary);
+}
+
+.custom-colour-hint {
+  font-size: 11px;
+  color: var(--text-muted);
 }

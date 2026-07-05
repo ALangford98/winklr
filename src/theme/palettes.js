@@ -6,6 +6,25 @@ export function hexToRgba(hex, alpha) {
 }
 
 export const PALETTES = {
+  terracotta: {
+    name: 'Terracotta',
+    '--bg-app':         '#dbddcf',
+    '--bg-card':        '#e2d3be',
+    '--bg-nav':         '#aab190',
+    '--bg-raised':      '#d5c4a8',
+    '--bg-input':       '#f2ece0',
+    '--border-subtle':  '#c9b79a',
+    '--border-muted':   '#b39271',
+    '--border-hover':   '#b87644',
+    '--text-primary':   '#3a2f22',
+    '--text-secondary': '#6b5a45',
+    '--text-muted':     '#8a7860',
+    '--text-meta':      '#5a4a38',
+    '--text-on-nav':    '#ffffff',
+    '--accent-primary': '#b87644',
+    '--accent-success': '#7a9b5c',
+    '--accent-danger':  '#b0503f',
+  },
   dark: {
     name: 'Dark',
     '--bg-app':         '#282c34',

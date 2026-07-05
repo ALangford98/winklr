@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useRef } from "react";
 import { AppContext } from "../components/appContext";
 import StockListLoader from "../components/stock/StockListLoader";
 import StockListEditor from "../components/stock/StockListEditor";
@@ -13,6 +13,10 @@ import IntegrationsPanel from "../components/IntegrationsPanel";
 import CollapsibleSection from "../components/CollapsibleSection";
 import WebsiteTypeSelector from "../components/WebsiteTypeSelector";
 import CategoryConfig from "../components/CategoryConfig";
+import DecalsPanel from "../components/decals/DecalsPanel";
+import DecalsLayer from "../components/decals/DecalsLayer";
+
+const SEARCH_MARGIN_CSS = { left: "0", center: "0 auto", right: "0 0 0 auto" };
 
 function matchesQuery(item, query) {
   const q = query.toLowerCase();
@@ -50,6 +54,7 @@ function CategorySection({ cat, items, state, onReorder }) {
         config={state.layoutConfig}
         items={items}
         tileConfig={state.tileConfig}
+        align={state.layoutAlign}
         isEditMode={state.viewMode}
         onReorder={onReorder}
       />
@@ -59,8 +64,9 @@ function CategorySection({ cat, items, state, onReorder }) {
 
 function GroupedContent({ state, filtered, setStockList }) {
   const orderedCats = [
+    ...Object.keys(state.categoryConfig || {}),
     ...new Set(state.stockList.flatMap((i) => i.categories || [])),
-  ].filter(Boolean);
+  ].filter((c, i, arr) => c && arr.indexOf(c) === i);
 
   const makeReorder = (cat) => (reorderedItems) => {
     setStockList((prev) => {
@@ -118,6 +124,7 @@ function GroupedContent({ state, filtered, setStockList }) {
               config={state.layoutConfig}
               items={uncategorized}
               tileConfig={state.tileConfig}
+              align={state.layoutAlign}
               isEditMode={state.viewMode}
               onReorder={makeUncatReorder}
             />
@@ -130,6 +137,7 @@ function GroupedContent({ state, filtered, setStockList }) {
 
 export default function Home() {
   const { state, setStockList, setSearchQuery, mobilePanelOpen, setMobilePanelOpen } = useContext(AppContext);
+  const contentAreaRef = useRef(null);
 
   const hasSearchWidget = Object.values(state.widgets).some(
     (w) => w?.type === 'function' && w?.content === 'Search'
@@ -174,6 +182,9 @@ export default function Home() {
             <CollapsibleSection title="Theme" storageKey="theme" defaultOpen={false}>
               <ThemePicker />
             </CollapsibleSection>
+            <CollapsibleSection title="Decals" storageKey="decals" defaultOpen={false}>
+              <DecalsPanel />
+            </CollapsibleSection>
             <CollapsibleSection title="Branding" storageKey="branding" defaultOpen={false}>
               <BrandingEditor />
             </CollapsibleSection>
@@ -187,7 +198,8 @@ export default function Home() {
         </>
       )}
 
-      <div className="content-area">
+      <div className="content-area" ref={contentAreaRef}>
+        <DecalsLayer containerRef={contentAreaRef} />
         {(state.brand?.pageTitle || state.brand?.pageSubtitle) && (
           <div className="page-header">
             {state.brand.pageTitle    && <h1 className="page-header-title">{state.brand.pageTitle}</h1>}
@@ -196,7 +208,7 @@ export default function Home() {
         )}
 
         {state.stockList.length > 0 && !hasSearchWidget && (
-          <div className="store-search-wrap">
+          <div className="store-search-wrap" style={{ margin: SEARCH_MARGIN_CSS[state.searchAlign] || SEARCH_MARGIN_CSS.center }}>
             <input
               className="store-search-input"
               type="text"
@@ -226,6 +238,7 @@ export default function Home() {
               config={state.layoutConfig}
               items={filtered}
               tileConfig={state.tileConfig}
+              align={state.layoutAlign}
               isEditMode={state.viewMode}
               onReorder={setStockList}
             />

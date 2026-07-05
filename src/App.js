@@ -5,6 +5,7 @@ import './styles/tiles.css';
 import './styles/layouts.css';
 import './styles/cart.css';
 import './styles/checkout.css';
+import './styles/admin.css';
 
 import React, { useContext, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -14,7 +15,9 @@ import NavbarView from './components/view-mode/NavbarView';
 import CartDrawer, { CartIcon } from './components/cart/CartDrawer';
 import HelpModal from './components/HelpModal';
 import CheckoutModal from './components/checkout/CheckoutModal';
+import OwnerGateModal from './components/OwnerGateModal';
 import Home from './pages/Home';
+import Admin from './pages/Admin';
 import { encodeConfigToHash } from './utils/shareableUrl';
 
 function hasWidget(widgets, type, content) {
@@ -48,28 +51,44 @@ function ShareFab({ state }) {
   );
 }
 
-function App() {
-  const { toggleViewMode, state, cartOpen, setCartOpen, helpOpen, setHelpOpen, checkoutOpen, setCheckoutOpen, mobilePanelOpen, setMobilePanelOpen } = useContext(AppContext);
+function StoreApp() {
+  const {
+    toggleViewMode, state, cartOpen, setCartOpen, helpOpen, setHelpOpen,
+    checkoutOpen, setCheckoutOpen, setMobilePanelOpen, ownerUnlocked, setOwnerUnlocked,
+  } = useContext(AppContext);
+  const [gateOpen, setGateOpen] = useState(false);
 
   const isRegistry   = state.websiteType === 'registry';
   const cartCount    = state.cart.reduce((sum, c) => sum + c.quantity, 0);
   const hideCartFab  = isRegistry || hasWidget(state.widgets, 'link', 'Cart');
   const hideHelpFab  = hasWidget(state.widgets, 'link', 'Help');
+  const ownerPasscode = state.integrations?.ownerPasscode;
 
   const handleToggleViewMode = () => {
-    if (state.viewMode) setMobilePanelOpen(false);
+    if (state.viewMode) {
+      setMobilePanelOpen(false);
+      toggleViewMode();
+      return;
+    }
+    if (ownerPasscode && !ownerUnlocked) {
+      setGateOpen(true);
+      return;
+    }
+    toggleViewMode();
+  };
+
+  const handleGateSuccess = () => {
+    setOwnerUnlocked(true);
+    setGateOpen(false);
     toggleViewMode();
   };
 
   return (
-    <Router basename={process.env.PUBLIC_URL}>
-      <div className="App">
-        {state.viewMode ? <Navbar /> : <NavbarView />}
-        <Routes>
-          <Route path="/" element={<Home />} />
-        </Routes>
+    <div className="App">
+      {state.viewMode ? <Navbar /> : <NavbarView />}
+      <Home />
 
-        <div className="fab-group">
+      <div className="fab-group">
           {!hideHelpFab && (
             <button className="help-fab" onClick={() => setHelpOpen(true)} title="Help">?</button>
           )}
@@ -98,7 +117,24 @@ function App() {
         <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
         <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
         {!isRegistry && <CheckoutModal open={checkoutOpen} onClose={() => setCheckoutOpen(false)} />}
+        {gateOpen && (
+          <OwnerGateModal
+            passcode={ownerPasscode}
+            onSuccess={handleGateSuccess}
+            onClose={() => setGateOpen(false)}
+          />
+        )}
       </div>
+  );
+}
+
+function App() {
+  return (
+    <Router basename={process.env.PUBLIC_URL}>
+      <Routes>
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/*" element={<StoreApp />} />
+      </Routes>
     </Router>
   );
 }

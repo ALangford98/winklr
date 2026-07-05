@@ -91,120 +91,15 @@ Opens at [http://localhost:3000](http://localhost:3000).
 
 Other scripts: `npm test`, `npm run build`.
 
+New to the codebase? See **[QUICKSTART.md](QUICKSTART.md)** for project structure,
+the live-app/static-export split, and how config state round-trips through
+export/import/share.
+
 ---
 
-## TODO
+## Roadmap
 
-### Navbar widget rework
-- [x] Convert "Help" and "Cart" link widgets from dead routes to action triggers (Help → opens help modal, Cart → opens cart drawer)
-- [x] When a Cart or Help widget is present in any navbar slot, suppress the corresponding FAB button — the navbar widget is the canonical entry point
-- [x] Remove the "Home" link option (redundant in a single-page app) or replace it with a configurable external URL field
-- [x] When the Search Bar widget is present in any navbar slot, hide the store search bar above the tile grid
-- [x] Review the Dropdown widget — options are now chosen from available link actions (Help, Cart) and item categories; selecting an option triggers the action or filters by category
-
-### Website types / Templates
-- [x] `websiteType` field in app state (persisted to localStorage, included in JSON export/import and shareable URL)
-- [x] Website type selector in the edit panel — choosing a type applies that type's default config (widgets, FABs, tile action label)
-- [ ] "Reset to defaults for this type" button — re-applies the selected type's full default config on demand
-- [x] Website type carried through to the static export so exported behaviour matches the selected type
-
-#### Online Store *(default — existing behaviour)*
-- Default FABs: Cart, Help
-- Default tile action: "Add to cart"
-- Default panels visible: all
-
-#### Portfolio
-- [ ] Default FABs: Contact (opens contact popup), Help; cart and checkout suppressed by default
-- [ ] Default tile action: "View" button — links to an optional `url` field on each stock item
-- [ ] Contact popup — name, email, message fields; no backend; submits via `mailto:` fallback or shows a thank-you state; exportable to the static file
-- [ ] Item model extension: optional `url` field for external project / case-study links (visible in `StockListEditor` and rendered on tiles)
-- [ ] Static export: Contact popup with `mailto:` submission
-
-#### Registry
-- [x] Default FABs: Help, Share (copies shareable URL); cart and checkout suppressed by default
-- [x] Default tile action: "Reserve" — marks an item as reserved; reserved items show a green filled button
-- [x] Reservation state persisted to `localStorage` in the static export; syncs live via Firebase when configured
-- [x] Share registry: Share FAB copies the registry URL with full config encoded in the hash
-- [ ] "Mark as purchased" action in edit mode — registry owner can permanently mark items fulfilled (removes from public reservation pool)
-- [x] Optional quantity per item — set how many are needed (0 = unlimited); tile shows "X of Y reserved" with +/− stepper; fully reserved items show a locked "Fully Reserved ✓" state
-- [ ] RSVP / message popup — name + message field (same Contact component as Portfolio, re-used)
-
-### Functionality
-- [x] Shopping cart — add/remove items, quantity management, cart sidebar or modal
-- [x] Help popup / onboarding guide for first-time users
-- [x] Search bar — live tile filtering by name and metadata fields
-- [ ] Custom tile config builder — define field layout, font sizes, visible fields beyond the three presets
-
-### Integrations
-- [x] Integrations panel in the edit UI — fields for each supported client-side credential (Stripe publishable key, Mapbox access token)
-- [x] Clear labelling distinguishing public keys (safe to export) from secret keys (managed tier only)
-- [x] In-editor warning if a user pastes what looks like a secret key (starts with `sk_`)
-- [x] Integration status indicators — show connected / not configured per service
-- [x] Firebase Realtime Database URL — live shared reservation state synced across all visitors via SSE; setup note with required security rules shown inline; embedded in static export; falls back to `localStorage` when not configured
-
-### Checkout
-- [x] Checkout modal — triggered from the "Checkout" button in the cart drawer; overlays the page (not a new route)
-- [x] Multi-step flow: (1) Contact details → (2) Delivery address → (3) Payment → (4) Confirmation
-- [x] Step indicator showing current and completed steps; allow navigating back to earlier steps
-- [x] Contact step — name, email, phone fields with basic required-field validation
-- [x] Delivery step — address fields (line 1, line 2, city, postcode, country); Mapbox autocomplete hooks in here
-- [x] Payment step — card fields; Stripe Elements hooks in here
-- [x] Order summary sidebar (or collapsible panel on mobile) — visible across all steps: itemised cart, subtotal, shipping line, total
-- [x] Shipping cost calculation placeholder — free shipping over $50, $5 flat rate otherwise
-- [x] Confirmation step — order reference number (client-generated), summary of items and delivery address, "Continue shopping" CTA
-- [x] Persist in-progress checkout form state to React state (not localStorage) so a page refresh resets it
-- [ ] Accessible focus management — trap focus inside the modal, return focus to the trigger on close
-
-### Stripe
-- [ ] Wire Stripe publishable key from integrations state into the checkout payment step
-- [ ] Load Stripe.js lazily when the payment step mounts — only if a publishable key is configured
-- [ ] Render `CardElement` (or individual `CardNumberElement` / `CardExpiryElement` / `CardCvcElement`) in the payment step
-- [ ] Tokenise on submit via `stripe.confirmCardPayment` or `stripe.createToken` — no server-side charge in the editor
-- [ ] Disable the Pay button until the card Element reports complete
-- [ ] Surface Stripe field errors inline below the card input
-- [ ] On success: advance to the Confirmation step and clear the cart
-- [ ] Static export: embed Stripe publishable key and Stripe.js script tag; wire up Elements in the exported storefront
-
-### Mapbox
-- [ ] Wire Mapbox access token from integrations state into the checkout flow
-- [ ] Add delivery address field to checkout — autocomplete via Mapbox Geocoding API (`/geocoding/v5/mapbox.places`)
-- [ ] Debounced suggestion dropdown as the user types — show formatted place names
-- [ ] On suggestion select: populate structured address fields (line 1, city, postcode, country)
-- [ ] Basic address validation — require a selection from suggestions rather than free-text entry
-- [ ] Static export: embed Mapbox token and `mapbox-gl` / Geocoding API call in the exported storefront
-
-### Deployment pipeline
-- [x] Static export — generate a single self-contained HTML file from the current config; embeds theme CSS vars, stock data, and client-side API keys; renders a fully functional read-only storefront with basic cart and search in vanilla JS
-- [ ] Static export: Stripe Elements checkout flow (card tokenisation only — no server-side charge)
-- [ ] Static export: Mapbox address autocomplete at checkout
-- [ ] Guided self-deployment — exported file + one-page hosting instructions (Netlify drag-and-drop, Vercel CLI, GitHub Pages)
-- [ ] Managed deployment subscription tier — user provides publishable keys; Winklr hosts the frontend and provides the backend for Stripe charge confirmation, order storage, and email receipts
-- [ ] Managed tier: order management dashboard
-- [ ] Managed tier: webhook handling for Stripe payment confirmation
-- [ ] Version 1.0.0 milestone: both tiers live end-to-end (static export working + at least one managed deployment)
-
-### Branding
-- [x] Default Winklr branding assets (mark + wordmark) displayed in navbar and footer
-- [x] User logo upload in edit panel — replaces default with any image
-- [x] "Powered by Winklr" footer
-- [x] Configurable currency prefix (default `$`) — shown on tiles, cart, and checkout
-- [ ] Store name / tagline field — displayed in navbar or hero area
-- [ ] Favicon swap when custom logo is uploaded
-
-### Mobile
-- [x] Edit panel is too wide for mobile — replace the left-side panel with a bottom sheet or slide-in drawer triggered by a FAB
-- [x] FAB group reduced to smaller buttons with tighter spacing on small screens
-- [x] Navbar widget slots no longer overflow on narrow screens; widget editor dropdowns pinned to right edge
-- [x] Cart drawer slides up as a full-width bottom sheet on screens ≤ 768 px
-- [x] Brand header scrolls off screen on mobile; sticky navbar locks to top beneath it
-- [x] Navbar widgets (search, dropdown) fill their slot width — no more fixed pixel widths
-- [x] Edit panel content no longer overflows panel bounds (collapsible sections constrained, integration inputs get `min-width: 0`)
-- [ ] Test and fix tile layout responsiveness in all four layout variants on common mobile screen sizes (375px, 390px, 414px)
-- [ ] Touch target audit — ensure all interactive elements (tile buttons, cart qty controls, widget editor) meet minimum 44px tap target size
-- [ ] Static export: apply updated mobile styles to generated HTML
-
-### Polish
-- [ ] Basic tests for `AppContext` reducers and the `Tile` / `Layout` components
+See **[TODO.md](TODO.md)** for the full, up-to-date public roadmap.
 
 ---
 

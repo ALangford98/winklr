@@ -23,7 +23,7 @@ export default function ConfigPorter() {
     a.download = "store.html";
     a.click();
     URL.revokeObjectURL(url);
-    setStatus({ message: "store.html exported — open it in any browser.", isError: false });
+    setStatus({ message: "store.html exported - open it in any browser.", isError: false });
   };
 
   const handleImport = async (file) => {
@@ -46,7 +46,7 @@ export default function ConfigPorter() {
       await navigator.clipboard.writeText(url);
       setStatus({ message: "Link copied to clipboard.", isError: false });
     } catch {
-      setStatus({ message: "Link updated — copy it from the address bar.", isError: false });
+      setStatus({ message: "Link updated - copy it from the address bar.", isError: false });
     }
   };
 

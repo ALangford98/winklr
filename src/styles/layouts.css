@@ -11,6 +11,7 @@
   flex-wrap: wrap;
   gap: 16px;
   align-content: flex-start;
+  justify-content: center;
 }
 
 /* ── Strip ─────────────────────────────────────────────── */
@@ -20,6 +21,7 @@
   overflow-x: auto;
   gap: 16px;
   align-items: flex-start;
+  justify-content: center;
   padding-bottom: 20px;
 }
 
@@ -36,6 +38,7 @@
   flex-direction: column;
   gap: 10px;
   max-width: 860px;
+  margin: 0 auto;
 }
 
 .layout--stacked .tile {
@@ -102,6 +105,7 @@
   flex-wrap: wrap;
   gap: 16px;
   align-content: flex-start;
+  justify-content: center;
 }
 
 /* ── LayoutSelector ────────────────────────────────────── */
@@ -111,11 +115,48 @@
   gap: 8px;
 }
 
+.layout-section-add {
+  display: flex;
+  gap: 6px;
+}
+
+.layout-section-add .editor-add-form-input {
+  flex: 1;
+}
+
+.layout-section-add-btn {
+  flex-shrink: 0;
+  width: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: var(--accent-subtle);
+  color: var(--accent-primary);
+  font-size: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.layout-section-add-btn:hover:not(:disabled) {
+  border-color: var(--accent-primary);
+}
+
+.layout-section-add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.layout-section-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 /* ── Responsive ────────────────────────────────────────── */
 
 /* Tablet: tighten up detailed tile width */
 @media (max-width: 860px) {
-  .layout--detailed {
+  .tile--detailed {
     width: 220px;
   }
 }

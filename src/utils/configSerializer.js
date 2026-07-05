@@ -5,13 +5,18 @@ export function exportConfig(state) {
     version:      CONFIG_VERSION,
     websiteType:     state.websiteType,
     widgets:         state.widgets,
-    stockList:       state.stockList,
+    stockList:       (state.stockList || []).filter((item) => !item.is_sample),
     tileConfig:      state.tileConfig,
     layoutConfig:    state.layoutConfig,
+    layoutAlign:     state.layoutAlign,
+    searchAlign:     state.searchAlign,
     theme:           state.theme,
+    customTheme:     state.customTheme,
     integrations:    state.integrations,
     groupByCategory: state.groupByCategory,
     categoryConfig:  state.categoryConfig,
+    brand:           state.brand,
+    decals:          state.decals,
   };
 
   const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
@@ -34,7 +39,7 @@ export function parseConfigFile(file) {
       try {
         raw = JSON.parse(e.target.result);
       } catch {
-        reject(new Error("Invalid JSON — check the file and try again."));
+        reject(new Error("Invalid JSON - check the file and try again."));
         return;
       }
 
@@ -50,10 +55,15 @@ export function parseConfigFile(file) {
         stockList:       Array.isArray(raw.stockList) ? raw.stockList : null,
         tileConfig:      raw.tileConfig      ?? null,
         layoutConfig:    raw.layoutConfig    ?? null,
+        layoutAlign:     raw.layoutAlign     ?? null,
+        searchAlign:     raw.searchAlign     ?? null,
         theme:           raw.theme           ?? null,
+        customTheme:     raw.customTheme     ?? null,
         integrations:    raw.integrations    ?? null,
         groupByCategory: raw.groupByCategory ?? null,
         categoryConfig:  raw.categoryConfig  ?? null,
+        brand:           raw.brand           ?? null,
+        decals:          Array.isArray(raw.decals) ? raw.decals : null,
       });
     };
 

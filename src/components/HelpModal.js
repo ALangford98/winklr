@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 const SECTIONS = [
   {
     title: "Edit Mode vs View Mode",
-    body: "Use the button at the bottom-right to switch modes. Edit Mode shows the configuration panel on the left — use it to set up your store. View Mode hides all editing UI and shows only the finished storefront.",
+    body: "Use the button at the bottom-right to switch modes. Edit Mode shows the configuration panel on the left, use it to set up your store. View Mode hides all editing UI and shows only the finished storefront.",
   },
   {
     title: "Loading your stock list",
@@ -31,7 +31,7 @@ const SECTIONS = [
   },
   {
     title: "Navbar widgets",
-    body: "In Edit Mode, click any + slot in the navbar to add a widget — links, a search bar, a dropdown, or a text label. Saved widgets appear in View Mode automatically.",
+    body: "In Edit Mode, click any + slot in the navbar to add a widget: links, a search bar, a dropdown, or a text label. Saved widgets appear in View Mode automatically.",
   },
   {
     title: "Export, Import & Share",
