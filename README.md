@@ -105,6 +105,70 @@ See **[TODO.md](TODO.md)** for the full, up-to-date public roadmap.
 
 ## Changelog
 
+### [0.5.0] — 2026-07-05
+
+#### Decals
+- New **Decals** section (Theme category) — upload an image and drag it anywhere on the page in Edit Mode; position sticks to that spot in the scrollable content, not the viewport
+- Per-decal size and rotation sliders in the panel
+- Included in JSON export/import; baked into the static export as static (non-draggable) positioned images; intentionally excluded from the shareable-link hash to keep URLs short (same treatment as the branding logo)
+
+#### Documentation
+- Replaced the stale inline TODO in this README with **[TODO.md](TODO.md)**, rewritten against the actual current state of the app
+- Added **[QUICKSTART.md](QUICKSTART.md)** — install/run, project structure, the live-app/static-export duplication contributors need to know about, and how to enable telemetry
+- Added `TODO.private.md` (gitignored) for personal/in-progress notes that shouldn't be public
+- Added `CLAUDE.md` with repo-specific instructions for AI coding agents, including that the changelog must be updated for every change
+
+### [0.4.1] — 2026-07-05
+
+#### Layout
+- Edit panel and page content now scroll independently — previously they shared one page-level scroll, so a long item list would scroll the settings panel along with it
+- Search bar alignment (Left / Center / Right), independent of item alignment; fixed the exported static site missing the `max-width` that made the alignment control meaningful there
+
+### [0.4.0] — 2026-07-05
+
+#### Registry trust & safety
+- Reservations are now keyed per guest name (`{ [itemId]: { [guestName]: quantity } }`) instead of a flat count — a guest can only add to or remove *their own* reservation, not anyone else's
+- Per-item `nameRequired` toggle (default on) — reserving prompts the guest for their name first, so the registry owner can see who reserved what
+- Owner view of reservations by name, with a "Release" action — shown inline in the Items panel in Edit Mode, and via a hidden `#owner` view + passcode on the exported static site
+- Owner passcode (Integrations panel) gates switching into Edit Mode and the exported owner view — documented everywhere as a client-side check only, not real authentication
+- New visitors now land in View Mode by default (was Edit Mode) — a shared or exported link no longer opens straight into the full editing panel
+
+#### Layout & sections
+- Item alignment (Left / Center / Right) for grid/strip/featured layouts, replacing a previous hardcoded center
+- Manually-created named sections — "+" button in the Layout panel creates an empty, orderable section before any items are tagged into it
+
+#### Theme
+- "My custom theme" — editing any colour or font auto-saves to a separate slot, restorable after previewing a built-in preset
+- Terracotta preset palette
+- Font pickers for Body, Headings, and Navbar — system stacks plus a few Google Fonts, loaded on demand in both the live app and exported sites
+
+#### Sample data
+- `is_sample` flag on demo/placeholder items — stripped from JSON export, the shareable link, and the exported static site; visible "Sample" badge and one-click bulk removal in the Items panel
+- "Load sample items" button appears wherever the stock list is empty (main view and Items panel) so a new user or designer has real content to look at
+
+#### Framework telemetry
+- Optional, anonymous usage ping (domain, website type, item count) from the live app and every exported site — opt-in by filling in `src/config/telemetry.js` with your own Firebase project; no-ops entirely until configured
+- `/admin` route — passcode-gated dashboard showing total pings, unique domains, and a breakdown by website type
+
+#### Bug fixes
+- Fixed a dead CSS selector (`.layout--detailed` → `.tile--detailed`) that meant the tablet tile-width rule never applied
+- `box-sizing: border-box` added to the search bar wrapper so its `max-width` behaves consistently with the exported site
+
+### [0.3.1] — 2026-07-05
+
+#### Branding & theme clarity
+- Branding logo picker no longer defaults to showing the Winklr wordmark where a real logo would go — empty state now reads "Your logo here" with a clear upload affordance, plus a hint explaining what shows in the navbar until one is uploaded
+- Registry title, subheading, and currency fields now have persistent labels instead of placeholder-only text
+- "Accent colour" folded into the same Colours grid as every other customisable variable instead of sitting in its own separate block
+- Added an editable "Outline colour" swatch (`--border-subtle`) — this CSS variable already drove borders throughout the app but had no control exposed for it
+
+### [0.3.0] — 2026-07-05
+
+#### Sharing & export correctness
+- Fixed the shareable link (Copy link) silently dropping `integrations` (breaking live cross-guest reservation sync via Firebase), `groupByCategory`, and `categoryConfig`
+- Fixed JSON config export/import dropping `brand` (page title, subheading, currency, logo) entirely
+- Exported static site (`store.html`) fixes to match the live editor: honours the configured currency prefix instead of a hardcoded `$`, renders the page heading/subheading, supports category-grouped sections, and models reservations by quantity (`X of Y reserved`) instead of a plain boolean — the old boolean model was also incompatible with the live app's Firebase schema if the two ever shared a database
+
 ### [0.2.2] — 2026-05-11
 
 #### Registry
