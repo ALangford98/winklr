@@ -246,7 +246,7 @@ function PaymentStep({ form, onChange }) {
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
           <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
-        Payments are encrypted and processed securely via Stripe.
+        This is a demo checkout - no real payment is processed, and no card details leave this browser.
       </div>
     </div>
   );
@@ -265,7 +265,9 @@ function ConfirmationStep({ orderRef, form, cartItems }) {
       <h3 className="checkout-confirm-heading">Order placed!</h3>
       <p className="checkout-confirm-ref">Reference: <strong>{orderRef}</strong></p>
       <p className="checkout-confirm-email">
-        A confirmation will be sent to <strong>{form.email}</strong>
+        This demo order was recorded on this device only - no confirmation email is sent to{' '}
+        <strong>{form.email}</strong> (there's no backend to send it from). Take a screenshot of
+        this reference if you need to note it down.
       </p>
       <div className="checkout-confirm-details">
         <div className="checkout-confirm-section">

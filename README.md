@@ -105,6 +105,237 @@ See **[TODO.md](TODO.md)** for the full, up-to-date public roadmap.
 
 ## Changelog
 
+### [0.9.0] — 2026-07-12
+
+#### Paste a list of items
+The Stock List panel now has an "…or paste a list of items" option: paste a plain text
+list (like one shared over WhatsApp), one item per line, and each line becomes a registry
+item. Anything after a ` - ` on a line goes into the item's Details field, so
+"Nappies - Huggies extra care" becomes an item named "Nappies" with "Huggies extra care"
+shown in its details. Pasted items are *added* to the existing list (unlike a file
+import, which replaces it), and are normal items afterwards - editable, removable,
+taggable below.
+
+The parser is deliberately tolerant of real-world copy/paste mess, verified against an
+actual registry list pasted from a phone: invisible zero-width characters that ride
+along from WhatsApp/Notes are stripped (they'd otherwise silently break search and
+dedupe), leading bullets/numbering are removed, sloppy spacing around the dash parses
+fine, and hyphenated names like "Soft-Structured Carrier" stay whole because only a
+dash *with a space before it* splits name from details.
+
+### [0.8.0] — 2026-07-06
+
+#### Exported sites were completely broken - fixed, and now actually tested
+While preparing the export flow for a real deployment, discovered that **every
+`store.html` this app has ever exported had a dead script**: the export template is a
+giant JS template literal, and template literals *cook* escape sequences - so the
+regex `/\/$/` in the generated code shipped as `//$/` (a line comment that swallowed
+the rest of the statement and broke the whole script's parse), and the email regexes
+shipped as patterns that rejected any address containing a literal "s". ESLint's
+`no-useless-escape` warning had been flagging exactly this and was suppressed with an
+incorrect "emitted verbatim" justification comment. Nobody had ever actually opened an
+export in a browser until now - all prior verification checked the pre-interpolation
+source, which is exactly the text that *doesn't* ship.
+
+- Fixed by emitting the script template with `String.raw`, so every backslash ships
+  byte-for-byte; also fixed an `\'` in the storage-warning string with the same
+  cooked-escape problem.
+- Added real end-to-end coverage so this class of bug can't come back silently: a test
+  now generates an actual `store.html`, loads it into a scripted DOM, drives the Guest
+  Access gate form with a wrong then a right password, and asserts the outcome. Also
+  smoke-tested both gated and open exports visually in headless Chrome.
+
+#### Exported sites no longer contain any plaintext secrets
+The exported page used to embed the Owner passcode and Guest Access password in
+plaintext - readable by anyone who pressed View Source on the deployed site. Both now
+ship only as SHA-256 fingerprints, and the gate/owner-view checks hash the entered
+value and compare fingerprints:
+
+- New `src/utils/sha256.js` (synchronous pure-JS, verified against Node's native
+  crypto across block-boundary and unicode edge cases), with the same implementation
+  inlined into the exported page; a test extracts the inlined copy from a real export
+  and confirms both produce identical digests.
+- Still a client-side check, not real auth - and a weak passcode can be brute-forced
+  offline from its hash - but the passcode itself can no longer be read out of the
+  page, which is what matters most if it was ever reused elsewhere. Panel copy updated
+  to reflect this.
+
+#### Scoped Firebase rules guidance
+The Integrations panel's setup note used to recommend fully-open database rules. It
+now recommends rules scoped to only the four paths the app uses, with the guest
+access log (which contains guest emails) set **write-only** so nobody - including
+someone with the database URL from the page source - can download the email list.
+
+### [0.7.2] — 2026-07-06
+
+#### Empty navbar no longer shows as a bar of blank dividers
+In View Mode, an unconfigured navbar (the common case for a fresh registry - no widgets
+added yet) rendered a full-width row of empty, dashed-border slots next to the brand logo,
+since every slot got its own bordered `<li>` whether or not it had a widget in it. Fixed
+`NavbarView.js` to only render slots that actually produce content, so an empty navbar is
+just the logo with no dividers. The exported static site (`buildNavbarHTML` in
+`generateStoreHTML.js`) already filtered these out correctly - only the live app had the
+regression.
+
+### [0.7.1] — 2026-07-06
+
+#### Security review before deploying
+Went looking specifically for secrets leaking into the frontend and other deployment
+risks, since that's an easy thing to get wrong in an app with no backend. Found and fixed
+two real issues, and confirmed a few other things are fine as-is:
+
+- **Fixed: the shareable "Copy link" leaked the Owner passcode.** `encodeConfigToHash()`
+  was embedding the entire `integrations` object - including the Owner passcode - into
+  the link handed straight to guests (Share FAB, and the Copy link button in the Config
+  panel). Anyone who received a completely normal registry link could read the owner's
+  passcode straight out of the URL (it's just base64, no real encryption), and since
+  that's the same passcode used to gate the exported site's owner view, it also
+  compromised the deployed site's admin access. Fixed to only carry the fields guests
+  actually need (Firebase URL, Stripe/Mapbox public keys) - the passcode now travels
+  only through JSON export (a private backup file) and the static site export (already
+  disclosed there as a client-side-only check). Added a disclosure note to the Config
+  panel explaining exactly what each sharing method includes.
+- **Fixed: a gift suggestion's "link" field could execute script in the owner's
+  browser.** The link a guest submits was rendered as a clickable `<a href>` with no
+  scheme check, so a `javascript:` URL would run when the owner clicked "View link" -
+  classic stored XSS via URL scheme, in both the live app and the exported site. Now
+  validated on submit and, more importantly, re-checked at render time (`isSafeUrl()`)
+  so a suggestion arriving any other way - a direct Firebase write, an older cached
+  value - still can't render as an executable link.
+- **Confirmed clean**: no hardcoded API keys, private keys, or committed `.env` files
+  anywhere in the repo or its git history. Every place user-submitted text gets rendered
+  in the exported site already runs through `esc()` for HTML-escaping - checked
+  systematically across items, categories, suggestions, cash pledges, and checkout.
+- **Known accepted risk, documented rather than "fixed"**: this app has no backend, so
+  the Firebase Realtime Database rules needed for reservations/suggestions/pledges to
+  sync (`{ ".read": true, ".write": true }`) are genuinely open to anyone who has the
+  URL - not just through the app's UI, but via any raw HTTP request. Same tradeoff
+  already disclosed for the Owner passcode and Guest Access password: fine for a small
+  trusted audience, not something to reuse for anything sensitive.
+- **Noted, not yet fixed**: `xlsx` (used to parse imported CSV/XLSX stock lists) has two
+  known, currently-unpatched vulnerabilities upstream (prototype pollution, ReDoS) with
+  no fixed version on the public npm registry. Risk is bounded - it only runs when the
+  *owner* imports a file, not triggerable by a guest - but worth knowing about before
+  opening a stock-list file from someone else. All other `npm audit` findings are
+  build-tooling dependencies that never ship in the production bundle.
+
+Added `src/__tests__/security.test.js` covering both fixes as regressions, and polyfilled
+`TextEncoder`/`TextDecoder` in `setupTests.js` (jsdom doesn't provide them, so the
+shareable-link code was previously untested).
+
+### [0.7.0] — 2026-07-05
+
+#### Cash Fund
+Registries can now accept cash contributions instead of (or alongside) physical items.
+Turned on per-registry from a new "Cash Fund" panel in the edit sidebar:
+- Custom heading and an optional message to guests.
+- Optional running total pledged, and an optional goal amount with a progress bar.
+- Optional payment/bank details field (free text, so it fits bank transfer, PayPal.me,
+  Venmo, or whatever the owner actually uses) - shown as plain text to anyone with the
+  link, same trust model as the registry link itself.
+- Guests can record a pledge (name, email, amount, optional message) so the owner - and
+  other guests, if the total is shown - can see what's been contributed. There's no real
+  payment processing anywhere in this; money changes hands outside the app the same way
+  a bank transfer or PayPal payment always has, and the pledge is just a record of it.
+- Owner can remove any pledge (accidental double-entries, pranks) from the same panel.
+- Built in both the live app (`CashFundPanel.js`, `CashFundCard.js`) and the static export
+  (`generateStoreHTML.js`), wired through `configSerializer.js` and `shareableUrl.js` like
+  every other config field.
+
+#### A pass at making the app harder to break by accident
+Went through both sides of the app - the person building a registry and the guests using
+it - looking for places where a careless click or a slow connection could silently lose
+data or lie about what happened. Fixed:
+- **Silent data loss on a full/blocked browser storage**: every write now surfaces a
+  visible warning banner instead of failing invisibly while the UI still looks saved.
+- **False "success" messages**: gift suggestions, cash pledges, and reservations now
+  check the actual Firebase response (`fetch` only rejects on a network failure, not on
+  an HTTP error code) before telling a guest something worked. A failed reservation or
+  pledge now falls back to a local update instead of a dead-looking button; a failed
+  suggestion/pledge now shows a real error instead of a cheerful "Thanks!".
+- **Cross-site data bleed**: a new per-site `siteId`, carried through every config
+  round-trip, namespaces every localStorage key. Two different exported registries (or
+  two different shared links) opened in the same browser no longer inherit each other's
+  cart, reservations, or guest name.
+- **Import overwrite guardrails**: dragging a new file onto an already-loaded stock list,
+  or importing a config JSON file, now asks for confirmation first instead of silently
+  replacing everything.
+- **Oversized image uploads**: logos, decals, item photos, and suggestion photos are
+  capped at 3MB with a clear error, instead of silently blowing the storage quota.
+- **Malformed Firebase URLs no longer crash the page** for every visitor - guarded with
+  a try/catch and an inline validation hint in the Integrations panel.
+- **Spreadsheet imports** now recognise `quantity`/`qty` and `category`/`categories`/`tag`
+  column headers (previously silently dropped into metadata).
+- **Category tags** are now deduplicated case-insensitively as you type them, so
+  "Kitchen" and "kitchen" don't become two different sections.
+- Decals can no longer be dragged to negative coordinates where they'd become invisible
+  and unreachable.
+- Rewrote the checkout confirmation and payment-step copy, which previously implied a
+  real email confirmation and encrypted Stripe payment were happening when neither is
+  wired up yet - now honestly describes it as a local-only demo.
+- Added an honest note about reservation sync timing to the Help modal (registries only),
+  and a "Reserving items" section that only shows for registries (previously guests saw
+  cart/checkout help text that didn't apply to their site type at all).
+
+#### Tests
+Added `src/__tests__/ownerFlows.test.js` and `src/__tests__/guestFlows.test.js`, exercising
+the real `AppContext` (no mocking) end-to-end for both sides of the app: item CRUD,
+config/stock-file import including the new column aliases, the access-gate
+lockout-prevention and owner-passcode bypass, cash fund configuration and pledge removal,
+gift suggestions and cash pledges (including what happens when the Firebase write actually
+fails), guest email autofill across forms, and a full guest journey through a
+password-protected gate to the storefront.
+
+### [0.6.3] — 2026-07-05
+
+#### "Powered by Winklr" now links back to Winklr
+Clicking the footer badge (both in the live editor and every exported site) opens a small
+popup with two options, instead of doing nothing:
+- **Build one that looks like this** - opens the Winklr app pre-loaded with the current
+  colours, fonts, and layout choices, but with the built-in sample items instead of this
+  page's real item list (or anyone's personal data).
+- **Start from scratch** - opens a blank Winklr app with the default look.
+
+The "look-only" link reuses the existing shareable-URL hash mechanism (`#winklr=...`), so no
+new persisted config field was needed - `encodeLookConfigToHash()` in `shareableUrl.js` just
+builds a narrower version of that same payload. Built in both the live app
+(`PoweredByModal.js`) and the static export (`generateStoreHTML.js`), per the dual-build rule.
+
+### [0.6.2] — 2026-07-05
+
+#### Featured items, and gift-suggestion email/link/photo/alignment
+- Item list editor: each item now has a star toggle to mark it as the "featured" item, used by
+  the Featured layout as the hero (only one item can be featured at a time). Mirrored into the
+  static export's `renderLayout()`.
+- Gift suggestions now prefill the guest's email if they already entered one to get past the
+  Access Gate, so they don't have to type it twice.
+- Guests can attach an optional link and photo to a gift suggestion; both show up for the owner
+  in the suggestions panel and carry through onto the item once approved.
+- The "Suggest a gift" form now has its own Left/Center/Right alignment control (registry sites
+  only), matching the pattern already used for items and the search bar.
+- All of the above was built twice, once in the live app and once in `generateStoreHTML.js` for
+  the exported static site, per this repo's dual-build rule.
+
+### [0.6.1] — 2026-07-05
+
+#### Guest Access gate: lockout fixes
+Found in response to a direct question ("make sure not to lock admin users out") right after
+the gate shipped in 0.6.0 - two real ways an owner could get shut out of their own registry:
+
+- Ticking "Require a password" re-rendered the app immediately, and the owner had never
+  themselves "passed" the gate they were only just creating - so turning it on booted them
+  to the gate screen mid-edit. Fixed: enabling the toggle now marks the person doing it as
+  already past the gate.
+- A gate enabled with no password typed yet was trivially bypassable (an empty submitted
+  password matched the empty stored one) while still locking the owner out per the bug
+  above. Fixed: the gate is only considered active once a non-empty password exists, in
+  both the live app and the exported site.
+- Added a genuine safety net: an "I'm the registry owner" link on the gate screen (live app
+  and exported site) that accepts the separate Owner passcode instead of the shared guest
+  password - so losing or forgetting the guest password, or opening on a new device, no
+  longer means being locked out entirely, as long as an Owner passcode was set. The Access
+  panel now warns if the gate is active without one.
+
 ### [0.6.0] — 2026-07-05
 
 #### Gift suggestions

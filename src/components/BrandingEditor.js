@@ -1,18 +1,23 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { AppContext } from "./appContext";
+import { readImageFileAsDataUrl } from "../utils/readImageFile";
 
 export default function BrandingEditor() {
   const { state, setBrand } = useContext(AppContext);
   const inputRef = useRef(null);
+  const [uploadError, setUploadError] = useState("");
 
   const update = (field, value) =>
     setBrand((prev) => ({ ...prev, [field]: value }));
 
-  const handleUpload = (file) => {
+  const handleUpload = async (file) => {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => update('logo', e.target.result);
-    reader.readAsDataURL(file);
+    try {
+      update('logo', await readImageFileAsDataUrl(file));
+      setUploadError("");
+    } catch (err) {
+      setUploadError(err.message);
+    }
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -81,6 +86,7 @@ export default function BrandingEditor() {
       {!logo && (
         <p className="branding-hint">No logo yet - the Winklr mark will show in the navbar until you upload one.</p>
       )}
+      {uploadError && <p className="branding-error">{uploadError}</p>}
 
       <label className="branding-field-label">Currency prefix</label>
       <div className="branding-field">

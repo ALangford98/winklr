@@ -3,6 +3,7 @@ const CONFIG_VERSION = 1;
 export function exportConfig(state) {
   const config = {
     version:      CONFIG_VERSION,
+    siteId:          state.siteId,
     websiteType:     state.websiteType,
     widgets:         state.widgets,
     stockList:       (state.stockList || []).filter((item) => !item.is_sample),
@@ -10,6 +11,7 @@ export function exportConfig(state) {
     layoutConfig:    state.layoutConfig,
     layoutAlign:     state.layoutAlign,
     searchAlign:     state.searchAlign,
+    suggestFormAlign: state.suggestFormAlign,
     theme:           state.theme,
     customTheme:     state.customTheme,
     integrations:    state.integrations,
@@ -19,6 +21,7 @@ export function exportConfig(state) {
     decals:          state.decals,
     giftSuggestionsEnabled: state.giftSuggestionsEnabled,
     accessGate:      state.accessGate,
+    cashFund:        state.cashFund,
   };
 
   const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
@@ -52,6 +55,7 @@ export function parseConfigFile(file) {
 
       // Loose validation: accept whatever fields are present, null out the rest
       resolve({
+        siteId:          raw.siteId           ?? null,
         websiteType:     raw.websiteType     ?? null,
         widgets:         raw.widgets         ?? null,
         stockList:       Array.isArray(raw.stockList) ? raw.stockList : null,
@@ -59,6 +63,7 @@ export function parseConfigFile(file) {
         layoutConfig:    raw.layoutConfig    ?? null,
         layoutAlign:     raw.layoutAlign     ?? null,
         searchAlign:     raw.searchAlign     ?? null,
+        suggestFormAlign: raw.suggestFormAlign ?? null,
         theme:           raw.theme           ?? null,
         customTheme:     raw.customTheme     ?? null,
         integrations:    raw.integrations    ?? null,
@@ -68,6 +73,7 @@ export function parseConfigFile(file) {
         decals:          Array.isArray(raw.decals) ? raw.decals : null,
         giftSuggestionsEnabled: raw.giftSuggestionsEnabled ?? null,
         accessGate:      raw.accessGate       ?? null,
+        cashFund:        raw.cashFund         ?? null,
       });
     };
 

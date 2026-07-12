@@ -13,6 +13,12 @@ const SLOTS = [
 
 const NavbarView = () => {
   const { state } = useContext(AppContext);
+  // Slots with nothing configured (or a stale/unrecognised widget entry that
+  // renders nothing) used to still get their own bordered <li>, which is
+  // what produced a row of empty dividers with no content in them.
+  const activeSlots = SLOTS
+    .map(({ key, desktopOnly }) => ({ key, desktopOnly, content: renderWidget(state.widgets[key]) }))
+    .filter((slot) => slot.content);
 
   return (
     <>
@@ -21,16 +27,18 @@ const NavbarView = () => {
       </div>
       <div className="Navbar">
         <NavbarBrand />
-        <div className="navbar-slots">
-          {SLOTS.map(({ key, desktopOnly }) => (
-            <li
-              key={key}
-              className={`navbar-slot${desktopOnly ? ' navbar-slot--desktop' : ''}`}
-            >
-              {renderWidget(state.widgets[key])}
-            </li>
-          ))}
-        </div>
+        {activeSlots.length > 0 && (
+          <div className="navbar-slots">
+            {activeSlots.map(({ key, desktopOnly, content }) => (
+              <li
+                key={key}
+                className={`navbar-slot${desktopOnly ? ' navbar-slot--desktop' : ''}`}
+              >
+                {content}
+              </li>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

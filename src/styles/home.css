@@ -200,6 +200,26 @@
   opacity: 0.6;
 }
 
+.footer-poweredby-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 6px;
+}
+
+.footer-poweredby-btn:hover {
+  background: var(--bg-raised);
+}
+
+.footer-poweredby-btn:hover .footer-wordmark {
+  opacity: 0.9;
+}
+
 /* ── DecalsPanel ───────────────────────────────────────── */
 .decals-panel {
   display: flex;
@@ -537,6 +557,48 @@
   color: var(--accent-success);
 }
 
+.loader-paste-toggle {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  align-self: flex-start;
+}
+
+.loader-paste-toggle:hover {
+  color: var(--text-primary);
+}
+
+.loader-paste-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loader-paste-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.loader-paste-textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
 .loader-status--error {
   color: var(--accent-danger);
 }
@@ -678,6 +740,8 @@
 .editor-item-actions button:hover:not(:disabled) { color: var(--text-primary); }
 .editor-item-actions button:disabled { opacity: 0.25; cursor: not-allowed; }
 .editor-item-actions .editor-remove:hover { color: var(--accent-danger); }
+.editor-item-actions .editor-feature-btn:hover { color: var(--accent-primary); }
+.editor-item-actions .editor-feature-btn--active { color: var(--accent-primary); }
 
 .editor-add-btn {
   background: none;

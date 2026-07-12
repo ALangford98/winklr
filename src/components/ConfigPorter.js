@@ -28,6 +28,10 @@ export default function ConfigPorter() {
 
   const handleImport = async (file) => {
     if (!file) return;
+    const ok = window.confirm(
+      "Importing a config file replaces your entire current setup - items, theme, layout, branding, everything. Continue?"
+    );
+    if (!ok) { if (inputRef.current) inputRef.current.value = ""; return; }
     try {
       const config = await parseConfigFile(file);
       loadConfig(config);
@@ -71,6 +75,14 @@ export default function ConfigPorter() {
       <button className="selector-btn config-share-btn selector-btn--active" onClick={handleExportSite}>
         Export website
       </button>
+      <p className="decals-hint">
+        The link includes your Firebase/Stripe/Mapbox settings so live sync keeps working for
+        whoever opens it, but never your Owner passcode or Guest Access password - safe to hand
+        to anyone you want viewing this registry. <strong>Export website</strong> carries only
+        scrambled fingerprints (hashes) of your passcodes, never the plaintext - safe to host
+        publicly. <strong>Export</strong> (the JSON file) is the one that does include the Owner
+        passcode, since that's meant as your own private backup, not something to share.
+      </p>
       {status && (
         <p className={`loader-status${status.isError ? " loader-status--error" : ""}`}>
           {status.message}

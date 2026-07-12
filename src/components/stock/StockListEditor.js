@@ -1,24 +1,23 @@
 import React, { useState, useContext, useRef } from 'react';
 import { AppContext } from '../appContext';
 import { buildDemoItems } from '../../data/demoItems';
+import { readImageFileAsDataUrl } from '../../utils/readImageFile';
 
 const EMPTY_FORM = { name: '', price: '', image: '', categories: [], quantity: '', nameRequired: true };
 
-function readFileAsDataUrl(file) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target.result);
-    reader.readAsDataURL(file);
-  });
-}
-
 function ImagePicker({ value, onChange }) {
   const ref = useRef(null);
+  const [error, setError] = useState('');
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    onChange(await readFileAsDataUrl(file));
+    try {
+      onChange(await readImageFileAsDataUrl(file));
+      setError('');
+    } catch (err) {
+      setError(err.message);
+    }
     e.target.value = '';
   };
 
@@ -60,6 +59,7 @@ function ImagePicker({ value, onChange }) {
           Replace photo
         </button>
       )}
+      {error && <p className="image-picker-error">{error}</p>}
     </div>
   );
 }
@@ -69,7 +69,8 @@ function TagInput({ value = [], onChange }) {
 
   const addTag = (raw) => {
     const tag = raw.trim();
-    if (tag && !value.includes(tag)) onChange([...value, tag]);
+    const alreadyExists = value.some((v) => v.toLowerCase() === tag.toLowerCase());
+    if (tag && !alreadyExists) onChange([...value, tag]);
     setInput('');
   };
 
@@ -151,7 +152,7 @@ function EditItemForm({ item, onSave, onCancel }) {
 }
 
 export default function StockListEditor() {
-  const { state, removeStockItem, updateStockItem, setStockList, addStockItem } = useContext(AppContext);
+  const { state, removeStockItem, updateStockItem, toggleFeaturedItem, setStockList, addStockItem } = useContext(AppContext);
   const isRegistry = state.websiteType === 'registry';
   const [editingId, setEditingId] = useState(null);
   const [showAdd, setShowAdd]     = useState(false);
@@ -234,6 +235,13 @@ export default function StockListEditor() {
                 </div>
                 <div className="editor-item-actions">
                   <button onClick={() => setEditingId(item.id)} title="Edit">✎</button>
+                  <button
+                    onClick={() => toggleFeaturedItem(item.id)}
+                    className={item.featured ? 'editor-feature-btn editor-feature-btn--active' : 'editor-feature-btn'}
+                    title={item.featured ? "Featured - click to unfeature" : "Feature this item (used by the Featured layout)"}
+                  >
+                    {item.featured ? '★' : '☆'}
+                  </button>
                   <button onClick={() => moveItem(i, -1)} disabled={i === 0} title="Move up">↑</button>
                   <button onClick={() => moveItem(i, 1)} disabled={i === state.stockList.length - 1} title="Move down">↓</button>
                   <button onClick={() => removeStockItem(item.id)} className="editor-remove" title="Remove">×</button>

@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
+import { AppContext } from "./appContext";
 
 const SECTIONS = [
   {
@@ -7,7 +8,7 @@ const SECTIONS = [
   },
   {
     title: "Loading your stock list",
-    body: "In Edit Mode, drag a file onto the drop zone or click to browse. Supported formats: JSON (array or { items: [...] }), CSV, and XLSX. You can also add, remove, and reorder items manually using the list below the drop zone.",
+    body: "In Edit Mode, drag a file onto the drop zone or click to browse. Supported formats: JSON (array or { items: [...] }), CSV, and XLSX. You can also paste a plain text list (one item per line, with an optional \" - details\" after each name), or add, remove, and reorder items manually using the list below the drop zone.",
   },
   {
     title: "Tiles",
@@ -28,6 +29,12 @@ const SECTIONS = [
   {
     title: "Shopping cart",
     body: "Each tile has an Add to Cart button. Click the Cart button at the bottom-right to review cart contents, adjust quantities, or clear the cart. Cart state persists across page refreshes.",
+    hideFor: "registry",
+  },
+  {
+    title: "Reserving items",
+    body: "Click Reserve on an item to claim it (or part of it) so other guests know it's taken. Reservations update live for everyone viewing the page, but if two guests reserve the very last one at almost the same moment, check with each other directly to sort out who brings it.",
+    onlyFor: "registry",
   },
   {
     title: "Navbar widgets",
@@ -40,6 +47,8 @@ const SECTIONS = [
 ];
 
 export default function HelpModal({ open, onClose }) {
+  const { state } = useContext(AppContext);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
@@ -48,6 +57,12 @@ export default function HelpModal({ open, onClose }) {
   }, [open, onClose]);
 
   if (!open) return null;
+
+  const sections = SECTIONS.filter((s) => {
+    if (s.onlyFor) return s.onlyFor === state.websiteType;
+    if (s.hideFor) return s.hideFor !== state.websiteType;
+    return true;
+  });
 
   return (
     <>
@@ -58,7 +73,7 @@ export default function HelpModal({ open, onClose }) {
           <button className="help-modal-close" onClick={onClose}>✕</button>
         </div>
         <div className="help-modal-body">
-          {SECTIONS.map((s) => (
+          {sections.map((s) => (
             <div key={s.title} className="help-section">
               <p className="help-section-title">{s.title}</p>
               <p className="help-section-body">{s.body}</p>

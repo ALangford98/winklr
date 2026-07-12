@@ -1,16 +1,30 @@
 import React, { useContext, useState } from "react";
 import { AppContext } from "../appContext";
 
+// A suggestion's "link" is free text from a guest - rendering it as a
+// clickable href without checking the scheme would let someone submit a
+// `javascript:` URL that runs in the registry owner's browser the moment
+// they click "View link".
+const isSafeUrl = (url) => /^https?:\/\//i.test((url || "").trim());
+
 function PendingRow({ id, suggestion, onApprove, onReject }) {
   const [qty, setQty] = useState(String(suggestion.quantity ?? 1));
 
   return (
     <li className="suggestion-row">
-      <div className="suggestion-row-info">
-        <span className="suggestion-row-name">{suggestion.name}</span>
-        <span className="suggestion-row-meta">
-          Suggested qty: {suggestion.quantity} &middot; {suggestion.email}
-        </span>
+      <div className="suggestion-row-top">
+        {suggestion.image && <img src={suggestion.image} alt="" className="suggestion-row-thumb" />}
+        <div className="suggestion-row-info">
+          <span className="suggestion-row-name">{suggestion.name}</span>
+          <span className="suggestion-row-meta">
+            Suggested qty: {suggestion.quantity} &middot; {suggestion.email}
+          </span>
+          {suggestion.link && isSafeUrl(suggestion.link) && (
+            <a href={suggestion.link} target="_blank" rel="noopener noreferrer" className="suggestion-row-link">
+              View link ↗
+            </a>
+          )}
+        </div>
       </div>
       <div className="suggestion-row-actions">
         <input
@@ -48,8 +62,8 @@ export default function SuggestionsPanel() {
         <span>Let guests suggest gifts</span>
       </label>
       <p className="decals-hint">
-        Guests submit a name, quantity, and email. Approving adds it to your registry with the
-        quantity you choose below (defaults to what they suggested).
+        Guests submit a name, quantity, email, and optionally a link and a photo. Approving adds
+        it to your registry with the quantity you choose below (defaults to what they suggested).
       </p>
 
       {pending.length === 0 ? (

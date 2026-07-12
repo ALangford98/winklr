@@ -15,7 +15,7 @@ const ALIGN_OPTIONS = [
 ];
 
 export default function LayoutSelector() {
-  const { state, setLayoutConfig, setLayoutAlign, setSearchAlign, addSection } = useContext(AppContext);
+  const { state, setLayoutConfig, setLayoutAlign, setSearchAlign, setSuggestFormAlign, addSection } = useContext(AppContext);
   const [newSection, setNewSection] = useState("");
 
   const handleAddSection = () => {
@@ -64,6 +64,23 @@ export default function LayoutSelector() {
           </button>
         ))}
       </div>
+
+      {state.websiteType === 'registry' && (
+        <>
+          <p className="selector-label">"Suggest a gift" alignment</p>
+          <div className="selector-options">
+            {ALIGN_OPTIONS.map(({ value, label }) => (
+              <button
+                key={value}
+                className={`selector-btn${(state.suggestFormAlign || "center") === value ? " selector-btn--active" : ""}`}
+                onClick={() => setSuggestFormAlign(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       <p className="selector-label">Sections</p>
       <div className="layout-section-add">

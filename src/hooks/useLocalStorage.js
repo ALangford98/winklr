@@ -19,6 +19,7 @@ export function useLocalStorage(key, initialValue) {
         window.localStorage.setItem(key, JSON.stringify(next));
       } catch (err) {
         console.error(`useLocalStorage: could not write "${key}"`, err);
+        window.dispatchEvent(new CustomEvent("winklr:storage-write-failed", { detail: { key } }));
       }
       return next;
     });

@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { AppContext } from "../components/appContext";
 import StockListLoader from "../components/stock/StockListLoader";
 import StockListEditor from "../components/stock/StockListEditor";
@@ -18,6 +18,9 @@ import DecalsLayer from "../components/decals/DecalsLayer";
 import SuggestionsPanel from "../components/suggestions/SuggestionsPanel";
 import SuggestGiftForm from "../components/suggestions/SuggestGiftForm";
 import AccessGatePanel from "../components/access/AccessGatePanel";
+import PoweredByModal from "../components/PoweredByModal";
+import CashFundPanel from "../components/CashFundPanel";
+import CashFundCard from "../components/cashfund/CashFundCard";
 
 const SEARCH_MARGIN_CSS = { left: "0", center: "0 auto", right: "0 0 0 auto" };
 
@@ -31,14 +34,22 @@ function matchesQuery(item, query) {
 }
 
 function Footer() {
+  const [poweredByOpen, setPoweredByOpen] = useState(false);
   return (
     <footer className="app-footer">
-      <span className="footer-text">Powered by</span>
-      <img
-        src={`${process.env.PUBLIC_URL}/branding/wordmark-lowercase.svg`}
-        alt="Winklr"
-        className="footer-wordmark"
-      />
+      <button
+        type="button"
+        className="footer-poweredby-btn"
+        onClick={() => setPoweredByOpen(true)}
+      >
+        <span className="footer-text">Powered by</span>
+        <img
+          src={`${process.env.PUBLIC_URL}/branding/wordmark-lowercase.svg`}
+          alt="Winklr"
+          className="footer-wordmark"
+        />
+      </button>
+      <PoweredByModal open={poweredByOpen} onClose={() => setPoweredByOpen(false)} />
     </footer>
   );
 }
@@ -186,6 +197,11 @@ export default function Home() {
                 <SuggestionsPanel />
               </CollapsibleSection>
             )}
+            {isRegistry && (
+              <CollapsibleSection title="Cash Fund" storageKey="cashFund" defaultOpen={false}>
+                <CashFundPanel />
+              </CollapsibleSection>
+            )}
             <CollapsibleSection title="Tile Style" storageKey="tileConfig" defaultOpen={false}>
               <TileConfigSelector />
             </CollapsibleSection>
@@ -263,7 +279,8 @@ export default function Home() {
           <p className="search-no-results">No items match "{state.searchQuery}"</p>
         )}
 
-        {isRegistry && state.giftSuggestionsEnabled && <SuggestGiftForm />}
+        {isRegistry && state.cashFund?.enabled && <CashFundCard />}
+        {isRegistry && state.giftSuggestionsEnabled && <SuggestGiftForm align={state.suggestFormAlign} />}
 
         <Footer />
       </div>

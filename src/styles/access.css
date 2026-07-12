@@ -10,6 +10,26 @@
   font-style: italic;
 }
 
+.access-gate-warn {
+  color: var(--accent-danger);
+}
+
+.access-gate-recovery {
+  color: var(--accent-success);
+}
+
+.access-gate-owner-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+  align-self: center;
+}
+
 .access-gate-password-row {
   display: flex;
   gap: 6px;

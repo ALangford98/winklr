@@ -26,11 +26,16 @@ function DecalItem({ decal, isEditMode, containerRef, onUpdate, onRemove }) {
 
   const handlePointerMove = (e) => {
     if (!dragging) return;
+    const container = containerRef.current;
     const point = toContentPoint(e.clientX, e.clientY);
-    onUpdate(decal.id, {
-      x: Math.round(point.x - offsetRef.current.dx),
-      y: Math.round(point.y - offsetRef.current.dy),
-    });
+    // Clamp to non-negative, in-bounds coordinates so a decal can never be
+    // dragged above/left of the page where it'd be invisible and effectively
+    // stuck - the only way back would be deleting it and starting over.
+    const maxX = Math.max(0, container.scrollWidth - decal.width);
+    const maxY = Math.max(0, container.scrollHeight - decal.width);
+    const x = Math.min(maxX, Math.max(0, Math.round(point.x - offsetRef.current.dx)));
+    const y = Math.min(maxY, Math.max(0, Math.round(point.y - offsetRef.current.dy)));
+    onUpdate(decal.id, { x, y });
   };
 
   const handlePointerUp = (e) => {

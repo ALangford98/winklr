@@ -8,6 +8,7 @@ import './styles/checkout.css';
 import './styles/admin.css';
 import './styles/suggestions.css';
 import './styles/access.css';
+import './styles/cashfund.css';
 
 import React, { useContext, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -21,6 +22,7 @@ import OwnerGateModal from './components/OwnerGateModal';
 import AccessGateScreen from './components/access/AccessGateScreen';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
+import StorageWarningBanner from './components/StorageWarningBanner';
 import { encodeConfigToHash } from './utils/shareableUrl';
 
 function hasWidget(widgets, type, content) {
@@ -86,12 +88,16 @@ function StoreApp() {
     toggleViewMode();
   };
 
-  if (state.accessGate?.enabled && !state.gatePassed) {
+  // A gate with no password set would be trivially passable (blank matches
+  // blank) while still locking the owner out of their own session - so it
+  // isn't considered "active" until a real password exists.
+  if (state.accessGate?.enabled && state.accessGate?.password && !state.gatePassed) {
     return <AccessGateScreen />;
   }
 
   return (
     <div className="App">
+      <StorageWarningBanner />
       {state.viewMode ? <Navbar /> : <NavbarView />}
       <Home />
 

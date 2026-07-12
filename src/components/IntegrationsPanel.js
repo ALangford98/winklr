@@ -9,7 +9,9 @@ const SERVICES = [
     placeholder: 'https://your-project-default-rtdb.firebaseio.com',
     docsHref:    'https://console.firebase.google.com/',
     isPublicUrl: true,
-    setupNote:   'In Firebase Console → Realtime Database → Rules, set: { "rules": { ".read": true, ".write": true } }',
+    setupNote:   'In Firebase Console → Realtime Database → Rules, paste: { "rules": { "reservations": { ".read": true, ".write": true }, "suggestions": { ".read": true, ".write": true }, "cashPledges": { ".read": true, ".write": true }, "guests": { ".read": false, ".write": true } } } — this limits access to just the paths the app uses, and keeps the guest access log (which contains emails) write-only so nobody can download it.',
+    isMalformed: (v) => !/^https?:\/\/.+/i.test(v.trim()),
+    malformedWarn: 'This doesn\'t look like a full web address (it should start with https://). Live sync won\'t work until this is the real database URL from Firebase Console.',
   },
   {
     id:          'stripePublishableKey',
@@ -32,7 +34,7 @@ const SERVICES = [
   {
     id:          'ownerPasscode',
     label:       'Owner passcode',
-    description: 'Optional. When set, switching into Edit Mode (and the owner view in an exported site) asks for this passcode first. This only stops casual guests from wandering into owner controls - it is checked in the browser, not on a server, so do not reuse a password you care about and do not treat it as real security.',
+    description: 'Optional. When set, switching into Edit Mode (and the owner view in an exported site) asks for this passcode first. This only stops casual guests from wandering into owner controls - it is checked in the browser, not on a server, so do not reuse a password you care about and do not treat it as real security. The exported website only ever contains a scrambled fingerprint (SHA-256 hash) of it, never the passcode itself.',
     placeholder: 'e.g. a short word or phrase',
   },
 ];
@@ -46,6 +48,7 @@ function StatusBadge({ value, isSecret }) {
 function ServiceRow({ service, value, onChange }) {
   const [show, setShow] = useState(false);
   const warn = value && service.isSecret && service.isSecret(value);
+  const malformed = value && service.isMalformed && service.isMalformed(value);
 
   return (
     <div className={`integration-row${warn ? ' integration-row--warn' : ''}`}>
@@ -55,6 +58,7 @@ function ServiceRow({ service, value, onChange }) {
       </div>
       <p className="integration-description">{service.description}</p>
       {warn && <p className="integration-secret-warn">{service.secretWarn}</p>}
+      {!warn && malformed && <p className="integration-secret-warn">{service.malformedWarn}</p>}
       {service.setupNote && !value && (
         <p className="integration-setup-note">{service.setupNote}</p>
       )}

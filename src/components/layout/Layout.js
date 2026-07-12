@@ -56,7 +56,8 @@ function StackedLayout({ items, tileConfig, sortable, align }) {
 }
 
 function FeaturedLayout({ items, tileConfig, sortable, align }) {
-  const [featured, ...rest] = items;
+  const featured = items.find((i) => i.featured) ?? items[0];
+  const rest = items.filter((i) => i !== featured);
   const allIds = items.map((i) => i.id);
   return (
     <SortableContext items={allIds} strategy={rectSortingStrategy}>

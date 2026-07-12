@@ -1,7 +1,8 @@
 /* ── Guest-facing suggest form ─────────────────────────── */
 .suggest-gift-form {
   max-width: 420px;
-  margin: 32px 24px;
+  box-sizing: border-box;
+  /* margin comes from an inline style driven by suggestFormAlign */
   padding: 16px;
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
@@ -30,6 +31,28 @@
   font-size: 11px;
   color: var(--text-muted);
   line-height: 1.4;
+}
+
+.suggest-gift-image-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.suggest-gift-image-preview {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-subtle);
+}
+
+.suggest-gift-image-btn {
+  width: auto;
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
 }
 
 .suggest-gift-error {
@@ -81,10 +104,26 @@
   gap: 6px;
 }
 
+.suggestion-row-top {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.suggestion-row-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-subtle);
+}
+
 .suggestion-row-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .suggestion-row-name {
@@ -96,6 +135,11 @@
 .suggestion-row-meta {
   font-size: 11px;
   color: var(--text-muted);
+}
+
+.suggestion-row-link {
+  font-size: 11px;
+  color: var(--accent-primary);
 }
 
 .suggestion-row-actions {

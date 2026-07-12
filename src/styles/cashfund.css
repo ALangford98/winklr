@@ -1,0 +1,93 @@
+/* ── Owner-facing cash fund panel ──────────────────────── */
+.cash-fund-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Guest-facing cash fund card ───────────────────────── */
+.cash-fund-card {
+  max-width: 420px;
+  box-sizing: border-box;
+  margin: 32px auto;
+  padding: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cash-fund-heading {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cash-fund-message {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.cash-fund-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cash-fund-total {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cash-fund-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg-raised);
+  overflow: hidden;
+}
+
+.cash-fund-bar-fill {
+  height: 100%;
+  background: var(--accent-primary);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.cash-fund-bank-details {
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cash-fund-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cash-fund-form-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.cash-fund-thanks {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+}

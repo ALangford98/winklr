@@ -15,6 +15,7 @@ README for a dated history of what shipped when.
 - [x] Remove the "Home" link option (redundant in a single-page app) or replace it with a configurable external URL field
 - [x] When the Search Bar widget is present in any navbar slot, hide the store search bar above the tile grid
 - [x] Review the Dropdown widget — options are now chosen from available link actions (Help, Cart) and item categories; selecting an option triggers the action or filters by category
+- [x] In View Mode, an empty navbar (no widgets configured) no longer shows a row of blank bordered dividers — only slots with actual content render
 
 ### Website types / Templates
 - [x] `websiteType` field in app state (persisted to localStorage, included in JSON export/import and shareable URL)
@@ -45,6 +46,7 @@ README for a dated history of what shipped when.
 - [x] Reservation quantity cap enforced in state (not just hidden by the UI) — a guest can no longer push total reservations past an item's needed quantity
 - [x] Gift Suggestions — guests submit a name/quantity/email; owner approves (with an editable final quantity) or rejects from the Items panel or the exported site's owner view
 - [x] Guest Access gate — optional email + display name + shared password screen in front of the whole registry, toggleable per registry; owner can generate a random password
+- [x] Cash Fund — guests can pledge a cash contribution instead of (or alongside) items; owner controls the heading/message, whether the running total and goal progress are shown, and optional payment/bank details text; guests can record a pledge so the owner (and other guests, if enabled) can see what's been contributed. No real payment processing — money changes hands outside the app
 - [ ] "Mark as purchased" action in edit mode — registry owner can permanently mark items fulfilled (removes from public reservation pool)
 - [ ] RSVP / message popup — name + message field (same Contact component as Portfolio, re-used)
 - [ ] Real email verification for suggestions/access gate (currently format-validated only) — would need Firebase Auth email-link sign-in or similar; a real backend dependency, not built yet
@@ -53,6 +55,15 @@ README for a dated history of what shipped when.
 - [x] `is_sample` flag on demo/placeholder items — stripped out of JSON export, the shareable link, and the exported static site, so sample data can never leak into a real deployment; visible "Sample" badge + one-click removal in the Items panel
 - [x] Owner passcode (Integrations panel) — gates switching into Edit Mode and the exported site's owner view. **Client-side check only, not real auth** — documented as such everywhere it appears; don't reuse a real password
 - [x] New visitors land in View Mode by default (previously defaulted to Edit Mode, meaning a shared/exported link opened straight into the full editing panel)
+- [x] Guest-facing writes (reservations, gift suggestions, cash pledges) check the actual Firebase response instead of just whether the network request threw — a guest is never told "done" when a write silently failed; failed reservations/pledges fall back to a local update instead of looking like a dead button
+- [x] Visible warning banner (live app and exported site) when a browser's storage is full and changes are silently failing to save, instead of looking saved when they aren't
+- [x] Image uploads (logo, decals, item photos, suggestion/reference photos) capped at 3MB with a friendly error, instead of silently blowing the storage quota
+- [x] Per-site `siteId` namespacing for localStorage — two different exported sites (or two different shared links) opened in the same browser no longer bleed cart/reservations/guest name into each other
+- [x] Confirmation prompts before a stock-list drag-and-drop import or a full config import silently replaces existing items/config
+- [x] The shareable "Copy link" no longer carries the Owner passcode — it used to embed the whole Integrations object, leaking the passcode to anyone who received a normal guest link
+- [x] A gift suggestion's "link" field is checked for a safe `http(s)://` scheme before ever being rendered as a clickable link, both on submit and at render time — closes a stored-XSS-via-`javascript:`-URL hole
+- [x] The exported site carries only SHA-256 fingerprints of the Owner passcode and Guest Access password — never plaintext — so neither can be read out of the deployed page's source
+- [x] Firebase rules guidance scoped to only the paths the app uses, with the guest access log (contains emails) write-only so the email list can't be downloaded
 
 ### Layout & appearance
 - [x] Item alignment (Left / Center / Right) for the grid, strip, and featured layouts
@@ -72,6 +83,7 @@ README for a dated history of what shipped when.
 - [x] Help popup / onboarding guide for first-time users
 - [x] Search bar — live tile filtering by name, category, and metadata fields
 - [x] Sample/demo items — "Load sample items" button appears wherever the stock list is empty, so a new user or designer has real content to look at
+- [x] Paste-a-list import — paste a plain text list (one item per line, `Name - details` format, e.g. straight out of WhatsApp) into the Stock List panel and each line becomes an item; strips invisible zero-width characters and bullet prefixes, appends to the existing list rather than replacing it
 
 ### Integrations
 - [x] Integrations panel in the edit UI — fields for each supported client-side credential (Stripe publishable key, Mapbox access token)
@@ -114,6 +126,7 @@ README for a dated history of what shipped when.
 
 ### Deployment pipeline
 - [x] Static export — generate a single self-contained HTML file from the current config; embeds theme CSS vars, stock data, and client-side API keys; renders a fully functional read-only storefront with cart/registry, search, decals, and fonts in vanilla JS
+- [x] Export template escape bug fixed (`String.raw`) — regexes in the generated script used to ship with backslashes cooked away, breaking every exported file's parse; now covered by an end-to-end test that loads a real export and drives the access gate
 - [x] Framework usage telemetry — anonymous, aggregate pings (domain, website type, item count) from the live app and every exported site, opt-in by filling in `src/config/telemetry.js` with your own Firebase project. No-ops entirely until configured
 - [x] `/admin` dashboard — passcode-gated view of telemetry pings across every deployment (total pings, unique domains, breakdown by type)
 - [ ] Static export: Stripe Elements checkout flow (card tokenisation only — no server-side charge)
@@ -146,4 +159,5 @@ README for a dated history of what shipped when.
 - [ ] Static export: apply updated mobile styles to generated HTML
 
 ### Polish
-- [ ] Basic tests for `AppContext` reducers and the `Tile` / `Layout` components
+- [x] Jest test suite covering both sides of the app: owner flows (item CRUD, config/stock-file import, access-gate lockout prevention, owner passcode bypass, cash fund config) and guest flows (reservations, gift suggestions, cash pledges, access-gate pass-through, email autofill between forms, and Firebase-failure fallback behaviour) — `src/__tests__/ownerFlows.test.js`, `src/__tests__/guestFlows.test.js`
+- [x] Security regression tests — shareable link never carries the Owner passcode, `javascript:` URLs in a suggestion's link field are never rendered as clickable — `src/__tests__/security.test.js`

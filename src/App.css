@@ -11,6 +11,36 @@
   pointer-events: none;
 }
 
+.storage-warning-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--accent-danger, #c0392b);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+  flex-shrink: 0;
+}
+
+.storage-warning-dismiss {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+  padding: 2px 6px;
+  opacity: 0.85;
+}
+
+.storage-warning-dismiss:hover {
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;

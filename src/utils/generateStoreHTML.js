@@ -1,5 +1,7 @@
 import { TELEMETRY_FIREBASE_URL } from "../config/telemetry";
 import { googleFontFamilyFor } from "../theme/fonts";
+import { WINKLR_HOMEPAGE_URL, encodeLookConfigToHash } from "./shareableUrl";
+import { sha256 } from "./sha256";
 
 const CSS_VARS_LIST = [
   '--bg-app', '--bg-card', '--bg-nav', '--bg-raised', '--bg-input',
@@ -195,19 +197,40 @@ button { font-family: inherit; }
 .suggestion-qty-input { width: 56px; box-sizing: border-box; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 4px; color: var(--text-primary); font-size: 12px; padding: 4px; }
 
 /* Suggest-a-gift form */
-.suggest-gift-form { max-width: 420px; margin: 32px 24px; padding: 16px; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--bg-card); display: flex; flex-direction: column; gap: 8px; }
+.suggest-gift-form { max-width: 420px; box-sizing: border-box; padding: 16px; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--bg-card); display: flex; flex-direction: column; gap: 8px; }
 .suggest-gift-heading { margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary); }
 .suggest-gift-hint { margin: 0 0 4px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
 .suggest-gift-email-note { margin: 0; font-size: 11px; color: var(--text-muted); line-height: 1.4; }
 .suggest-gift-error { margin: 0; font-size: 12px; color: var(--accent-danger); }
 .suggest-gift-form--done { align-items: center; text-align: center; }
 .suggest-gift-thanks { margin: 0; font-size: 13px; color: var(--text-secondary); }
+.suggest-gift-image-row { display: flex; align-items: center; gap: 8px; }
+.suggest-gift-image-preview { width: 36px; height: 36px; object-fit: cover; border-radius: 6px; flex-shrink: 0; border: 1px solid var(--border-subtle); }
+.suggest-gift-image-btn { width: auto; flex: 1; text-align: center; cursor: pointer; }
+.suggestion-row-top { display: flex; gap: 8px; align-items: flex-start; }
+.suggestion-row-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; flex-shrink: 0; border: 1px solid var(--border-subtle); }
+.suggestion-row-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.suggestion-row-link { font-size: 11px; color: var(--accent-primary); }
+
+/* Cash fund */
+.cash-fund-card { max-width: 420px; box-sizing: border-box; margin: 32px auto; padding: 16px; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px; }
+.cash-fund-heading { margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.cash-fund-message { margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.cash-fund-progress { display: flex; flex-direction: column; gap: 6px; }
+.cash-fund-total { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.cash-fund-bar { height: 8px; border-radius: 4px; background: var(--bg-raised); overflow: hidden; }
+.cash-fund-bar-fill { height: 100%; background: var(--accent-primary); border-radius: 4px; }
+.cash-fund-bank-details { margin: 0; padding: 10px 12px; background: var(--bg-raised); border: 1px solid var(--border-subtle); border-radius: 6px; font-family: inherit; font-size: 12px; color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; }
+.cash-fund-form { display: flex; flex-direction: column; gap: 8px; }
+.cash-fund-form-hint { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.cash-fund-thanks { margin: 0; font-size: 13px; color: var(--text-secondary); text-align: center; }
 
 /* Guest access gate */
 .access-gate-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg-app); padding: 24px; box-sizing: border-box; }
 .access-gate-card { width: 100%; max-width: 360px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 28px 24px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
 .access-gate-title { margin: 0 0 2px; font-size: 19px; font-weight: 700; color: var(--text-primary); text-align: center; font-family: var(--font-heading, inherit); }
 .access-gate-body { margin: 0 0 6px; font-size: 13px; color: var(--text-secondary); text-align: center; }
+.access-gate-owner-toggle { background: none; border: none; padding: 0; color: var(--text-muted); font-size: 11px; text-decoration: underline; cursor: pointer; font-family: inherit; align-self: center; }
 
 /* Cart drawer */
 .cart-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 199; display: none; }
@@ -327,6 +350,16 @@ button { font-family: inherit; }
 .app-footer { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 20px 24px; margin-top: auto; border-top: 1px solid var(--border-subtle); }
 .footer-text { font-size: 12px; color: var(--text-muted); }
 .footer-brand { font-size: 13px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.03em; }
+.footer-poweredby-btn { display: flex; align-items: center; gap: 8px; background: none; border: none; padding: 4px; cursor: pointer; font-family: inherit; border-radius: 6px; }
+.footer-poweredby-btn:hover { background: var(--bg-raised); }
+.storage-warning-banner { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 10px 20px; background: #c0392b; color: #fff; font-size: 13px; line-height: 1.4; text-align: left; position: relative; z-index: 350; }
+.storage-warning-dismiss { background: none; border: none; color: #fff; cursor: pointer; font-size: 14px; line-height: 1; flex-shrink: 0; padding: 2px 6px; opacity: 0.85; }
+.storage-warning-dismiss:hover { opacity: 1; }
+.poweredby-hint { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.poweredby-option { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border: 1px solid var(--border-subtle); border-radius: 8px; text-decoration: none; transition: border-color 0.15s ease; }
+.poweredby-option:hover { border-color: var(--accent-primary); }
+.poweredby-option-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.poweredby-option-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
 
 /* Responsive */
 @media (max-width: 860px) { .tile--detailed { width: 220px; } }
@@ -404,42 +437,168 @@ function buildNavbarHTML(state, logoDataUrl) {
 
 function buildScriptContent(state) {
   const stockJson  = safeJSON((state.stockList || []).filter((item) => !item.is_sample));
+  // Falls back to a fresh id if this config was never opened in the live
+  // editor (e.g. hand-written config JSON) - namespaces every localStorage
+  // key below so two different exported sites hosted under the same origin
+  // (or the same site re-exported later) don't corrupt each other's guest
+  // cart/reservations/suggestions data.
+  const siteId = state.siteId || Math.random().toString(36).slice(2, 10);
   const configJson = safeJSON({
+    siteId:             siteId,
     websiteType:        state.websiteType,
     firebaseDatabaseUrl: state.integrations?.firebaseDatabaseUrl?.trim().replace(/\/$/, '') || null,
     tileConfig:         state.tileConfig,
     layoutConfig:       state.layoutConfig,
     layoutAlign:        state.layoutAlign || 'center',
     searchAlign:        state.searchAlign || 'center',
+    suggestFormAlign:   state.suggestFormAlign || 'center',
     widgets:            state.widgets,
     groupByCategory:    state.groupByCategory,
     categoryConfig:     state.categoryConfig,
     currencyPrefix:     state.brand?.currencyPrefix || '$',
-    ownerPasscode:      state.integrations?.ownerPasscode || '',
+    // Only SHA-256 fingerprints of the two passcodes ship in the exported
+    // page - never the plaintext - so nobody can read them out of the
+    // deployed site's source. Runtime checks compare sha256(input) to these.
+    ownerPasscodeHash:  state.integrations?.ownerPasscode ? sha256(state.integrations.ownerPasscode) : '',
     telemetryUrl:       TELEMETRY_FIREBASE_URL || '',
     pageTitle:          state.brand?.pageTitle || '',
     giftSuggestionsEnabled: state.giftSuggestionsEnabled !== false,
-    accessGate:         state.accessGate?.enabled
-      ? { enabled: true, password: state.accessGate.password || '' }
-      : { enabled: false, password: '' },
+    accessGate:         state.accessGate?.enabled && state.accessGate.password
+      ? { enabled: true, passwordHash: sha256(state.accessGate.password) }
+      : { enabled: false, passwordHash: '' },
+    cashFund:           state.cashFund || { enabled: false },
   });
 
-  // The template below is emitted verbatim into the exported <script> tag, so its
-  // `\/` escapes are real regex syntax for that runtime, not stray string escapes here.
+  // String.raw is load-bearing: a plain template literal *cooks* escape
+  // sequences, so the regex `\/` and `\s` escapes below would ship to the
+  // exported page with their backslashes stripped - turning `/\/$/` into a
+  // `//` line comment (killing the whole script's parse) and the email
+  // regexes into patterns that reject any address containing a literal "s".
+  // Raw mode emits every backslash verbatim, so what you read here is
+  // byte-for-byte what the exported <script> contains. (${...} interpolation
+  // still works in raw mode; only escape processing is disabled.)
   /* eslint-disable no-useless-escape */
-  return `
+  return String.raw`
 var STOCK  = ${stockJson};
 var CONFIG = ${configJson};
+var KEY_PREFIX = 'wk_' + (CONFIG.siteId || 'default') + '_';
 
 /* ── Helpers ──────────────────────────────────────────── */
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// A suggestion's "link" is free text from a guest - rendering it as a
+// clickable href without checking the scheme would let someone submit a
+// javascript: URL that runs in the registry owner's browser the moment
+// they click "View link".
+function isSafeUrl(url) {
+  return /^https?:\/\//i.test(String(url || '').trim());
+}
+
+/* ── SHA-256 (mirror of src/utils/sha256.js - keep in sync) ──────────────
+   The Owner passcode and Guest Access password are embedded in this page
+   only as SHA-256 fingerprints, never plaintext. Entered values are hashed
+   here and compared against those fingerprints. Pure JS (not crypto.subtle)
+   so it stays synchronous and works over file:// and plain http too. */
+var SHA256_K = [
+  0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+  0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+  0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+  0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+  0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+  0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+  0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+  0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+];
+
+function sha256(message) {
+  var bytes = [];
+  for (var ci = 0; ci < message.length; ci++) {
+    var code = message.charCodeAt(ci);
+    if (code >= 0xd800 && code <= 0xdbff && ci + 1 < message.length) {
+      var lo = message.charCodeAt(ci + 1);
+      if (lo >= 0xdc00 && lo <= 0xdfff) {
+        code = 0x10000 + ((code - 0xd800) << 10) + (lo - 0xdc00);
+        ci++;
+      }
+    }
+    if (code < 0x80) bytes.push(code);
+    else if (code < 0x800) bytes.push(0xc0 | (code >> 6), 0x80 | (code & 63));
+    else if (code < 0x10000) bytes.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 63), 0x80 | (code & 63));
+    else bytes.push(0xf0 | (code >> 18), 0x80 | ((code >> 12) & 63), 0x80 | ((code >> 6) & 63), 0x80 | (code & 63));
+  }
+
+  var bitLen = bytes.length * 8;
+  bytes.push(0x80);
+  while (bytes.length % 64 !== 56) bytes.push(0);
+  bytes.push(0, 0, 0, Math.floor(bitLen / 0x100000000) & 0xff);
+  bytes.push((bitLen >>> 24) & 0xff, (bitLen >>> 16) & 0xff, (bitLen >>> 8) & 0xff, bitLen & 0xff);
+
+  var h0 = 0x6a09e667, h1 = 0xbb67ae85, h2 = 0x3c6ef372, h3 = 0xa54ff53a;
+  var h4 = 0x510e527f, h5 = 0x9b05688c, h6 = 0x1f83d9ab, h7 = 0x5be0cd19;
+  var w = new Array(64);
+
+  for (var off = 0; off < bytes.length; off += 64) {
+    for (var i = 0; i < 16; i++) {
+      w[i] = (bytes[off + i * 4] << 24) | (bytes[off + i * 4 + 1] << 16) | (bytes[off + i * 4 + 2] << 8) | bytes[off + i * 4 + 3];
+    }
+    for (var t = 16; t < 64; t++) {
+      var s0 = ((w[t - 15] >>> 7) | (w[t - 15] << 25)) ^ ((w[t - 15] >>> 18) | (w[t - 15] << 14)) ^ (w[t - 15] >>> 3);
+      var s1 = ((w[t - 2] >>> 17) | (w[t - 2] << 15)) ^ ((w[t - 2] >>> 19) | (w[t - 2] << 13)) ^ (w[t - 2] >>> 10);
+      w[t] = (w[t - 16] + s0 + w[t - 7] + s1) | 0;
+    }
+
+    var a = h0, b = h1, c = h2, d = h3, e = h4, f = h5, g = h6, h = h7;
+    for (var r = 0; r < 64; r++) {
+      var S1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+      var ch = (e & f) ^ (~e & g);
+      var temp1 = (h + S1 + ch + SHA256_K[r] + w[r]) | 0;
+      var S0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+      var maj = (a & b) ^ (a & c) ^ (b & c);
+      var temp2 = (S0 + maj) | 0;
+      h = g; g = f; f = e; e = (d + temp1) | 0;
+      d = c; c = b; b = a; a = (temp1 + temp2) | 0;
+    }
+
+    h0 = (h0 + a) | 0; h1 = (h1 + b) | 0; h2 = (h2 + c) | 0; h3 = (h3 + d) | 0;
+    h4 = (h4 + e) | 0; h5 = (h5 + f) | 0; h6 = (h6 + g) | 0; h7 = (h7 + h) | 0;
+  }
+
+  return [h0, h1, h2, h3, h4, h5, h6, h7]
+    .map(function (v) { return ('00000000' + (v >>> 0).toString(16)).slice(-8); })
+    .join('');
+}
+
+function showStorageWarning() {
+  var el = document.getElementById('storage-warning-banner');
+  if (el) { el.style.display = 'flex'; return; }
+  el = document.createElement('div');
+  el.id = 'storage-warning-banner';
+  el.className = 'storage-warning-banner';
+  el.setAttribute('role', 'alert');
+  el.innerHTML = '<span>Your browser’s storage is full, so this action may not have been saved. Try freeing up space or use a different device/browser.</span>' +
+    '<button type="button" class="storage-warning-dismiss" aria-label="Dismiss">&#10005;</button>';
+  el.querySelector('.storage-warning-dismiss').addEventListener('click', function(){ el.style.display = 'none'; });
+  document.body.insertBefore(el, document.body.firstChild);
+}
+
+// Wraps localStorage.setItem so a full/blocked store doesn't silently
+// swallow a guest or owner action - surfaces a visible banner instead.
+function safeSetItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    showStorageWarning();
+    return false;
+  }
+}
+
 /* ── Cart state ───────────────────────────────────────── */
-var cart = JSON.parse(localStorage.getItem('wk_cart') || '[]');
+var cart = JSON.parse(localStorage.getItem(KEY_PREFIX + 'cart') || '[]');
 var reservations = {}; // itemId -> { guestName: reservedCount }
-var guestName = localStorage.getItem('wk_guestName') || '';
+var guestName = localStorage.getItem(KEY_PREFIX + 'guestName') || '';
 var query = '';
 var fbUrl = (CONFIG.firebaseDatabaseUrl || '').replace(/\/$/, '') || null;
 var CP = CONFIG.currencyPrefix || '$';
@@ -481,10 +640,19 @@ function applyReservationAtPath(path, data) {
 
 function initReservations() {
   if (!fbUrl) {
-    reservations = JSON.parse(localStorage.getItem('wk_reservations') || '{}');
+    reservations = JSON.parse(localStorage.getItem(KEY_PREFIX + 'reservations') || '{}');
     return;
   }
-  var es = new EventSource(fbUrl + '/reservations.json');
+  // A malformed Firebase URL throws synchronously here rather than failing
+  // gracefully - guard it so one bad paste in the owner's Integrations panel
+  // can't crash the whole page for every guest.
+  var es;
+  try {
+    es = new EventSource(fbUrl + '/reservations.json');
+  } catch (e) {
+    reservations = JSON.parse(localStorage.getItem(KEY_PREFIX + 'reservations') || '{}');
+    return;
+  }
   es.addEventListener('put', function(evt) {
     var payload = JSON.parse(evt.data);
     applyReservationAtPath(payload.path, payload.data);
@@ -523,7 +691,7 @@ function reserveItem(id, delta, name) {
     if (next === 0) delete itemRes[guest]; else itemRes[guest] = next;
     if (Object.keys(itemRes).length) nextReservations[id] = itemRes; else delete nextReservations[id];
     reservations = nextReservations;
-    localStorage.setItem('wk_reservations', JSON.stringify(reservations));
+    safeSetItem(KEY_PREFIX + 'reservations', JSON.stringify(reservations));
     renderTiles();
     renderOwnerView();
   }
@@ -533,8 +701,12 @@ function reserveItem(id, delta, name) {
   var opts = next === 0
     ? { method: 'DELETE' }
     : { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) };
-  fetch(fbUrl + '/reservations/' + encodeURIComponent(id) + '/' + encodeURIComponent(guest) + '.json', opts).catch(function(){});
-  // SSE will fire back and update reservations + re-render
+  // SSE will fire back and update reservations + re-render on success; a
+  // failed write (bad rules, wrong URL) never triggers that echo, so fall
+  // back to a local update instead of leaving the guest's click looking dead.
+  fetch(fbUrl + '/reservations/' + encodeURIComponent(id) + '/' + encodeURIComponent(guest) + '.json', opts)
+    .then(function(res) { if (!res.ok) applyLocal(); })
+    .catch(function() { applyLocal(); });
 }
 
 /* ── Gift suggestions ───────────────────────────────────── */
@@ -557,10 +729,16 @@ function applySuggestionAtPath(path, data) {
 
 function initSuggestions() {
   if (!fbUrl) {
-    suggestions = JSON.parse(localStorage.getItem('wk_suggestions') || '{}');
+    suggestions = JSON.parse(localStorage.getItem(KEY_PREFIX + 'suggestions') || '{}');
     return;
   }
-  var es = new EventSource(fbUrl + '/suggestions.json');
+  var es;
+  try {
+    es = new EventSource(fbUrl + '/suggestions.json');
+  } catch (e) {
+    suggestions = JSON.parse(localStorage.getItem(KEY_PREFIX + 'suggestions') || '{}');
+    return;
+  }
   es.addEventListener('put', function(evt) {
     var payload = JSON.parse(evt.data);
     applySuggestionAtPath(payload.path, payload.data);
@@ -575,26 +753,27 @@ function initSuggestions() {
   });
 }
 
-function suggestGift(name, quantity, email) {
+function suggestGift(name, quantity, email, link, image) {
   var id = 'sg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-  var suggestion = { name: name, quantity: Math.max(0, Number(quantity) || 0), email: email, status: 'pending', createdAt: Date.now() };
+  var suggestion = { name: name, quantity: Math.max(0, Number(quantity) || 0), email: email, link: link || '', image: image || '', status: 'pending', createdAt: Date.now() };
+  safeSetItem(KEY_PREFIX + 'guestEmail', email);
   if (!fbUrl) {
     suggestions[id] = suggestion;
-    localStorage.setItem('wk_suggestions', JSON.stringify(suggestions));
-    return;
+    safeSetItem(KEY_PREFIX + 'suggestions', JSON.stringify(suggestions));
+    return Promise.resolve(true);
   }
-  fetch(fbUrl + '/suggestions/' + id + '.json', {
+  return fetch(fbUrl + '/suggestions/' + id + '.json', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(suggestion),
-  }).catch(function(){});
+  }).then(function(res) { return res.ok; }).catch(function() { return false; });
 }
 
 function setSuggestionStatus(id, status) {
   if (!suggestions[id]) return;
   suggestions[id].status = status;
   if (!fbUrl) {
-    localStorage.setItem('wk_suggestions', JSON.stringify(suggestions));
+    safeSetItem(KEY_PREFIX + 'suggestions', JSON.stringify(suggestions));
     renderOwnerView();
     return;
   }
@@ -608,37 +787,235 @@ function setSuggestionStatus(id, status) {
 function approveSuggestionAction(id, finalQuantity) {
   var s = suggestions[id];
   if (!s) return;
-  STOCK.push({ id: 'approved_' + id, name: s.name, image: '', price: 0, metadata: {}, categories: [], quantity: Math.max(0, Number(finalQuantity) || 0), nameRequired: true, is_sample: false });
+  STOCK.push({ id: 'approved_' + id, name: s.name, image: s.image || '', price: 0, metadata: s.link ? { Link: s.link } : {}, categories: [], quantity: Math.max(0, Number(finalQuantity) || 0), nameRequired: true, is_sample: false });
   setSuggestionStatus(id, 'approved');
   renderTiles();
 }
+
+/* ── Cash fund ────────────────────────────────────────── */
+var cashPledges = {};
+
+function applyCashPledgeAtPath(path, data) {
+  var segments = path.split('/').filter(function(s){ return s; });
+  if (segments.length === 0) {
+    cashPledges = (data && typeof data === 'object') ? data : {};
+  } else {
+    var id = segments[0];
+    if (data) cashPledges[id] = data; else delete cashPledges[id];
+  }
+  renderOwnerView();
+  renderCashFundCard();
+}
+
+function initCashPledges() {
+  if (!fbUrl) {
+    cashPledges = JSON.parse(localStorage.getItem(KEY_PREFIX + 'cashPledges') || '{}');
+    return;
+  }
+  var es;
+  try {
+    es = new EventSource(fbUrl + '/cashPledges.json');
+  } catch (e) {
+    cashPledges = JSON.parse(localStorage.getItem(KEY_PREFIX + 'cashPledges') || '{}');
+    return;
+  }
+  es.addEventListener('put', function(evt) {
+    var payload = JSON.parse(evt.data);
+    applyCashPledgeAtPath(payload.path, payload.data);
+  });
+  es.addEventListener('patch', function(evt) {
+    var payload = JSON.parse(evt.data);
+    var data = payload.data;
+    if (!data || typeof data !== 'object') return;
+    Object.keys(data).forEach(function(key) {
+      applyCashPledgeAtPath(payload.path === '/' ? '/'+key : payload.path+'/'+key, data[key]);
+    });
+  });
+}
+
+function pledgeCash(name, email, amount, message) {
+  var id = 'cp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  var pledge = { name: name || 'Anonymous', email: email, amount: Math.max(0, Number(amount) || 0), message: message || '', createdAt: Date.now() };
+  safeSetItem(KEY_PREFIX + 'guestEmail', email);
+  if (!fbUrl) {
+    cashPledges[id] = pledge;
+    safeSetItem(KEY_PREFIX + 'cashPledges', JSON.stringify(cashPledges));
+    renderCashFundCard();
+    return Promise.resolve(true);
+  }
+  return fetch(fbUrl + '/cashPledges/' + id + '.json', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(pledge),
+  }).then(function(res) { return res.ok; }).catch(function() { return false; });
+}
+
+function removePledgeAction(id) {
+  delete cashPledges[id];
+  if (!fbUrl) {
+    safeSetItem(KEY_PREFIX + 'cashPledges', JSON.stringify(cashPledges));
+    renderOwnerView();
+    renderCashFundCard();
+    return;
+  }
+  fetch(fbUrl + '/cashPledges/' + id + '.json', { method: 'DELETE' }).catch(function(){});
+}
+
+function cashPledgeTotal() {
+  return Object.values(cashPledges).reduce(function(sum, p) { return sum + (Number(p.amount) || 0); }, 0);
+}
+
+function renderCashFundCard() {
+  var container = document.getElementById('cash-fund-container');
+  if (!container) return;
+  var fund = CONFIG.cashFund || {};
+  if (CONFIG.websiteType !== 'registry' || !fund.enabled) { container.style.display = 'none'; return; }
+  container.style.display = 'block';
+
+  var total = cashPledgeTotal();
+  var goal = Number(fund.goalAmount) || 0;
+  var pct = goal > 0 ? Math.min(100, Math.round((total / goal) * 100)) : 0;
+
+  var progressHTML = '';
+  if (fund.showTotalPledged || goal > 0) {
+    progressHTML = '<div class="cash-fund-progress">' +
+      (fund.showTotalPledged ? '<span class="cash-fund-total">' + CP + total.toFixed(2) + ' pledged' + (goal > 0 ? ' of ' + CP + goal.toFixed(2) + ' goal' : '') + '</span>' : '') +
+      (goal > 0 ? '<div class="cash-fund-bar"><div class="cash-fund-bar-fill" style="width:' + pct + '%"></div></div>' : '') +
+      '</div>';
+  }
+
+  var bankHTML = (fund.bankDetailsEnabled && fund.bankDetails)
+    ? '<pre class="cash-fund-bank-details">' + esc(fund.bankDetails) + '</pre>'
+    : '';
+
+  container.innerHTML =
+    '<div class="cash-fund-card">' +
+      '<p class="cash-fund-heading">' + esc(fund.title || 'Cash Fund') + '</p>' +
+      (fund.message ? '<p class="cash-fund-message">' + esc(fund.message) + '</p>' : '') +
+      progressHTML +
+      bankHTML +
+      '<form class="cash-fund-form" id="cash-fund-form">' +
+        '<p class="cash-fund-form-hint">Contributing? Let us know so we can say thank you.</p>' +
+        '<input class="editor-add-form-input" type="text" placeholder="Your name" id="cf-name" value="' + esc(guestName) + '">' +
+        '<input class="editor-add-form-input" type="number" min="0" step="0.01" placeholder="Amount (' + esc(CP) + ')" id="cf-amount">' +
+        '<input class="editor-add-form-input" type="email" placeholder="Your email" id="cf-email" value="' + esc(localStorage.getItem(KEY_PREFIX + 'guestEmail') || '') + '">' +
+        '<input class="editor-add-form-input" type="text" placeholder="Message (optional)" id="cf-message">' +
+        '<p class="suggest-gift-error" id="cf-error" style="display:none"></p>' +
+        '<button type="submit" class="selector-btn selector-btn--active">Record my pledge</button>' +
+      '</form>' +
+    '</div>';
+
+  document.getElementById('cash-fund-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var name = document.getElementById('cf-name').value.trim();
+    var amount = document.getElementById('cf-amount').value;
+    var email = document.getElementById('cf-email').value.trim();
+    var message = document.getElementById('cf-message').value.trim();
+    var err = document.getElementById('cf-error');
+    if (!(Number(amount) > 0)) { err.textContent = 'Enter an amount greater than 0.'; err.style.display = 'block'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'That doesn’t look like a valid email address.'; err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    var submitBtn = document.getElementById('cash-fund-form').querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Recording...';
+    pledgeCash(name, email, amount, message).then(function(ok) {
+      if (ok) {
+        container.innerHTML = '<div class="cash-fund-card"><p class="cash-fund-thanks">Thanks! Your pledge has been recorded.</p></div>';
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Record my pledge';
+        err.textContent = 'Something went wrong recording your pledge. Check your connection and try again.';
+        err.style.display = 'block';
+      }
+    });
+  });
+}
+
+var SUGGEST_FORM_MARGIN_CSS = { left: '32px auto 32px 24px', center: '32px auto', right: '32px 24px 32px auto' };
 
 function initSuggestGiftForm() {
   var container = document.getElementById('suggest-gift-container');
   if (!container) return;
   if (CONFIG.websiteType !== 'registry' || !CONFIG.giftSuggestionsEnabled) { container.style.display = 'none'; return; }
   container.style.display = 'block';
+  var margin = SUGGEST_FORM_MARGIN_CSS[CONFIG.suggestFormAlign] || SUGGEST_FORM_MARGIN_CSS.center;
+  var savedEmail = localStorage.getItem(KEY_PREFIX + 'guestEmail') || '';
   container.innerHTML =
-    '<form class="suggest-gift-form" id="suggest-gift-form">' +
+    '<form class="suggest-gift-form" id="suggest-gift-form" style="margin:' + margin + '">' +
       '<p class="suggest-gift-heading">Suggest a gift</p>' +
       '<p class="suggest-gift-hint">Don’t see something you’d like to give? Suggest it below - the registry owner reviews every suggestion before it’s added.</p>' +
       '<input class="editor-add-form-input" type="text" placeholder="Item name" id="sg-name">' +
       '<input class="editor-add-form-input" type="number" min="0" step="1" placeholder="Suggested quantity" id="sg-qty" value="1">' +
-      '<input class="editor-add-form-input" type="email" placeholder="Your email" id="sg-email">' +
+      '<input class="editor-add-form-input" type="url" placeholder="Link to it online (optional)" id="sg-link">' +
+      '<div class="suggest-gift-image-row">' +
+        '<img id="sg-image-preview" class="suggest-gift-image-preview" style="display:none">' +
+        '<label class="selector-btn config-import-label suggest-gift-image-btn" id="sg-image-label">Add a photo (optional)' +
+          '<input type="file" accept="image/*" id="sg-image" hidden>' +
+        '</label>' +
+        '<button type="button" class="suggestion-reject-btn" id="sg-image-remove" style="display:none">Remove</button>' +
+      '</div>' +
+      '<input class="editor-add-form-input" type="email" placeholder="Your email" id="sg-email" value="' + esc(savedEmail) + '">' +
       '<p class="suggest-gift-email-note">We only check this looks like a real email address - it isn’t verified. Used so the owner can follow up about your suggestion.</p>' +
       '<p class="suggest-gift-error" id="sg-error" style="display:none"></p>' +
       '<button type="submit" class="selector-btn selector-btn--active">Submit suggestion</button>' +
     '</form>';
+
+  var imageData = '';
+  var imageInput = document.getElementById('sg-image');
+  var imagePreview = document.getElementById('sg-image-preview');
+  var imageLabel = document.getElementById('sg-image-label');
+  var imageRemove = document.getElementById('sg-image-remove');
+  var err = document.getElementById('sg-error');
+  imageInput.addEventListener('change', function() {
+    var file = imageInput.files[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      err.textContent = 'That image is too large (max 3MB). Try a smaller photo.';
+      err.style.display = 'block';
+      imageInput.value = '';
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      imageData = e.target.result;
+      imagePreview.src = imageData;
+      imagePreview.style.display = 'block';
+      imageLabel.textContent = 'Replace photo';
+      imageRemove.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+  imageRemove.addEventListener('click', function() {
+    imageData = '';
+    imageInput.value = '';
+    imagePreview.style.display = 'none';
+    imageLabel.textContent = 'Add a photo (optional)';
+    imageRemove.style.display = 'none';
+  });
+
   document.getElementById('suggest-gift-form').addEventListener('submit', function(e) {
     e.preventDefault();
     var name = document.getElementById('sg-name').value.trim();
     var qty = document.getElementById('sg-qty').value;
+    var link = document.getElementById('sg-link').value.trim();
     var email = document.getElementById('sg-email').value.trim();
-    var err = document.getElementById('sg-error');
     if (!name) { err.textContent = 'Add an item name.'; err.style.display = 'block'; return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'That doesn’t look like a valid email address.'; err.style.display = 'block'; return; }
-    suggestGift(name, qty, email);
-    container.innerHTML = '<div class="suggest-gift-form suggest-gift-form--done"><p class="suggest-gift-thanks">Thanks! Your suggestion has been sent to the registry owner for approval.</p></div>';
+    if (link && !isSafeUrl(link)) { err.textContent = 'Links must start with http:// or https://.'; err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    var submitBtn = document.getElementById('suggest-gift-form').querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    suggestGift(name, qty, email, link, imageData).then(function(ok) {
+      if (ok) {
+        container.innerHTML = '<div class="suggest-gift-form suggest-gift-form--done" style="margin:' + margin + '"><p class="suggest-gift-thanks">Thanks! Your suggestion has been sent to the registry owner for approval.</p></div>';
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit suggestion';
+        err.textContent = 'Something went wrong sending your suggestion. Check your connection and try again.';
+        err.style.display = 'block';
+      }
+    });
   });
 }
 
@@ -663,7 +1040,7 @@ function openNameModal(itemId) {
     var val = document.getElementById('name-modal-input').value.trim();
     if (!val) return;
     guestName = val;
-    localStorage.setItem('wk_guestName', val);
+    safeSetItem(KEY_PREFIX + 'guestName', val);
     reserveItem(itemId, 1, val);
     closeNameModal();
   });
@@ -675,7 +1052,7 @@ var ownerUnlocked = false;
 var ownerViewOpen  = false;
 
 function openOwnerGate() {
-  if (!CONFIG.ownerPasscode) return;
+  if (!CONFIG.ownerPasscodeHash) return;
   document.getElementById('owner-gate-container').innerHTML =
     '<div class="modal-backdrop" data-action="close-owner-gate"></div>' +
     '<div class="owner-gate-modal" role="dialog" aria-modal="true">' +
@@ -693,7 +1070,7 @@ function openOwnerGate() {
   document.getElementById('owner-gate-form').addEventListener('submit', function(e) {
     e.preventDefault();
     var val = document.getElementById('owner-gate-input').value;
-    if (val === CONFIG.ownerPasscode) {
+    if (sha256(val) === CONFIG.ownerPasscodeHash) {
       ownerUnlocked = true;
       closeOwnerGate();
       openOwnerView();
@@ -733,8 +1110,15 @@ function renderOwnerView() {
     html += '<p class="owner-view-section-title">Gift suggestions</p>';
     pendingIds.forEach(function(id) {
       var s = suggestions[id];
-      html += '<div class="owner-view-item"><div class="owner-view-item-name">' + esc(s.name) + '</div>' +
-        '<div class="owner-view-row"><span>Suggested qty ' + s.quantity + ' &middot; ' + esc(s.email) + '</span></div>' +
+      html += '<div class="owner-view-item">' +
+        '<div class="suggestion-row-top">' +
+          (s.image ? '<img src="' + esc(s.image) + '" alt="" class="suggestion-row-thumb">' : '') +
+          '<div class="suggestion-row-info">' +
+            '<div class="owner-view-item-name">' + esc(s.name) + '</div>' +
+            '<div class="owner-view-row"><span>Suggested qty ' + s.quantity + ' &middot; ' + esc(s.email) + '</span></div>' +
+            (s.link && isSafeUrl(s.link) ? '<a href="' + esc(s.link) + '" target="_blank" rel="noopener noreferrer" class="suggestion-row-link">View link ↗</a>' : '') +
+          '</div>' +
+        '</div>' +
         '<div class="owner-view-row">' +
           '<input type="number" min="0" step="1" class="suggestion-qty-input" id="qty-' + id + '" value="' + s.quantity + '">' +
           '<button class="owner-view-release-btn" data-action="approve-suggestion" data-id="' + id + '">Approve</button>' +
@@ -757,7 +1141,18 @@ function renderOwnerView() {
     });
   }
 
-  if (!pendingIds.length && !withReservations.length) {
+  var pledgeIds = Object.keys(cashPledges);
+  if (pledgeIds.length) {
+    html += '<p class="owner-view-section-title">Cash pledges (' + CP + cashPledgeTotal().toFixed(2) + ' total)</p>';
+    pledgeIds.forEach(function(id) {
+      var p = cashPledges[id];
+      html += '<div class="owner-view-item"><div class="owner-view-item-name">' + esc(p.name) + ' - ' + CP + Number(p.amount || 0).toFixed(2) + '</div>' +
+        '<div class="owner-view-row"><span>' + esc(p.email) + (p.message ? ' &middot; “' + esc(p.message) + '”' : '') + '</span>' +
+        '<button class="owner-view-release-btn" data-action="remove-pledge" data-id="' + id + '">Remove</button></div></div>';
+    });
+  }
+
+  if (!pendingIds.length && !withReservations.length && !pledgeIds.length) {
     html = '<p class="owner-view-empty">Nothing to review yet.</p>';
   }
 
@@ -771,7 +1166,7 @@ function releaseReservation(itemId, guest) {
   if (!fbUrl) {
     delete itemRes[guest];
     if (Object.keys(itemRes).length) reservations[itemId] = itemRes; else delete reservations[itemId];
-    localStorage.setItem('wk_reservations', JSON.stringify(reservations));
+    safeSetItem(KEY_PREFIX + 'reservations', JSON.stringify(reservations));
     renderTiles();
     renderOwnerView();
     return;
@@ -780,7 +1175,7 @@ function releaseReservation(itemId, guest) {
   fetch(fbUrl + '/reservations/' + encodeURIComponent(itemId) + '/' + encodeURIComponent(guest) + '.json', { method: 'DELETE' }).catch(function(){});
 }
 
-function saveCart() { localStorage.setItem('wk_cart', JSON.stringify(cart)); }
+function saveCart() { safeSetItem(KEY_PREFIX + 'cart', JSON.stringify(cart)); }
 function cartCount() { return cart.reduce(function(s,e){ return s+e.quantity; }, 0); }
 function cartSubtotal() {
   return cart.reduce(function(s,e){
@@ -882,9 +1277,10 @@ function renderLayout(items) {
   if (l === 'stacked')  return '<div class="layout layout--stacked" style="margin:'+(STACKED_MARGIN_CSS[align] || '0 auto')+'">'+tiles+'</div>';
   if (l === 'featured') {
     if (!items.length)  return '<div class="layout layout--featured"></div>';
-    var rest = items.slice(1).map(renderTile).join('');
+    var hero = items.find(function(i){ return i.featured; }) || items[0];
+    var rest = items.filter(function(i){ return i !== hero; }).map(renderTile).join('');
     return '<div class="layout layout--featured">' +
-      '<div class="layout-featured-slot">'+renderTile(items[0])+'</div>' +
+      '<div class="layout-featured-slot">'+renderTile(hero)+'</div>' +
       '<div class="layout-featured-grid" style="justify-content:'+justify+'">'+rest+'</div></div>';
   }
   return '<div class="layout layout--grid" style="justify-content:'+justify+'">'+tiles+'</div>';
@@ -1054,6 +1450,16 @@ function closeHelp() {
   document.getElementById('help-backdrop').style.display='none';
   document.getElementById('help-modal').style.display='none';
 }
+
+/* ── Powered-by ───────────────────────────────────────── */
+function openPoweredBy() {
+  document.getElementById('poweredby-backdrop').style.display='block';
+  document.getElementById('poweredby-modal').style.display='flex';
+}
+function closePoweredBy() {
+  document.getElementById('poweredby-backdrop').style.display='none';
+  document.getElementById('poweredby-modal').style.display='none';
+}
 function coNext() {
   if(co.step===2){
     co.ref='WK-'+Math.random().toString(36).slice(2,8).toUpperCase();
@@ -1112,7 +1518,7 @@ function coFormHTML() {
     '<div class="checkout-confirm-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'+
     '<h3 class="checkout-confirm-heading">Order placed!</h3>'+
     '<p class="checkout-confirm-ref">Reference: <strong>'+esc(co.ref)+'</strong></p>'+
-    '<p class="checkout-confirm-email">Confirmation will be sent to <strong>'+esc(co.form.email)+'</strong></p>'+
+    '<p class="checkout-confirm-email">This demo order was recorded on this device only - no confirmation email is sent to <strong>'+esc(co.form.email)+'</strong> (there’s no backend to send it from). Take a screenshot of this reference if you need to note it down.</p>'+
     '<div class="checkout-confirm-details">'+
       '<div class="checkout-confirm-section"><p class="checkout-confirm-section-title">Delivering to</p>'+
         '<address class="checkout-confirm-address">'+esc(f.name)+'<br>'+esc(f.line1)+(f.line2?', '+esc(f.line2):'')+'<br>'+esc(f.city)+', '+esc(f.postcode)+'<br>'+esc(f.country)+'</address></div>'+
@@ -1185,6 +1591,8 @@ document.addEventListener('click', function(e) {
   if(a==='co-back')          coBack();
   if(a==='open-help')        openHelp();
   if(a==='close-help')       closeHelp();
+  if(a==='open-poweredby')   openPoweredBy();
+  if(a==='close-poweredby')  closePoweredBy();
   if(a==='reserve-inc') {
     var item = STOCK.find(function(i){ return i.id===id; });
     var needsName = item && item.nameRequired !== false && !guestName;
@@ -1201,6 +1609,7 @@ document.addEventListener('click', function(e) {
     approveSuggestionAction(id, finalQty);
   }
   if(a==='reject-suggestion')    setSuggestionStatus(id, 'rejected');
+  if(a==='remove-pledge')        removePledgeAction(id);
   if(a==='copy-share-link') {
     try { navigator.clipboard.writeText(window.location.href).catch(function(){}); } catch(e) {}
   }
@@ -1231,8 +1640,10 @@ function logTelemetry() {
 
 /* ── Guest access gate ──────────────────────────────────── */
 function accessGatePassed() {
-  if (!CONFIG.accessGate || !CONFIG.accessGate.enabled) return true;
-  try { return localStorage.getItem('wk_gate_passed') === '1'; } catch (e) { return false; }
+  // A gate with no password set would be trivially passable (blank matches
+  // blank), so it isn't considered active until a real password exists.
+  if (!CONFIG.accessGate || !CONFIG.accessGate.enabled || !CONFIG.accessGate.passwordHash) return true;
+  try { return localStorage.getItem(KEY_PREFIX + 'gate_passed') === '1'; } catch (e) { return false; }
 }
 
 function logGuestAccess(email, handle) {
@@ -1245,6 +1656,32 @@ function logGuestAccess(email, handle) {
   }).catch(function(){});
 }
 
+function renderOwnerGateForm() {
+  document.body.innerHTML =
+    '<div class="access-gate-screen"><form class="access-gate-card" id="owner-access-form">' +
+      '<h1 class="access-gate-title">Owner access</h1>' +
+      '<p class="access-gate-body">Enter your Owner passcode to get straight in.</p>' +
+      '<input class="editor-add-form-input" type="password" placeholder="Owner passcode" id="owner-access-input" autofocus>' +
+      '<p class="owner-gate-error" id="owner-access-error" style="display:none"></p>' +
+      '<button type="submit" class="selector-btn selector-btn--active">Continue</button>' +
+      '<button type="button" class="access-gate-owner-toggle" id="owner-access-back">Back to guest access</button>' +
+    '</form></div>';
+
+  document.getElementById('owner-access-back').addEventListener('click', renderAccessGate);
+  document.getElementById('owner-access-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var val = document.getElementById('owner-access-input').value;
+    var err = document.getElementById('owner-access-error');
+    if (!CONFIG.ownerPasscodeHash || sha256(val) !== CONFIG.ownerPasscodeHash) {
+      err.textContent = 'Incorrect owner passcode.';
+      err.style.display = 'block';
+      return;
+    }
+    safeSetItem(KEY_PREFIX + 'gate_passed', '1');
+    window.location.reload();
+  });
+}
+
 function renderAccessGate() {
   document.body.innerHTML =
     '<div class="access-gate-screen"><form class="access-gate-card" id="access-gate-form">' +
@@ -1255,8 +1692,10 @@ function renderAccessGate() {
       '<input class="editor-add-form-input" type="password" placeholder="Registry password" id="gate-password">' +
       '<p class="owner-gate-error" id="gate-error" style="display:none"></p>' +
       '<button type="submit" class="selector-btn selector-btn--active">Continue</button>' +
+      '<button type="button" class="access-gate-owner-toggle" id="gate-owner-toggle">I’m the registry owner</button>' +
     '</form></div>';
 
+  document.getElementById('gate-owner-toggle').addEventListener('click', renderOwnerGateForm);
   document.getElementById('access-gate-form').addEventListener('submit', function(e) {
     e.preventDefault();
     var email = document.getElementById('gate-email').value.trim();
@@ -1266,9 +1705,10 @@ function renderAccessGate() {
     function showErr(msg) { err.textContent = msg; err.style.display = 'block'; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('Enter a valid email address.'); return; }
     if (!handle) { showErr('Pick a display name.'); return; }
-    if (password !== CONFIG.accessGate.password) { showErr('Incorrect password.'); return; }
-    try { localStorage.setItem('wk_gate_passed', '1'); } catch (e2) {}
-    localStorage.setItem('wk_guestName', handle);
+    if (sha256(password) !== CONFIG.accessGate.passwordHash) { showErr('Incorrect password.'); return; }
+    safeSetItem(KEY_PREFIX + 'gate_passed', '1');
+    safeSetItem(KEY_PREFIX + 'guestName', handle);
+    safeSetItem(KEY_PREFIX + 'guestEmail', email);
     logGuestAccess(email, handle);
     window.location.reload();
   });
@@ -1277,8 +1717,9 @@ function renderAccessGate() {
 function initApp() {
   initReservations();
   initSuggestions();
+  initCashPledges();
   logTelemetry();
-  renderTiles(); renderCart(); initSearch(); updateFabs(); initSuggestGiftForm();
+  renderTiles(); renderCart(); initSearch(); updateFabs(); initSuggestGiftForm(); renderCashFundCard();
   var hasCartWidget = Object.values(CONFIG.widgets||{}).some(function(w){ return w && w.content==='Cart'; });
   var hasHelpWidget = Object.values(CONFIG.widgets||{}).some(function(w){ return w && w.content==='Help'; });
   var isRegistry = CONFIG.websiteType === 'registry';
@@ -1334,6 +1775,11 @@ export async function generateStoreHTML(state) {
   const pageHeader  = buildPageHeaderHTML(state);
   const decalsHTML  = buildDecalsHTML(state);
   const pageTitle   = state.brand?.pageTitle || 'Store';
+  const poweredByBlankUrl = WINKLR_HOMEPAGE_URL;
+  const poweredByLookUrl  = WINKLR_HOMEPAGE_URL + encodeLookConfigToHash(state);
+  const helpBodyHTML = state.websiteType === 'registry'
+    ? '<p>Click "Reserve" on an item to claim it (or part of it) so other guests know it\'s taken. Reservations update live for everyone viewing this page, but if two people reserve the very last one at almost the same moment, please check with the couple/family directly to sort out who ends up bringing it.</p>'
+    : '<p>Browse items and add them to your cart. When you\'re ready, open your cart and click Checkout to complete your order.</p>';
 
   const googleFontFamilies = [...new Set(
     ['--font-body', '--font-heading', '--font-nav']
@@ -1366,11 +1812,32 @@ ${navbar}
   ${pageHeader}
   <div id="search-wrap" class="store-search-wrap" style="display:none"></div>
   <div id="tile-grid"></div>
+  <div id="cash-fund-container" style="display:none"></div>
   <div id="suggest-gift-container" style="display:none"></div>
   <footer class="app-footer">
-    <span class="footer-text">Powered by</span>
-    <span class="footer-brand">Winklr</span>
+    <button type="button" class="footer-poweredby-btn" data-action="open-poweredby">
+      <span class="footer-text">Powered by</span>
+      <span class="footer-brand">Winklr</span>
+    </button>
   </footer>
+</div>
+<div id="poweredby-backdrop" class="modal-backdrop" style="display:none" data-action="close-poweredby"></div>
+<div id="poweredby-modal" class="help-modal poweredby-modal" style="display:none">
+  <div class="help-modal-header">
+    <span class="help-modal-title">Made with Winklr</span>
+    <button class="help-modal-close" data-action="close-poweredby">&#10005;</button>
+  </div>
+  <div class="help-modal-body">
+    <p class="poweredby-hint">Winklr is a free tool for building a gift registry or storefront like this one - no code required.</p>
+    <a class="poweredby-option" href="${esc(poweredByLookUrl)}" target="_blank" rel="noopener noreferrer">
+      <span class="poweredby-option-title">Build one that looks like this</span>
+      <span class="poweredby-option-desc">Starts you off with this theme, layout, and font choices, plus a few sample items to get going.</span>
+    </a>
+    <a class="poweredby-option" href="${esc(poweredByBlankUrl)}" target="_blank" rel="noopener noreferrer">
+      <span class="poweredby-option-title">Start from scratch</span>
+      <span class="poweredby-option-desc">A blank Winklr project with the default look.</span>
+    </a>
+  </div>
 </div>
 <div id="cart-backdrop" class="cart-backdrop"></div>
 <div id="cart-drawer" class="cart-drawer">
@@ -1388,7 +1855,7 @@ ${navbar}
     <button class="help-modal-close" data-action="close-help">&#10005;</button>
   </div>
   <div class="help-modal-body">
-    <p>Browse items and add them to your cart. When you're ready, open your cart and click Checkout to complete your order.</p>
+    ${helpBodyHTML}
   </div>
 </div>
 <div class="fab-group">

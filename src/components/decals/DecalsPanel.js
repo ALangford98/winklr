@@ -1,22 +1,20 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { AppContext } from "../appContext";
-
-function readFileAsDataUrl(file) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target.result);
-    reader.readAsDataURL(file);
-  });
-}
+import { readImageFileAsDataUrl } from "../../utils/readImageFile";
 
 export default function DecalsPanel() {
   const { state, addDecal, updateDecal, removeDecal } = useContext(AppContext);
   const inputRef = useRef(null);
+  const [uploadError, setUploadError] = useState("");
 
   const handleUpload = async (file) => {
     if (!file) return;
-    const image = await readFileAsDataUrl(file);
-    addDecal(image);
+    try {
+      addDecal(await readImageFileAsDataUrl(file));
+      setUploadError("");
+    } catch (err) {
+      setUploadError(err.message);
+    }
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -36,6 +34,7 @@ export default function DecalsPanel() {
           hidden
         />
       </label>
+      {uploadError && <p className="decals-error">{uploadError}</p>}
 
       {state.decals.length > 0 && (
         <ul className="decals-list">
