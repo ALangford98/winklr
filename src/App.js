@@ -60,6 +60,7 @@ function StoreApp() {
   const {
     toggleViewMode, state, cartOpen, setCartOpen, helpOpen, setHelpOpen,
     checkoutOpen, setCheckoutOpen, setMobilePanelOpen, ownerUnlocked, setOwnerUnlocked,
+    previewDevice, setPreviewDevice,
   } = useContext(AppContext);
   const [gateOpen, setGateOpen] = useState(false);
 
@@ -113,6 +114,24 @@ function StoreApp() {
             </button>
           )}
           {isRegistry && <ShareFab state={state} />}
+          {state.viewMode && (
+            <button
+              className="cart-fab device-fab"
+              onClick={() => setPreviewDevice(previewDevice === 'mobile' ? 'desktop' : 'mobile')}
+              title={previewDevice === 'mobile' ? 'Preview at full desktop width' : 'Preview in a phone frame'}
+            >
+              {previewDevice === 'mobile' ? (
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+              ) : (
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/>
+                </svg>
+              )}
+              {previewDevice === 'mobile' ? 'Desktop' : 'Mobile'}
+            </button>
+          )}
           {state.viewMode && (
             <button className="panel-fab" onClick={() => setMobilePanelOpen(true)} title="Edit panel">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

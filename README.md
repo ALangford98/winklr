@@ -105,6 +105,28 @@ See **[TODO.md](TODO.md)** for the full, up-to-date public roadmap.
 
 ## Changelog
 
+### [0.13.0] — 2026-07-18
+
+#### Edit mode previews the store in an iPhone frame
+On desktop (windows wider than 1024px), Edit Mode now renders the storefront inside
+an iPhone-style frame — 393px screen, rounded titanium-look bezel, Dynamic Island,
+side buttons — centred on a dotted stage, so you see roughly what guests on a phone
+will see while you edit. A new device FAB next to the other floating buttons —
+edit-mode only, hidden below 1025px where the frame can't exist — toggles the
+preview between the phone frame and full desktop width, and the choice persists
+(`winklr_previewDevice`). The edit sidebar widened from 260px to
+`clamp(420px, 50vw, 800px)` — at least half the window on a laptop, capped on very
+wide monitors. The
+framed screen paints the theme's `--bg-app` itself (the content area is normally
+transparent over the page background — inside the dark bezel that read as a black
+screen on light themes until it painted its own). View Mode, mobile editing
+(bottom-sheet panel), and the exported site are untouched: the frame wrappers are
+`display: contents` everywhere except active desktop edit mode.
+One honest caveat: the preview approximates mobile by constraining width — CSS
+viewport media queries still see the real window, so breakpoint-specific styles
+(e.g. tighter paddings under 600px) don't apply inside the frame. Verified with a
+headless-Chrome screenshot of the production build.
+
 ### [0.12.0] — 2026-07-18
 
 #### Suggest a gift and reserve it yourself

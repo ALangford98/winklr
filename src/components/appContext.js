@@ -76,6 +76,9 @@ const AppContextProvider = ({ children }) => {
   const [checkoutOpen, setCheckoutOpen]     = useState(false);
   const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
   const [ownerUnlocked, setOwnerUnlocked]     = useState(false);
+  // Edit-mode preview device on desktop: 'mobile' shows the phone frame,
+  // 'desktop' shows the storefront full-width.
+  const [previewDevice, setPreviewDevice]     = useLocalStorage("winklr_previewDevice", "mobile");
 
   // On mount: load config from URL hash if present, then clear the hash
   useEffect(() => {
@@ -640,6 +643,7 @@ const AppContextProvider = ({ children }) => {
         checkoutOpen, setCheckoutOpen,
         mobilePanelOpen, setMobilePanelOpen,
         ownerUnlocked, setOwnerUnlocked,
+        previewDevice, setPreviewDevice,
         addToCart,
         removeFromCart,
         updateCartQty,

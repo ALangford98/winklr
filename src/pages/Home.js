@@ -170,7 +170,7 @@ function GroupedContent({ state, filtered, setStockList }) {
 }
 
 export default function Home() {
-  const { state, setStockList, setSearchQuery, mobilePanelOpen, setMobilePanelOpen } = useContext(AppContext);
+  const { state, setStockList, setSearchQuery, mobilePanelOpen, setMobilePanelOpen, previewDevice } = useContext(AppContext);
   const contentAreaRef = useRef(null);
 
   const hasSearchWidget = Object.values(state.widgets).some(
@@ -251,6 +251,12 @@ export default function Home() {
         </>
       )}
 
+      {/* In edit mode on desktop the storefront renders inside a phone-sized
+          frame (see .phone-* styles) so the owner previews the mobile look
+          while editing. The wrappers are display:contents everywhere else. */}
+      <div className={`phone-stage${state.viewMode && previewDevice === 'mobile' ? ' phone-stage--active' : ''}`}>
+        <div className="phone-frame">
+          <span className="phone-island" aria-hidden="true" />
       <div className="content-area" ref={contentAreaRef}>
         <DecalsLayer containerRef={contentAreaRef} />
         {(state.brand?.pageTitle || state.brand?.pageSubtitle) && (
@@ -308,6 +314,8 @@ export default function Home() {
         {isRegistry && state.giftSuggestionsEnabled && <SuggestGiftForm align={state.suggestFormAlign} />}
 
         <Footer />
+      </div>
+        </div>
       </div>
     </div>
   );
