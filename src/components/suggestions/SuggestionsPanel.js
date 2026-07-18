@@ -18,6 +18,9 @@ function PendingRow({ id, suggestion, onApprove, onReject }) {
           <span className="suggestion-row-name">{suggestion.name}</span>
           <span className="suggestion-row-meta">
             Suggested qty: {suggestion.quantity} &middot; {suggestion.email}
+            {suggestion.reserve && suggestion.reservedBy && (
+              <> &middot; {suggestion.reservedBy} wants to bring it</>
+            )}
           </span>
           {suggestion.link && isSafeUrl(suggestion.link) && (
             <a href={suggestion.link} target="_blank" rel="noopener noreferrer" className="suggestion-row-link">

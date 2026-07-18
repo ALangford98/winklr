@@ -339,7 +339,7 @@ const AppContextProvider = ({ children }) => {
     return () => es.close();
   }, [firebaseUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const suggestGift = async ({ name, quantity, email, link, image }) => {
+  const suggestGift = async ({ name, quantity, email, link, image, reserve, reservedBy }) => {
     const id = crypto.randomUUID();
     const trimmedEmail = (email || '').trim();
     const suggestion = {
@@ -348,10 +348,15 @@ const AppContextProvider = ({ children }) => {
       email: trimmedEmail,
       link: (link || '').trim(),
       image: image || '',
+      reserve: !!reserve,
+      reservedBy: reserve ? (reservedBy || '').trim() : '',
       status: 'pending',
       createdAt: Date.now(),
     };
     if (trimmedEmail) setGuestEmail(trimmedEmail);
+    // Reserving under the same identity later (e.g. undoing) relies on the
+    // stored guest name matching the one on the suggestion.
+    if (suggestion.reservedBy) setGuestName(suggestion.reservedBy);
 
     const applyLocal = () => setSuggestions((prev) => ({ ...prev, [id]: suggestion }));
 
@@ -386,15 +391,24 @@ const AppContextProvider = ({ children }) => {
   const approveSuggestion = (id, finalQuantity) => {
     const suggestion = suggestions[id];
     if (!suggestion) return;
-    addStockItem({
+    const finalQty = Math.max(0, Number(finalQuantity) || 0);
+    // Create the item directly (not via addStockItem) so its id is known -
+    // the suggester's up-front reservation needs to attach to it.
+    const item = createStockItem({
       name: suggestion.name,
-      quantity: Math.max(0, Number(finalQuantity) || 0),
+      quantity: finalQty,
       image: suggestion.image || '',
       metadata: suggestion.link ? { Link: suggestion.link } : {},
       categories: ['Suggested Gifts'],
       nameRequired: true,
     });
+    setStockList((prev) => [...prev, item]);
     setSuggestionStatus(id, 'approved');
+    if (suggestion.reserve && suggestion.reservedBy) {
+      const suggestedQty = Math.max(1, Number(suggestion.quantity) || 1);
+      const qty = finalQty > 0 ? Math.min(suggestedQty, finalQty) : suggestedQty;
+      reserveItem(item.id, qty, suggestion.reservedBy);
+    }
   };
 
   const rejectSuggestion = (id) => setSuggestionStatus(id, 'rejected');

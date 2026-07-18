@@ -105,6 +105,33 @@ See **[TODO.md](TODO.md)** for the full, up-to-date public roadmap.
 
 ## Changelog
 
+### [0.12.0] — 2026-07-18
+
+#### Suggest a gift and reserve it yourself
+The gift suggestion form (live app and export) now has an "I'd like to reserve this
+gift myself once it's approved" checkbox — unchecked by default. Ticking it reveals a
+name field (prefilled with the stored guest name, required to submit) since
+reservations are keyed by guest name. The intent is stored on the suggestion record;
+the owner sees "«name» wants to bring it" on the pending suggestion, and on approval
+the reservation is created automatically on the new item under the suggester's name,
+capped at the approved quantity. The suggester's name is also saved as the browser's
+guest identity so they can undo their own reservation like any other.
+
+Verified end-to-end in headless Chrome: tick → name required → submit → owner sees
+intent → approve → tile shows "1 of 1 reserved · Fully Reserved ✓" under the
+suggester's name → survives reload.
+
+### [0.11.0] — 2026-07-18
+
+#### Edit an item's detail fields directly in the editor
+The Items panel's add/edit forms now include a "Detail fields" editor for the
+open-ended metadata that renders as label/value rows on detailed tiles (Type, Notes,
+Price guide, paste-import Details, etc.). Previously the only way to touch these was
+the export-JSON → hand-edit → re-import loop. Add/remove rows freely; a field whose
+label is blanked is dropped on save. Covered by a new owner-flow test that round-trips
+a field through the real editor component. Editor-only change — the exported site
+already rendered item metadata, so no generator change was needed.
+
 ### [0.10.0] — 2026-07-18
 
 #### Approved suggestions now persist — and live in a "Suggested Gifts" section

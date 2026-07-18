@@ -204,6 +204,7 @@ button { font-family: inherit; }
 .suggest-gift-email-note { margin: 0; font-size: 11px; color: var(--text-muted); line-height: 1.4; }
 .suggest-gift-error { margin: 0; font-size: 12px; color: var(--accent-danger); }
 .suggest-gift-form--done { align-items: center; text-align: center; }
+.editor-checkbox-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); cursor: pointer; }
 .suggest-gift-thanks { margin: 0; font-size: 13px; color: var(--text-secondary); }
 .suggest-gift-image-row { display: flex; align-items: center; gap: 8px; }
 .suggest-gift-image-preview { width: 36px; height: 36px; object-fit: cover; border-radius: 6px; flex-shrink: 0; border: 1px solid var(--border-subtle); }
@@ -762,10 +763,16 @@ function initSuggestions() {
   });
 }
 
-function suggestGift(name, quantity, email, link, image) {
+function suggestGift(name, quantity, email, link, image, reserve, reservedBy) {
   var id = 'sg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-  var suggestion = { name: name, quantity: Math.max(0, Number(quantity) || 0), email: email, link: link || '', image: image || '', status: 'pending', createdAt: Date.now() };
+  var suggestion = { name: name, quantity: Math.max(0, Number(quantity) || 0), email: email, link: link || '', image: image || '', reserve: !!reserve, reservedBy: reserve ? (reservedBy || '').trim() : '', status: 'pending', createdAt: Date.now() };
   safeSetItem(KEY_PREFIX + 'guestEmail', email);
+  if (suggestion.reservedBy) {
+    // Store the reserver's identity so their eventual reservation (created on
+    // approval) belongs to the same guest name they'd reserve other items under.
+    guestName = suggestion.reservedBy;
+    safeSetItem(KEY_PREFIX + 'guestName', guestName);
+  }
   if (!fbUrl) {
     suggestions[id] = suggestion;
     safeSetItem(KEY_PREFIX + 'suggestions', JSON.stringify(suggestions));
@@ -808,11 +815,21 @@ function setSuggestionStatus(id, status) { setSuggestionFields(id, { status: sta
 function approveSuggestionAction(id, finalQuantity, finalName) {
   var s = suggestions[id];
   if (!s) return;
+  var finalQty = Math.max(0, Number(finalQuantity) || 0);
+  var wantsToBring = !!s.reserve && s.reservedBy;
+  var suggestedQty = Math.max(1, Number(s.quantity) || 1);
   setSuggestionFields(id, {
     status: 'approved',
-    quantity: Math.max(0, Number(finalQuantity) || 0),
+    quantity: finalQty,
     name: (finalName || '').trim() || s.name,
   });
+  // The suggester asked to bring it themselves: reserve on their behalf,
+  // capped at the approved quantity. The derived item id is deterministic,
+  // so the reservation attaches even before the SSE echo lands.
+  if (wantsToBring) {
+    var reserveQty = finalQty > 0 ? Math.min(suggestedQty, finalQty) : suggestedQty;
+    reserveItem('approved_' + id, reserveQty, s.reservedBy);
+  }
 }
 
 var SUGGESTED_CAT = 'Suggested Gifts';
@@ -1003,6 +1020,8 @@ function initSuggestGiftForm() {
         '</label>' +
         '<button type="button" class="suggestion-reject-btn" id="sg-image-remove" style="display:none">Remove</button>' +
       '</div>' +
+      '<label class="editor-checkbox-row suggest-reserve-row"><input type="checkbox" id="sg-reserve"> <span>I&rsquo;d like to reserve this gift myself once it&rsquo;s approved</span></label>' +
+      '<input class="editor-add-form-input" type="text" placeholder="Your name (for the reservation)" id="sg-guest-name" style="display:none" value="' + esc(guestName || '') + '">' +
       '<input class="editor-add-form-input" type="email" placeholder="Your email" id="sg-email" value="' + esc(savedEmail) + '">' +
       '<p class="suggest-gift-email-note">We only check this looks like a real email address - it isn’t verified. Used so the owner can follow up about your suggestion.</p>' +
       '<p class="suggest-gift-error" id="sg-error" style="display:none"></p>' +
@@ -1042,20 +1061,29 @@ function initSuggestGiftForm() {
     imageRemove.style.display = 'none';
   });
 
+  var reserveCheck = document.getElementById('sg-reserve');
+  var reserveName = document.getElementById('sg-guest-name');
+  reserveCheck.addEventListener('change', function() {
+    reserveName.style.display = reserveCheck.checked ? 'block' : 'none';
+  });
+
   document.getElementById('suggest-gift-form').addEventListener('submit', function(e) {
     e.preventDefault();
     var name = document.getElementById('sg-name').value.trim();
     var qty = document.getElementById('sg-qty').value;
     var link = document.getElementById('sg-link').value.trim();
     var email = document.getElementById('sg-email').value.trim();
+    var wantsReserve = reserveCheck.checked;
+    var reserverName = reserveName.value.trim();
     if (!name) { err.textContent = 'Add an item name.'; err.style.display = 'block'; return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'That doesn’t look like a valid email address.'; err.style.display = 'block'; return; }
     if (link && !isSafeUrl(link)) { err.textContent = 'Links must start with http:// or https://.'; err.style.display = 'block'; return; }
+    if (wantsReserve && !reserverName) { err.textContent = 'Add your name so the reservation can be recorded for you.'; err.style.display = 'block'; return; }
     err.style.display = 'none';
     var submitBtn = document.getElementById('suggest-gift-form').querySelector('button[type="submit"]');
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending...';
-    suggestGift(name, qty, email, link, imageData).then(function(ok) {
+    suggestGift(name, qty, email, link, imageData, wantsReserve, reserverName).then(function(ok) {
       if (ok) {
         container.innerHTML = '<div class="suggest-gift-form suggest-gift-form--done" style="margin:' + margin + '"><p class="suggest-gift-thanks">Thanks! Your suggestion has been sent to the registry owner for approval.</p></div>';
       } else {
@@ -1164,7 +1192,8 @@ function renderOwnerView() {
         (s.image ? '<img src="' + esc(s.image) + '" alt="" class="suggestion-row-thumb">' : '') +
         '<div class="suggestion-row-info">' +
           '<input type="text" class="editor-add-form-input" id="name-' + id + '" value="' + esc(s.name) + '" aria-label="Item name">' +
-          '<div class="owner-view-row"><span>Suggested qty ' + Math.max(0, Number(s.quantity) || 0) + ' &middot; ' + esc(s.email) + '</span></div>' +
+          '<div class="owner-view-row"><span>Suggested qty ' + Math.max(0, Number(s.quantity) || 0) + ' &middot; ' + esc(s.email) +
+            (s.reserve && s.reservedBy ? ' &middot; ' + esc(s.reservedBy) + ' wants to bring it' : '') + '</span></div>' +
           (s.link && isSafeUrl(s.link) ? '<a href="' + esc(s.link) + '" target="_blank" rel="noopener noreferrer" class="suggestion-row-link">View link ↗</a>' : '') +
         '</div>' +
       '</div>' +

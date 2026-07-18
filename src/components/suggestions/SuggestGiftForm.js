@@ -18,6 +18,8 @@ export default function SuggestGiftForm({ align }) {
   const [email, setEmail] = useState(state.guestEmail || "");
   const [link, setLink] = useState("");
   const [image, setImage] = useState("");
+  const [reserveIt, setReserveIt] = useState(false);
+  const [reserverName, setReserverName] = useState(state.guestName || "");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -39,9 +41,10 @@ export default function SuggestGiftForm({ align }) {
     if (!name.trim()) { setError("Add an item name."); return; }
     if (!EMAIL_RE.test(email.trim())) { setError("That doesn't look like a valid email address."); return; }
     if (link.trim() && !/^https?:\/\//i.test(link.trim())) { setError("Links must start with http:// or https://."); return; }
+    if (reserveIt && !reserverName.trim()) { setError("Add your name so the reservation can be recorded for you."); return; }
     setError("");
     setSubmitting(true);
-    const ok = await suggestGift({ name, quantity, email, link, image });
+    const ok = await suggestGift({ name, quantity, email, link, image, reserve: reserveIt, reservedBy: reserverName });
     setSubmitting(false);
     if (ok) {
       setSubmitted(true);
@@ -104,6 +107,23 @@ export default function SuggestGiftForm({ align }) {
           <button type="button" className="suggestion-reject-btn" onClick={() => setImage("")}>Remove</button>
         )}
       </div>
+      <label className="editor-checkbox-row">
+        <input
+          type="checkbox"
+          checked={reserveIt}
+          onChange={(e) => setReserveIt(e.target.checked)}
+        />
+        <span>I'd like to reserve this gift myself once it's approved</span>
+      </label>
+      {reserveIt && (
+        <input
+          className="editor-add-form-input"
+          type="text"
+          placeholder="Your name (for the reservation)"
+          value={reserverName}
+          onChange={(e) => setReserverName(e.target.value)}
+        />
+      )}
       <input
         className="editor-add-form-input"
         type="email"
