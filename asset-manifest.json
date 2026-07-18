@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/winklr/static/css/main.e233a6c5.css",
-    "main.js": "/winklr/static/js/main.8045c54c.js",
+    "main.css": "/winklr/static/css/main.725bbced.css",
+    "main.js": "/winklr/static/js/main.475d3bcf.js",
     "static/js/787.b78cf847.chunk.js": "/winklr/static/js/787.b78cf847.chunk.js",
     "index.html": "/winklr/index.html",
-    "main.e233a6c5.css.map": "/winklr/static/css/main.e233a6c5.css.map",
-    "main.8045c54c.js.map": "/winklr/static/js/main.8045c54c.js.map",
+    "main.725bbced.css.map": "/winklr/static/css/main.725bbced.css.map",
+    "main.475d3bcf.js.map": "/winklr/static/js/main.475d3bcf.js.map",
     "787.b78cf847.chunk.js.map": "/winklr/static/js/787.b78cf847.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.e233a6c5.css",
-    "static/js/main.8045c54c.js"
+    "static/css/main.725bbced.css",
+    "static/js/main.475d3bcf.js"
   ]
 }
