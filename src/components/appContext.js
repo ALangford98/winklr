@@ -391,6 +391,7 @@ const AppContextProvider = ({ children }) => {
       quantity: Math.max(0, Number(finalQuantity) || 0),
       image: suggestion.image || '',
       metadata: suggestion.link ? { Link: suggestion.link } : {},
+      categories: ['Suggested Gifts'],
       nameRequired: true,
     });
     setSuggestionStatus(id, 'approved');

@@ -212,6 +212,7 @@ button { font-family: inherit; }
 .suggestion-row-thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; flex-shrink: 0; border: 1px solid var(--border-subtle); }
 .suggestion-row-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .suggestion-row-link { font-size: 11px; color: var(--accent-primary); }
+.suggestion-photo-btn { width: auto; text-align: center; cursor: pointer; font-size: 11px; }
 
 /* Cash fund */
 .cash-fund-card { max-width: 420px; box-sizing: border-box; margin: 32px auto; padding: 16px; border: 1px solid var(--border-subtle); border-radius: 10px; background: var(--bg-card); display: flex; flex-direction: column; gap: 10px; }
@@ -679,7 +680,7 @@ function reserveItem(id, delta, name) {
   var next = Math.max(0, current + delta);
 
   if (delta > 0) {
-    var item = STOCK.find(function(i){ return i.id === id; });
+    var item = allStock().find(function(i){ return i.id === id; });
     var needed = item ? (item.quantity || 0) : 0;
     if (needed > 0) {
       var othersTotal = 0;
@@ -730,6 +731,9 @@ function applySuggestionAtPath(path, data) {
     suggestions[sid][field] = data;
   }
   renderOwnerView();
+  // Approved suggestions render as tiles (see approvedSuggestionItems), so
+  // any suggestion change can change the grid.
+  renderTiles();
 }
 
 function initSuggestions() {
@@ -774,28 +778,61 @@ function suggestGift(name, quantity, email, link, image) {
   }).then(function(res) { return res.ok; }).catch(function() { return false; });
 }
 
-function setSuggestionStatus(id, status) {
+function setSuggestionFields(id, fields) {
   if (!suggestions[id]) return;
-  suggestions[id].status = status;
-  if (!fbUrl) {
+
+  function applyLocal() {
+    suggestions[id] = Object.assign({}, suggestions[id], fields);
     safeSetItem(KEY_PREFIX + 'suggestions', JSON.stringify(suggestions));
     renderOwnerView();
-    return;
+    renderTiles();
   }
-  fetch(fbUrl + '/suggestions/' + id + '/status.json', {
-    method: 'PUT',
+
+  if (!fbUrl) { applyLocal(); return; }
+
+  // SSE echoes the patch back on success; a failed write never does, so fall
+  // back to a local update instead of leaving the owner's click looking dead.
+  fetch(fbUrl + '/suggestions/' + encodeURIComponent(id) + '.json', {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(status),
-  }).catch(function(){});
+    body: JSON.stringify(fields),
+  }).then(function(res) { if (!res.ok) applyLocal(); }).catch(function() { applyLocal(); });
 }
 
-function approveSuggestionAction(id, finalQuantity) {
+function setSuggestionStatus(id, status) { setSuggestionFields(id, { status: status }); }
+
+// Approving persists status + final name/quantity on the suggestion record
+// itself; the registry item is derived from that record on every load (see
+// approvedSuggestionItems), so approvals survive reloads and are visible to
+// every visitor - not just the session that clicked Approve.
+function approveSuggestionAction(id, finalQuantity, finalName) {
   var s = suggestions[id];
   if (!s) return;
-  STOCK.push({ id: 'approved_' + id, name: s.name, image: s.image || '', price: 0, metadata: s.link ? { Link: s.link } : {}, categories: [], quantity: Math.max(0, Number(finalQuantity) || 0), nameRequired: true, is_sample: false });
-  setSuggestionStatus(id, 'approved');
-  renderTiles();
+  setSuggestionFields(id, {
+    status: 'approved',
+    quantity: Math.max(0, Number(finalQuantity) || 0),
+    name: (finalName || '').trim() || s.name,
+  });
 }
+
+var SUGGESTED_CAT = 'Suggested Gifts';
+
+function approvedSuggestionItems() {
+  return Object.keys(suggestions)
+    .filter(function(id){ return suggestions[id] && suggestions[id].status === 'approved'; })
+    .sort(function(a, b){ return (suggestions[a].createdAt || 0) - (suggestions[b].createdAt || 0); })
+    .map(function(id){
+      var s = suggestions[id];
+      return {
+        id: 'approved_' + id, name: s.name, image: s.image || '', price: 0,
+        metadata: (s.link && isSafeUrl(s.link)) ? { Link: s.link } : {},
+        categories: [SUGGESTED_CAT],
+        quantity: Math.max(0, Number(s.quantity) || 0), nameRequired: true, is_sample: false,
+      };
+    });
+}
+
+function allStock() { return STOCK.concat(approvedSuggestionItems()); }
 
 /* ── Cash fund ────────────────────────────────────────── */
 var cashPledges = {};
@@ -1033,7 +1070,7 @@ function initSuggestGiftForm() {
 
 /* ── Guest name prompt ─────────────────────────────────── */
 function openNameModal(itemId) {
-  var item = STOCK.find(function(i){ return i.id === itemId; });
+  var item = allStock().find(function(i){ return i.id === itemId; });
   document.getElementById('name-modal-container').innerHTML =
     '<div class="modal-backdrop" data-action="close-name-modal"></div>' +
     '<div class="owner-gate-modal" role="dialog" aria-modal="true">' +
@@ -1095,6 +1132,10 @@ function closeOwnerGate() { document.getElementById('owner-gate-container').inne
 
 function openOwnerView() {
   if (!ownerUnlocked) return;
+  // Once unlocked, keep a FAB around so closing the popup doesn't strand the
+  // owner - it reopens without asking for the passcode again this session.
+  var ownerFab = document.getElementById('owner-fab');
+  if (ownerFab) ownerFab.style.display = 'flex';
   ownerViewOpen = true;
   document.getElementById('owner-view-container').innerHTML =
     '<div class="modal-backdrop" data-action="close-owner-view"></div>' +
@@ -1117,29 +1158,48 @@ function renderOwnerView() {
 
   var html = '';
 
+  function suggestionEditorHTML(id, s, actionsHTML) {
+    return '<div class="owner-view-item">' +
+      '<div class="suggestion-row-top">' +
+        (s.image ? '<img src="' + esc(s.image) + '" alt="" class="suggestion-row-thumb">' : '') +
+        '<div class="suggestion-row-info">' +
+          '<input type="text" class="editor-add-form-input" id="name-' + id + '" value="' + esc(s.name) + '" aria-label="Item name">' +
+          '<div class="owner-view-row"><span>Suggested qty ' + Math.max(0, Number(s.quantity) || 0) + ' &middot; ' + esc(s.email) + '</span></div>' +
+          (s.link && isSafeUrl(s.link) ? '<a href="' + esc(s.link) + '" target="_blank" rel="noopener noreferrer" class="suggestion-row-link">View link ↗</a>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="owner-view-row">' +
+        '<label class="selector-btn suggestion-photo-btn">' + (s.image ? 'Replace photo' : 'Add photo') +
+          '<input type="file" accept="image/*" hidden data-action="suggestion-image" data-id="' + id + '">' +
+        '</label>' +
+      '</div>' +
+      '<div class="owner-view-row">' +
+        '<input type="number" min="0" step="1" class="suggestion-qty-input" id="qty-' + id + '" value="' + Math.max(0, Number(s.quantity) || 0) + '">' +
+        actionsHTML +
+      '</div></div>';
+  }
+
   var pendingIds = Object.keys(suggestions).filter(function(id){ return suggestions[id].status === 'pending'; });
   if (pendingIds.length) {
     html += '<p class="owner-view-section-title">Gift suggestions</p>';
     pendingIds.forEach(function(id) {
-      var s = suggestions[id];
-      html += '<div class="owner-view-item">' +
-        '<div class="suggestion-row-top">' +
-          (s.image ? '<img src="' + esc(s.image) + '" alt="" class="suggestion-row-thumb">' : '') +
-          '<div class="suggestion-row-info">' +
-            '<div class="owner-view-item-name">' + esc(s.name) + '</div>' +
-            '<div class="owner-view-row"><span>Suggested qty ' + s.quantity + ' &middot; ' + esc(s.email) + '</span></div>' +
-            (s.link && isSafeUrl(s.link) ? '<a href="' + esc(s.link) + '" target="_blank" rel="noopener noreferrer" class="suggestion-row-link">View link ↗</a>' : '') +
-          '</div>' +
-        '</div>' +
-        '<div class="owner-view-row">' +
-          '<input type="number" min="0" step="1" class="suggestion-qty-input" id="qty-' + id + '" value="' + s.quantity + '">' +
-          '<button class="owner-view-release-btn" data-action="approve-suggestion" data-id="' + id + '">Approve</button>' +
-          '<button class="owner-view-release-btn" data-action="reject-suggestion" data-id="' + id + '">Reject</button>' +
-        '</div></div>';
+      html += suggestionEditorHTML(id, suggestions[id],
+        '<button class="owner-view-release-btn" data-action="approve-suggestion" data-id="' + id + '">Approve</button>' +
+        '<button class="owner-view-release-btn" data-action="reject-suggestion" data-id="' + id + '">Reject</button>');
     });
   }
 
-  var withReservations = STOCK.filter(function(i){ return reservations[i.id] && Object.keys(reservations[i.id]).length; });
+  var approvedIds = Object.keys(suggestions).filter(function(id){ return suggestions[id].status === 'approved'; });
+  if (approvedIds.length) {
+    html += '<p class="owner-view-section-title">Approved suggestions (shown to guests)</p>';
+    approvedIds.forEach(function(id) {
+      html += suggestionEditorHTML(id, suggestions[id],
+        '<button class="owner-view-release-btn" data-action="save-suggestion" data-id="' + id + '">Save</button>' +
+        '<button class="owner-view-release-btn" data-action="reject-suggestion" data-id="' + id + '">Remove</button>');
+    });
+  }
+
+  var withReservations = allStock().filter(function(i){ return reservations[i.id] && Object.keys(reservations[i.id]).length; });
   if (withReservations.length) {
     html += '<p class="owner-view-section-title">Reservations</p>';
     withReservations.forEach(function(item) {
@@ -1164,7 +1224,7 @@ function renderOwnerView() {
     });
   }
 
-  if (!pendingIds.length && !withReservations.length && !pledgeIds.length) {
+  if (!pendingIds.length && !approvedIds.length && !withReservations.length && !pledgeIds.length) {
     html = '<p class="owner-view-empty">Nothing to review yet.</p>';
   }
 
@@ -1191,7 +1251,7 @@ function saveCart() { safeSetItem(KEY_PREFIX + 'cart', JSON.stringify(cart)); }
 function cartCount() { return cart.reduce(function(s,e){ return s+e.quantity; }, 0); }
 function cartSubtotal() {
   return cart.reduce(function(s,e){
-    var item = STOCK.find(function(i){ return i.id===e.itemId; });
+    var item = allStock().find(function(i){ return i.id===e.itemId; });
     return s + (item ? (item.price||0)*e.quantity : 0);
   }, 0);
 }
@@ -1302,14 +1362,18 @@ function renderLayout(items) {
 function orderedCategories() {
   var seen = {}, list = [];
   Object.keys(CONFIG.categoryConfig || {}).forEach(function(c){ if (c && !seen[c]) { seen[c] = true; list.push(c); } });
-  STOCK.forEach(function(i){
+  allStock().forEach(function(i){
     (i.categories||[]).forEach(function(c){ if (c && !seen[c]) { seen[c] = true; list.push(c); } });
   });
+  // Guest-suggested gifts always render as the last section.
+  var si = list.indexOf(SUGGESTED_CAT);
+  if (si !== -1) { list.splice(si, 1); list.push(SUGGESTED_CAT); }
   return list;
 }
 
 function renderCategorySection(cat, items) {
-  var cfg = (CONFIG.categoryConfig || {})[cat] || {};
+  var cfg = (CONFIG.categoryConfig || {})[cat] ||
+    (cat === SUGGESTED_CAT ? { label: SUGGESTED_CAT, description: 'Extra ideas suggested by our guests.' } : {});
   var align = STACKED_MARGIN_CSS[CONFIG.layoutAlign] ? CONFIG.layoutAlign : 'center';
   var html = '<div class="category-section"><div class="category-section-header" style="text-align:'+align+'">' +
     '<h2 class="category-section-title">'+esc(cfg.label || cat)+'</h2>';
@@ -1346,9 +1410,9 @@ function matchesQuery(item, q) {
 }
 
 function renderTiles() {
-  var filtered = STOCK.filter(function(i){ return matchesQuery(i, query); });
+  var filtered = allStock().filter(function(i){ return matchesQuery(i, query); });
   var grid = document.getElementById('tile-grid');
-  var hasCategoryItems = STOCK.some(function(i){ return (i.categories||[]).length > 0; });
+  var hasCategoryItems = allStock().some(function(i){ return (i.categories||[]).length > 0; });
   if (!filtered.length && query) {
     grid.innerHTML = '<p class="search-no-results">No items match &ldquo;'+esc(query)+'&rdquo;</p>';
   } else if (CONFIG.groupByCategory && hasCategoryItems) {
@@ -1398,7 +1462,7 @@ function closeCart() {
 }
 
 function renderCart() {
-  var entries = cart.map(function(e){ return {e:e, item:STOCK.find(function(s){return s.id===e.itemId;})}; }).filter(function(x){return x.item;});
+  var entries = cart.map(function(e){ return {e:e, item:allStock().find(function(s){return s.id===e.itemId;})}; }).filter(function(x){return x.item;});
   var subtotal = cartSubtotal();
   var hasPrice = entries.some(function(x){ return x.item.price > 0; });
   var body = document.getElementById('cart-body');
@@ -1445,7 +1509,7 @@ function coIsValid() {
 }
 
 function openCheckout() {
-  co.savedItems = cart.map(function(e){ return {e:e, item:STOCK.find(function(s){return s.id===e.itemId;})}; }).filter(function(x){return x.item;});
+  co.savedItems = cart.map(function(e){ return {e:e, item:allStock().find(function(s){return s.id===e.itemId;})}; }).filter(function(x){return x.item;});
   co.open=true; closeCart(); renderCheckout();
 }
 function closeCheckout() {
@@ -1607,7 +1671,7 @@ document.addEventListener('click', function(e) {
   if(a==='open-poweredby')   openPoweredBy();
   if(a==='close-poweredby')  closePoweredBy();
   if(a==='reserve-inc') {
-    var item = STOCK.find(function(i){ return i.id===id; });
+    var item = allStock().find(function(i){ return i.id===id; });
     var needsName = item && item.nameRequired !== false && !guestName;
     if (needsName) openNameModal(id); else reserveItem(id, 1);
   }
@@ -1618,14 +1682,52 @@ document.addEventListener('click', function(e) {
   if(a==='release-reservation')  releaseReservation(id, el.dataset.guest);
   if(a==='approve-suggestion') {
     var qtyInput = document.getElementById('qty-'+id);
+    var nameInput = document.getElementById('name-'+id);
     var finalQty = qtyInput ? Number(qtyInput.value) || 0 : (suggestions[id] ? suggestions[id].quantity : 0);
-    approveSuggestionAction(id, finalQty);
+    approveSuggestionAction(id, finalQty, nameInput ? nameInput.value : '');
+  }
+  if(a==='save-suggestion') {
+    var sQty = document.getElementById('qty-'+id);
+    var sName = document.getElementById('name-'+id);
+    var fields = {};
+    if (sQty) fields.quantity = Math.max(0, Number(sQty.value) || 0);
+    if (sName && sName.value.trim()) fields.name = sName.value.trim();
+    setSuggestionFields(id, fields);
   }
   if(a==='reject-suggestion')    setSuggestionStatus(id, 'rejected');
   if(a==='remove-pledge')        removePledgeAction(id);
+  if(a==='open-owner-view')      openOwnerView();
   if(a==='copy-share-link') {
-    try { navigator.clipboard.writeText(window.location.href).catch(function(){}); } catch(e) {}
+    // Strip the hash so an owner browsing #owner never hands guests an
+    // owner-gate link.
+    var shareUrl = window.location.href.replace(/#.*$/, '');
+    var flashShareFab = function() {
+      var btn = document.getElementById('share-fab');
+      if (!btn) return;
+      if (!btn.dataset.orig) btn.dataset.orig = btn.innerHTML;
+      btn.innerHTML = 'Link copied ✓';
+      setTimeout(function(){ if (btn.dataset.orig) btn.innerHTML = btn.dataset.orig; }, 2000);
+    };
+    var manualFallback = function() { window.prompt('Copy this link:', shareUrl); };
+    try {
+      navigator.clipboard.writeText(shareUrl).then(flashShareFab, manualFallback);
+    } catch(e) { manualFallback(); }
   }
+});
+
+// The owner can replace/add a suggestion's photo from the owner view; the
+// image is stored on the suggestion record as a data URL (same 3MB cap as
+// guest uploads) so the derived tile picks it up everywhere.
+document.addEventListener('change', function(ev) {
+  var el = ev.target;
+  if (!el || !el.dataset || el.dataset.action !== 'suggestion-image') return;
+  var sid = el.dataset.id;
+  var file = el.files && el.files[0];
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024) { alert('That image is too large (max 3MB). Try a smaller photo.'); el.value = ''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e) { setSuggestionFields(sid, { image: e.target.result }); };
+  reader.readAsDataURL(file);
 });
 
 /* ── Init ─────────────────────────────────────────────── */
@@ -1743,6 +1845,11 @@ function initApp() {
   var shareFab = document.getElementById('share-fab');
   if (shareFab && isRegistry) shareFab.style.display='flex';
   if (window.location.hash === '#owner') openOwnerGate();
+  window.addEventListener('hashchange', function() {
+    if (window.location.hash === '#owner') {
+      if (ownerUnlocked) openOwnerView(); else openOwnerGate();
+    }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1882,6 +1989,10 @@ ${navbar}
   <button id="share-fab" class="cart-fab" style="display:none" data-action="copy-share-link">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
     Share
+  </button>
+  <button id="owner-fab" class="cart-fab" style="display:none" data-action="open-owner-view">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Owner
   </button>
 </div>
 <div id="name-modal-container"></div>

@@ -105,6 +105,38 @@ See **[TODO.md](TODO.md)** for the full, up-to-date public roadmap.
 
 ## Changelog
 
+### [0.10.0] — 2026-07-18
+
+#### Approved suggestions now persist — and live in a "Suggested Gifts" section
+On the exported site, approving a gift suggestion only pushed the item into the
+in-memory stock array: it vanished on reload and other visitors never saw it at all.
+Approved items are now *derived* from the suggestion records themselves (Firebase or
+localStorage) on every load, so approvals stick and appear for everyone. Approving
+persists the final quantity and name onto the suggestion via PATCH, with a local
+fallback when the write fails. In both the app and the export, approved suggestions
+render in a dedicated **"Suggested Gifts"** section pinned at the bottom of the page,
+with a default description noting these were suggested by guests (the owner can
+override the heading/description via a `Suggested Gifts` entry in Categories).
+
+#### Owner view: edit suggestions, and no more lock-out after closing
+The exported site's owner view now lets the owner fix a suggestion's name (typos),
+replace or add its photo (same 3MB cap as guest uploads), and adjust quantity — for
+pending *and* already-approved suggestions, via a new "Approved suggestions" section
+with Save/Remove. Closing the owner popup no longer strands the owner: once unlocked,
+an "Owner" FAB stays available to reopen it without re-entering the passcode, and
+navigating to `#owner` after page load now works too (there was no hashchange
+listener before — the gate only ever opened if the hash was set at load time).
+
+#### Share button now gives feedback
+The exported site's Share button silently copied the URL (or silently failed) —
+indistinguishable from doing nothing. It now flashes "Link copied ✓", falls back to a
+copyable prompt when the clipboard API is unavailable, and strips the `#owner` hash
+so an owner browsing their own registry never shares an owner-gate link to guests.
+
+Verified end-to-end in headless Chrome against a freshly generated export: suggest →
+edit typo → approve → appears in Suggested Gifts → survives reload → owner FAB
+reopens without passcode.
+
 ### [0.9.9] — 2026-07-18
 
 #### Stacked cards no longer overflow the screen on mobile

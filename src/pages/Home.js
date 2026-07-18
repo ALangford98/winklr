@@ -54,8 +54,16 @@ function Footer() {
   );
 }
 
+const SUGGESTED_CAT = "Suggested Gifts";
+const SUGGESTED_CAT_FALLBACK = {
+  label: SUGGESTED_CAT,
+  description: "Extra ideas suggested by our guests.",
+};
+
 function CategorySection({ cat, items, state, onReorder }) {
-  const cfg = state.categoryConfig?.[cat] || {};
+  const cfg =
+    state.categoryConfig?.[cat] ||
+    (cat === SUGGESTED_CAT ? SUGGESTED_CAT_FALLBACK : {});
   const align = ALIGN_MARGIN_CSS[state.layoutAlign] ? state.layoutAlign : "center";
   return (
     <div className="category-section">
@@ -86,6 +94,13 @@ function GroupedContent({ state, filtered, setStockList }) {
     ...Object.keys(state.categoryConfig || {}),
     ...new Set(state.stockList.flatMap((i) => i.categories || [])),
   ].filter((c, i, arr) => c && arr.indexOf(c) === i);
+
+  // Guest-suggested gifts always render as the last section.
+  const suggestedIdx = orderedCats.indexOf(SUGGESTED_CAT);
+  if (suggestedIdx !== -1) {
+    orderedCats.splice(suggestedIdx, 1);
+    orderedCats.push(SUGGESTED_CAT);
+  }
 
   const makeReorder = (cat) => (reorderedItems) => {
     setStockList((prev) => {
