@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { AppContextProvider, AppContext } from "../components/appContext";
 import AccessGatePanel from "../components/access/AccessGatePanel";
+import StockListEditor from "../components/stock/StockListEditor";
 import { parseConfigFile } from "../utils/configSerializer";
 import { parseStockFile, parsePastedList } from "../utils/parseStockFile";
 
@@ -76,6 +77,31 @@ test("owner can add, rename, and remove an item", () => {
 
   fireEvent.click(screen.getByText("remove-item"));
   expect(readJSON("stock-list")).toHaveLength(0);
+});
+
+test("owner can add, edit, and remove an item's detail fields in the editor", () => {
+  render(
+    <AppContextProvider>
+      <OwnerHarness />
+      <StockListEditor />
+    </AppContextProvider>
+  );
+
+  fireEvent.click(screen.getByText("add-item"));
+  fireEvent.click(screen.getByTitle("Edit"));
+  fireEvent.click(screen.getByText("+ Add field"));
+  fireEvent.change(screen.getByPlaceholderText("Label"), { target: { value: "Notes" } });
+  fireEvent.change(screen.getByPlaceholderText("Value"), { target: { value: "Any colour but beige" } });
+  fireEvent.click(screen.getByText("Save"));
+  expect(readJSON("stock-list")[0].metadata).toEqual({ Notes: "Any colour but beige" });
+
+  // Reopen: the saved field round-trips into the form; blanking its label
+  // drops the field on save (that's how a field is removed-by-emptying).
+  fireEvent.click(screen.getByTitle("Edit"));
+  expect(screen.getByPlaceholderText("Value").value).toBe("Any colour but beige");
+  fireEvent.change(screen.getByPlaceholderText("Label"), { target: { value: "" } });
+  fireEvent.click(screen.getByText("Save"));
+  expect(readJSON("stock-list")[0].metadata).toEqual({});
 });
 
 test("featuring an item un-features every other item (only one hero at a time)", () => {

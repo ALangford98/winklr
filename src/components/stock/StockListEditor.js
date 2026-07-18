@@ -3,7 +3,59 @@ import { AppContext } from '../appContext';
 import { buildDemoItems } from '../../data/demoItems';
 import { readImageFileAsDataUrl } from '../../utils/readImageFile';
 
-const EMPTY_FORM = { name: '', price: '', image: '', categories: [], quantity: '', nameRequired: true };
+const EMPTY_FORM = { name: '', price: '', image: '', categories: [], quantity: '', nameRequired: true, metaRows: [] };
+
+const metadataToRows = (metadata) =>
+  Object.entries(metadata || {}).map(([key, value]) => ({ key, value: String(value) }));
+
+const rowsToMetadata = (rows) =>
+  rows.reduce((acc, { key, value }) => {
+    const k = key.trim();
+    if (k) acc[k] = value;
+    return acc;
+  }, {});
+
+function MetadataEditor({ rows, onChange }) {
+  const setRow = (i, field, val) =>
+    onChange(rows.map((r, idx) => (idx === i ? { ...r, [field]: val } : r)));
+
+  return (
+    <div className="metadata-editor">
+      <span className="metadata-editor-label">Detail fields (shown on the tile)</span>
+      {rows.map((row, i) => (
+        <div className="metadata-editor-row" key={i}>
+          <input
+            className="editor-add-form-input metadata-editor-key"
+            placeholder="Label"
+            value={row.key}
+            onChange={(e) => setRow(i, 'key', e.target.value)}
+          />
+          <input
+            className="editor-add-form-input metadata-editor-value"
+            placeholder="Value"
+            value={row.value}
+            onChange={(e) => setRow(i, 'value', e.target.value)}
+          />
+          <button
+            type="button"
+            className="metadata-editor-remove"
+            onClick={() => onChange(rows.filter((_, idx) => idx !== i))}
+            title="Remove field"
+          >
+            ×
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        className="metadata-editor-add"
+        onClick={() => onChange([...rows, { key: '', value: '' }])}
+      >
+        + Add field
+      </button>
+    </div>
+  );
+}
 
 function ImagePicker({ value, onChange }) {
   const ref = useRef(null);
@@ -115,6 +167,7 @@ function EditItemForm({ item, onSave, onCancel }) {
     categories:   item.categories      ?? [],
     quantity:     item.quantity > 0    ? String(item.quantity) : '',
     nameRequired: item.nameRequired    !== false,
+    metaRows:     metadataToRows(item.metadata),
   });
 
   const set = (field) => (val) =>
@@ -123,7 +176,7 @@ function EditItemForm({ item, onSave, onCancel }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
-    onSave({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories, quantity: Number(form.quantity) || 0, nameRequired: form.nameRequired });
+    onSave({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories, quantity: Number(form.quantity) || 0, nameRequired: form.nameRequired, metadata: rowsToMetadata(form.metaRows) });
   };
 
   return (
@@ -132,6 +185,7 @@ function EditItemForm({ item, onSave, onCancel }) {
       <input className="editor-add-form-input" placeholder="Name *" value={form.name} onChange={set('name')} autoFocus />
       <input className="editor-add-form-input" placeholder="Price" type="number" min="0" step="0.01" value={form.price} onChange={set('price')} />
       <input className="editor-add-form-input" placeholder={isRegistry ? 'Quantity needed (0 = unlimited)' : 'Stock quantity (0 = unlimited)'} type="number" min="0" step="1" value={form.quantity} onChange={set('quantity')} />
+      <MetadataEditor rows={form.metaRows} onChange={(rows) => setForm((p) => ({ ...p, metaRows: rows }))} />
       <TagInput value={form.categories} onChange={(cats) => setForm((p) => ({ ...p, categories: cats }))} />
       {isRegistry && (
         <label className="editor-checkbox-row">
@@ -182,7 +236,7 @@ export default function StockListEditor() {
   const handleAdd = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
-    addStockItem({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories, quantity: Number(form.quantity) || 0, nameRequired: form.nameRequired });
+    addStockItem({ name: form.name.trim(), price: Number(form.price) || 0, image: form.image.trim(), categories: form.categories, quantity: Number(form.quantity) || 0, nameRequired: form.nameRequired, metadata: rowsToMetadata(form.metaRows) });
     setForm(EMPTY_FORM);
     setShowAdd(false);
   };
@@ -258,6 +312,7 @@ export default function StockListEditor() {
           <input className="editor-add-form-input" placeholder="Name *" value={form.name} onChange={set('name')} autoFocus />
           <input className="editor-add-form-input" placeholder="Price" type="number" min="0" step="0.01" value={form.price} onChange={set('price')} />
           <input className="editor-add-form-input" placeholder="Quantity needed (0 = unlimited)" type="number" min="0" step="1" value={form.quantity} onChange={set('quantity')} />
+          <MetadataEditor rows={form.metaRows} onChange={(rows) => setForm((p) => ({ ...p, metaRows: rows }))} />
           <TagInput value={form.categories} onChange={(cats) => setForm((p) => ({ ...p, categories: cats }))} />
           {isRegistry && (
             <label className="editor-checkbox-row">

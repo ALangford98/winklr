@@ -776,6 +776,60 @@
   color: var(--text-muted);
 }
 
+/* ── Metadata (detail fields) editor ────────────────────── */
+.metadata-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metadata-editor-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.metadata-editor-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.metadata-editor-key {
+  flex: 0 0 34%;
+  min-width: 0;
+}
+
+.metadata-editor-value {
+  flex: 1;
+  min-width: 0;
+}
+
+.metadata-editor-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.metadata-editor-remove:hover {
+  color: var(--accent-danger);
+}
+
+.metadata-editor-add {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--accent-primary);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 0;
+  font-family: inherit;
+}
+
 /* ── Add / edit form ────────────────────────────────────── */
 .editor-add-form,
 .editor-edit-form {
