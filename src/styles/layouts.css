@@ -46,9 +46,12 @@
   flex-direction: row;
 }
 
-/* body fills the row so prices/actions line up across tiles */
+/* body fills the row so prices/actions line up across tiles;
+   min-width: 0 lets it shrink below its content so long meta
+   values ellipsize instead of pushing the card past the viewport */
 .layout--stacked .tile-body {
   flex: 1;
+  min-width: 0;
 }
 
 /* image column fixed width in stacked mode */
@@ -214,5 +217,16 @@
   /* Stacked — remove desktop max-width cap */
   .layout--stacked {
     max-width: 100%;
+  }
+
+  /* On phones, wrap long meta values onto their own line
+     instead of ellipsizing — price guides stay readable */
+  .layout--stacked .tile-meta-row {
+    flex-wrap: wrap;
+  }
+  .layout--stacked .tile-meta-row dd {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
   }
 }

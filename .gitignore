@@ -17,6 +17,9 @@
 # personal notes - never committed
 TODO.private.md
 
+# personal registry data (may contain bank/payment details) - never committed
+baby-shower-registry-config.json
+
 .env.local
 .env.development.local
 .env.test.local

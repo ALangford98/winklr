@@ -105,6 +105,23 @@ See **[TODO.md](TODO.md)** for the full, up-to-date public roadmap.
 
 ## Changelog
 
+### [0.9.9] — 2026-07-18
+
+#### Stacked cards no longer overflow the screen on mobile
+On phones, stacked-layout cards ran wider than the viewport: meta text and the Reserve
+button spilled past the card's right edge and got cut off at the screen. Root cause:
+the stacked tile body (`flex: 1`) had no `min-width: 0`, so its flex-basis resolved to
+its content width — and meta values are `white-space: nowrap` by design, so a long
+"Price guide" made the whole card as wide as its longest unwrapped line. Diagnosed and
+verified against the actual deployed export in headless Chrome at 390px.
+
+Fix, in the live app and the static export: `min-width: 0` on the stacked tile body
+(long meta ellipsizes on desktop, as originally designed), plus a phone-width media
+rule that lets stacked meta rows wrap and their values break onto their own line, so
+price guides are fully readable instead of truncated. This closes part of the
+"Static export: apply updated mobile styles" roadmap item; the rest of that item is
+still open.
+
 ### [0.9.8] — 2026-07-18
 
 #### Personal registry config is no longer version-controlled
