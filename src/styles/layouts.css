@@ -46,6 +46,11 @@
   flex-direction: row;
 }
 
+/* body fills the row so prices/actions line up across tiles */
+.layout--stacked .tile-body {
+  flex: 1;
+}
+
 /* image column fixed width in stacked mode */
 .layout--stacked .tile-img-wrap,
 .layout--stacked .tile-img-wrap--sm {

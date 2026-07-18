@@ -59,6 +59,19 @@
   transition: width 0.3s ease;
 }
 
+.cash-fund-bank-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cash-fund-bank-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
 .cash-fund-bank-details {
   margin: 0;
   padding: 10px 12px;

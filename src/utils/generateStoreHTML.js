@@ -113,6 +113,7 @@ button { font-family: inherit; }
 .layout--strip::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
 .layout--stacked { display: flex; flex-direction: column; gap: 10px; max-width: 860px; margin: 0 auto; }
 .layout--stacked .tile { width: 100%; flex-direction: row; }
+.layout--stacked .tile-body { flex: 1; }
 .layout--stacked .tile-img-wrap, .layout--stacked .tile-img-wrap--sm { width: 80px; min-width: 80px; height: 80px; }
 .layout--stacked .tile--detailed .tile-img-wrap { width: 100px; min-width: 100px; height: 100px; }
 .layout--featured { display: flex; flex-direction: column; gap: 20px; }
@@ -220,6 +221,8 @@ button { font-family: inherit; }
 .cash-fund-total { font-size: 13px; font-weight: 600; color: var(--text-primary); }
 .cash-fund-bar { height: 8px; border-radius: 4px; background: var(--bg-raised); overflow: hidden; }
 .cash-fund-bar-fill { height: 100%; background: var(--accent-primary); border-radius: 4px; }
+.cash-fund-bank-block { display: flex; flex-direction: column; gap: 4px; }
+.cash-fund-bank-label { margin: 0; font-size: 12px; font-weight: 600; color: var(--text-primary); }
 .cash-fund-bank-details { margin: 0; padding: 10px 12px; background: var(--bg-raised); border: 1px solid var(--border-subtle); border-radius: 6px; font-family: inherit; font-size: 12px; color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; }
 .cash-fund-form { display: flex; flex-direction: column; gap: 8px; }
 .cash-fund-form-hint { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
@@ -884,8 +887,15 @@ function renderCashFundCard() {
       '</div>';
   }
 
-  var bankHTML = (fund.bankDetailsEnabled && fund.bankDetails)
-    ? '<pre class="cash-fund-bank-details">' + esc(fund.bankDetails) + '</pre>'
+  function bankBlock(label, details) {
+    if (!details) return '';
+    return '<div class="cash-fund-bank-block">' +
+      (label ? '<p class="cash-fund-bank-label">' + esc(label) + '</p>' : '') +
+      '<pre class="cash-fund-bank-details">' + esc(details) + '</pre></div>';
+  }
+  var bankHTML = fund.bankDetailsEnabled
+    ? bankBlock(fund.bankDetailsLabel, fund.bankDetails) +
+      (fund.bankDetails2Enabled ? bankBlock(fund.bankDetails2Label, fund.bankDetails2) : '')
     : '';
 
   container.innerHTML =
@@ -1298,9 +1308,10 @@ function orderedCategories() {
 
 function renderCategorySection(cat, items) {
   var cfg = (CONFIG.categoryConfig || {})[cat] || {};
-  var html = '<div class="category-section"><div class="category-section-header">' +
+  var align = STACKED_MARGIN_CSS[CONFIG.layoutAlign] ? CONFIG.layoutAlign : 'center';
+  var html = '<div class="category-section"><div class="category-section-header" style="text-align:'+align+'">' +
     '<h2 class="category-section-title">'+esc(cfg.label || cat)+'</h2>';
-  if (cfg.description) html += '<p class="category-section-desc">'+esc(cfg.description)+'</p>';
+  if (cfg.description) html += '<p class="category-section-desc" style="margin:'+STACKED_MARGIN_CSS[align]+'">'+esc(cfg.description)+'</p>';
   return html + '</div>' + renderLayout(items) + '</div>';
 }
 
@@ -1745,9 +1756,11 @@ function buildPageHeaderHTML(state) {
   const title = state.brand?.pageTitle;
   const subtitle = state.brand?.pageSubtitle;
   if (!title && !subtitle) return '';
-  return '<div class="page-header">' +
+  const marginByAlign = { left: '0', center: '0 auto', right: '0 0 0 auto' };
+  const align = marginByAlign[state.layoutAlign] ? state.layoutAlign : 'center';
+  return '<div class="page-header" style="text-align:' + align + '">' +
     (title ? '<h1 class="page-header-title">' + esc(title) + '</h1>' : '') +
-    (subtitle ? '<p class="page-header-subtitle">' + esc(subtitle) + '</p>' : '') +
+    (subtitle ? '<p class="page-header-subtitle" style="margin:' + marginByAlign[align] + '">' + esc(subtitle) + '</p>' : '') +
     '</div>';
 }
 

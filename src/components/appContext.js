@@ -25,6 +25,10 @@ const CASH_FUND_DEFAULT = {
   goalAmount: 0,
   bankDetailsEnabled: false,
   bankDetails: "",
+  bankDetailsLabel: "",
+  bankDetails2Enabled: false,
+  bankDetails2: "",
+  bankDetails2Label: "",
 };
 
 const WORDS = ["Otter", "Comet", "Maple", "Willow", "Pixel", "Harbor", "Lumen", "Cedar", "Coral", "Ember", "Aspen", "Nova"];

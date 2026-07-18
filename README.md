@@ -105,6 +105,114 @@ See **[TODO.md](TODO.md)** for the full, up-to-date public roadmap.
 
 ## Changelog
 
+### [0.9.8] — 2026-07-18
+
+#### Personal registry config is no longer version-controlled
+`baby-shower-registry-config.json` is now gitignored and untracked (the local file is
+kept), alongside `TODO.private.md`. It's personal registry data — and since config
+exports carry the Cash Fund's payment details, it could end up holding bank account
+numbers; that has no business in a repo. Note the file still exists in earlier
+commits' history.
+
+### [0.9.7] — 2026-07-18
+
+#### Registry config: five gap-filler items added
+Added the missing everyday items flagged in review, all non-specific (price 0 with a
+"Price guide" metadata range) with verified representative photos: Wipes and Nappy bag
+(Nursery & Nappies, photos from Dis-Chem), Sleep sacks (Nursery & Nappies, MACCIE's
+bamboo 1.0 TOG sack as the example), Thermometer (Bath & Health, Pigeon digital as the
+example), and Baby monitor (Gear, Babywombworld video monitor as the example). Items
+are ordered next to their related entries (wipes after nappies, sleep sacks after
+swaddles, etc.) so grouped sections read naturally.
+
+### [0.9.6] — 2026-07-18
+
+#### Registry config: camping cot and travel system added to Gear
+Two new big-ticket items in `baby-shower-registry-config.json`, both under Gear with
+verified photos and current prices: the Joie Commuter Change and Snooze camping cot in
+Linen Grey (R3 399.99 at Dis-Chem, with Dis-Chem's product photo) and the Belecoo
+3-in-1 Travel System in Grey (R3 999 at Clicks; Clicks blocks scraping, so the photo
+and the R3 499 direct price come from Belecoo's own SA storefront).
+
+### [0.9.5] — 2026-07-18
+
+#### Cash Fund: second bank account for international guests
+The Cash Fund's payment details section can now hold two accounts instead of one —
+useful when some guests are abroad and transferring to a local account is a pain for
+them. In the Cash Fund panel, once "Show payment details" is on, a new "Add a second
+account (e.g. for guests abroad)" toggle reveals a second details textarea, and both
+accounts get an optional label field (e.g. "South African account (ZAR)" /
+"International account (SWIFT/IBAN)") so guests can tell them apart. Labels render as
+small headings above each details block on the guest-facing card, in the live app and
+the static export. Existing configs are unaffected: the new fields default to empty/off
+and ride through JSON export/import, the shareable URL, and `loadConfig()` with the
+whole `cashFund` object, so no serializer changes were needed.
+
+### [0.9.4] — 2026-07-18
+
+#### Page heading/subheading alignment + stacked-layout buttons line up
+Two follow-ups to 0.9.3's alignment fix, in both the live app and the static export:
+
+- The page heading and subheading had the same bug as the category headers — the
+  title centered (inherited from the `.App` boilerplate) while the subtitle's
+  `max-width: 560px` box stayed left. The page header now takes its alignment
+  explicitly from the Layout alignment setting, same as category headers.
+- In the stacked layout, `.tile-body` never got the `flex: 1` the featured layout
+  has, so each row's body — and the Reserve/Add-to-cart button, which fills the
+  body's width — was only as wide as that tile's text. Buttons ended at a different
+  x-position on every row. The body now fills the row, so buttons (and prices/meta)
+  share the same right edge across all stacked tiles.
+
+### [0.9.3] — 2026-07-18
+
+#### Category heading and description no longer misalign
+In the live app, the category section heading rendered centered while its description
+hugged the left edge. Root cause: the CRA-boilerplate `.App { text-align: center }` is
+inherited by everything, so the full-width heading centered its text, but the
+description — capped at `max-width: 600px` with no auto margins — stayed pinned left.
+The exported site has no `.App` wrapper, so exports were left-aligned throughout:
+the two implementations silently disagreed.
+
+Both now set the section header's alignment explicitly from the Layout alignment
+setting (left/center/right), with the description box's margins following along, so
+heading and description always share an edge — in the live app and in exports, and
+immune to inherited `text-align` from ancestors. Unrecognised alignment values fall
+back to center (also keeps the exported inline style injection-safe).
+
+### [0.9.2] — 2026-07-18
+
+#### Registry config: photos for the remaining items
+Every registry item in `baby-shower-registry-config.json` except **Clothes** now has a
+product photo (19 of 20, all verified resolving). Since Takealot/Clicks block image
+scraping, the remaining photos were sourced via the Shopify product-JSON endpoints of
+SA stores that don't (Precious Cargo, MACCIE, Snuggletime, Toy Kingdom, A-Zee, Orms)
+plus Dis-Chem's catalog API. Non-specific items got representative example photos
+(e.g. a Hape rattle for "Toys", a NUK 2-pack for "Pacifiers", a Joie chair for the
+high chair — noted as "photo is an example" where it could set price expectations).
+Price guides were corrected where the sourced product disagreed with the earlier
+estimate: swaddles now "R350 – R420", feeding pillow starts at the R350 Snuggletime
+Snuggle Pillow, Polaroid guide notes the Gen 3 at R3 000 from Orms. Clothes stays
+photo-less: every SA clothing retailer checked (Ackermans, Babies R Us, Mr Price,
+Edgars, Woolworths) blocks automated fetches.
+
+### [0.9.1] — 2026-07-17
+
+#### Registry config filled in with real SA prices and product photos
+`baby-shower-registry-config.json` (the importable demo/personal registry config) now
+carries researched South African retail prices and product photographs instead of
+placeholder zeros and empty image fields. Branded items (Huggies Extra Care, the two
+Snuggletime SnuggleRoo carriers, Pigeon SofTouch bottles, Polaroid Now) get their actual
+current price in the `price` field plus a hotlinked product photo from the retailer's
+CDN (Dis-Chem and Snuggletime — verified resolving; Takealot/Clicks block hotlink
+scraping, so those items keep manual-photo slots). Non-specific items keep `price: 0`
+(so no misleading price renders on the tile) and instead carry a "Price guide" range and
+a "From" retailer list in metadata, which the detailed tile layout renders as rows.
+
+Also fixed two content bugs from the original paste-import: the **Feeding pillow** item
+was missing from the list entirely (now added under Feeding), and **Bottles** carried
+the pacifiers' "must pass the triangle test" note instead of its actual spec, "Pigeon
+SofTouch (Peristaltic Plus)".
+
 ### [0.9.0] — 2026-07-12
 
 #### Paste a list of items

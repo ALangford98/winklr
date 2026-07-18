@@ -75,6 +75,14 @@ export default function CashFundPanel() {
           </label>
           {fund.bankDetailsEnabled && (
             <>
+              <label className="branding-field-label">Account label (optional)</label>
+              <input
+                className="editor-add-form-input"
+                type="text"
+                placeholder="e.g. South African account (ZAR)"
+                value={fund.bankDetailsLabel || ""}
+                onChange={(e) => update({ bankDetailsLabel: e.target.value })}
+              />
               <textarea
                 className="category-config-textarea"
                 placeholder={"e.g.\nBank transfer: Jane Smith, Sort code 12-34-56, Account 12345678\nor PayPal.me/janesmith"}
@@ -82,6 +90,33 @@ export default function CashFundPanel() {
                 onChange={(e) => update({ bankDetails: e.target.value })}
                 rows={4}
               />
+              <label className="category-config-toggle">
+                <input
+                  type="checkbox"
+                  checked={!!fund.bankDetails2Enabled}
+                  onChange={(e) => update({ bankDetails2Enabled: e.target.checked })}
+                />
+                <span>Add a second account (e.g. for guests abroad)</span>
+              </label>
+              {fund.bankDetails2Enabled && (
+                <>
+                  <label className="branding-field-label">Second account label (optional)</label>
+                  <input
+                    className="editor-add-form-input"
+                    type="text"
+                    placeholder="e.g. International account (SWIFT/IBAN)"
+                    value={fund.bankDetails2Label || ""}
+                    onChange={(e) => update({ bankDetails2Label: e.target.value })}
+                  />
+                  <textarea
+                    className="category-config-textarea"
+                    placeholder={"e.g.\nIBAN: DE00 0000 0000 0000 0000 00\nBIC/SWIFT: ABCDEF2A\nAccount holder: Jane Smith"}
+                    value={fund.bankDetails2 || ""}
+                    onChange={(e) => update({ bankDetails2: e.target.value })}
+                    rows={4}
+                  />
+                </>
+              )}
               <p className="decals-hint">
                 Shown as plain text to every guest who can view this page - only include details
                 you're comfortable publishing to anyone with the link.

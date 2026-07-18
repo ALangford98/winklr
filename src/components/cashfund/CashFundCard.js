@@ -60,7 +60,16 @@ export default function CashFundCard() {
       )}
 
       {fund.bankDetailsEnabled && fund.bankDetails && (
-        <pre className="cash-fund-bank-details">{fund.bankDetails}</pre>
+        <div className="cash-fund-bank-block">
+          {fund.bankDetailsLabel && <p className="cash-fund-bank-label">{fund.bankDetailsLabel}</p>}
+          <pre className="cash-fund-bank-details">{fund.bankDetails}</pre>
+        </div>
+      )}
+      {fund.bankDetailsEnabled && fund.bankDetails2Enabled && fund.bankDetails2 && (
+        <div className="cash-fund-bank-block">
+          {fund.bankDetails2Label && <p className="cash-fund-bank-label">{fund.bankDetails2Label}</p>}
+          <pre className="cash-fund-bank-details">{fund.bankDetails2}</pre>
+        </div>
       )}
 
       {submitted ? (

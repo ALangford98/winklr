@@ -22,7 +22,7 @@ import PoweredByModal from "../components/PoweredByModal";
 import CashFundPanel from "../components/CashFundPanel";
 import CashFundCard from "../components/cashfund/CashFundCard";
 
-const SEARCH_MARGIN_CSS = { left: "0", center: "0 auto", right: "0 0 0 auto" };
+const ALIGN_MARGIN_CSS = { left: "0", center: "0 auto", right: "0 0 0 auto" };
 
 function matchesQuery(item, query) {
   const q = query.toLowerCase();
@@ -56,13 +56,18 @@ function Footer() {
 
 function CategorySection({ cat, items, state, onReorder }) {
   const cfg = state.categoryConfig?.[cat] || {};
+  const align = ALIGN_MARGIN_CSS[state.layoutAlign] ? state.layoutAlign : "center";
   return (
     <div className="category-section">
-      <div className="category-section-header">
+      <div className="category-section-header" style={{ textAlign: align }}>
         <h2 className="category-section-title">
           {cfg.label || cat}
         </h2>
-        {cfg.description && <p className="category-section-desc">{cfg.description}</p>}
+        {cfg.description && (
+          <p className="category-section-desc" style={{ margin: ALIGN_MARGIN_CSS[align] }}>
+            {cfg.description}
+          </p>
+        )}
       </div>
       <Layout
         config={state.layoutConfig}
@@ -164,6 +169,7 @@ export default function Home() {
 
   const hasCategoryItems = state.stockList.some((i) => i.categories?.length > 0);
   const isRegistry = state.websiteType === 'registry';
+  const headerAlign = ALIGN_MARGIN_CSS[state.layoutAlign] ? state.layoutAlign : "center";
 
   return (
     <div className="Home">
@@ -233,14 +239,18 @@ export default function Home() {
       <div className="content-area" ref={contentAreaRef}>
         <DecalsLayer containerRef={contentAreaRef} />
         {(state.brand?.pageTitle || state.brand?.pageSubtitle) && (
-          <div className="page-header">
+          <div className="page-header" style={{ textAlign: headerAlign }}>
             {state.brand.pageTitle    && <h1 className="page-header-title">{state.brand.pageTitle}</h1>}
-            {state.brand.pageSubtitle && <p  className="page-header-subtitle">{state.brand.pageSubtitle}</p>}
+            {state.brand.pageSubtitle && (
+              <p className="page-header-subtitle" style={{ margin: ALIGN_MARGIN_CSS[headerAlign] }}>
+                {state.brand.pageSubtitle}
+              </p>
+            )}
           </div>
         )}
 
         {state.stockList.length > 0 && !hasSearchWidget && (
-          <div className="store-search-wrap" style={{ margin: SEARCH_MARGIN_CSS[state.searchAlign] || SEARCH_MARGIN_CSS.center }}>
+          <div className="store-search-wrap" style={{ margin: ALIGN_MARGIN_CSS[state.searchAlign] || ALIGN_MARGIN_CSS.center }}>
             <input
               className="store-search-input"
               type="text"
